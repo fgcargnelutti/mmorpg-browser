@@ -1,0 +1,16 @@
+.event-log-panel {
+  min-width: 0;
+  min-height: 0;
+}
+
+.event-log-scroll {
+  min-height: 0;
+}
+
+.log-line {
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  background: rgba(0, 0, 0, 0.16);
+  border: 1px solid #3a2b20;
+  font-size: 13px;
+}

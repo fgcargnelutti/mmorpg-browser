@@ -1,0 +1,41 @@
+.portal-tooltip-trigger {
+  display: inline-flex;
+  position: relative;
+}
+
+.portal-tooltip {
+  position: fixed;
+  z-index: 999999;
+  width: 220px;
+  max-width: calc(100vw - 24px);
+  padding: 10px;
+  background: #120d0a;
+  border: 1px solid #4f3c2c;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+  color: #d8ccb8;
+  pointer-events: none;
+}
+
+.portal-tooltip strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.portal-tooltip p {
+  margin: 0 0 6px;
+  color: #aa967d;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.portal-tooltip ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.portal-tooltip li {
+  margin-bottom: 4px;
+  color: #aa967d;
+  font-size: 12px;
+}

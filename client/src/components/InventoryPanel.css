@@ -1,0 +1,61 @@
+.inventory-panel {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  z-index: 5;
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  align-content: start;
+}
+
+.inventory-slot {
+  min-height: 46px;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--line-soft);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.grouped-slot {
+  align-items: center;
+}
+
+.slot-icon {
+  color: #b89562;
+}
+
+.slot-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.slot-label {
+  font-size: 12px;
+  line-height: 1.1;
+}
+
+.slot-amount {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.inventory-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.inventory-panel::-webkit-scrollbar-track {
+  background: #140f0b;
+}
+
+.inventory-panel::-webkit-scrollbar-thumb {
+  background: #4f3c2c;
+  border: 1px solid #2b2018;
+}

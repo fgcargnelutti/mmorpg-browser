@@ -1,0 +1,78 @@
+.equipment-panel {
+  overflow: visible;
+  position: relative;
+  z-index: 20;
+}
+
+.equipment-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: visible;
+}
+
+.equipment-row-grid {
+  display: grid;
+  gap: 8px;
+  justify-content: center;
+  overflow: visible;
+}
+
+.equipment-cols-2 {
+  grid-template-columns: repeat(2, 50px);
+}
+
+.equipment-cols-3 {
+  grid-template-columns: repeat(3, 50px);
+}
+
+.equipment-cols-4 {
+  grid-template-columns: repeat(4, 50px);
+}
+
+.equip-slot {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, #3a2b20 0%, #201710 100%);
+  border: 1px solid #4a3626;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+  cursor: default;
+  z-index: 1;
+}
+
+.equip-slot:hover {
+  z-index: 9999;
+}
+
+.equip-slot-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.equip-slot:hover .inline-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.equipment-row-grid .equip-slot:last-child .equip-tooltip {
+  left: auto;
+  right: 0;
+  transform: translateY(-4px);
+}
+
+.equipment-row-grid .equip-slot:last-child:hover .equip-tooltip {
+  transform: translateY(0);
+}
+
+.equipment-row-grid.equipment-cols-4 .equip-slot:nth-child(3) .equip-tooltip {
+  left: auto;
+  right: -20px;
+  transform: translateY(-4px);
+}
+
+.equipment-row-grid.equipment-cols-4 .equip-slot:nth-child(3):hover .equip-tooltip {
+  transform: translateY(0);
+}
