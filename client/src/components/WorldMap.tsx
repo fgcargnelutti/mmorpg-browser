@@ -1,5 +1,13 @@
-import ContextActions from "./ContextActions";
 import "./WorldMap.css";
+import ContextActions from "./ContextActions";
+import NpcDialog from "./NpcDialog";
+import CombatDialog from "./CombatDialog";
+import mapImage from "../assets/map-town.png";
+import type {
+  LocationData,
+  LocationKey,
+  ContextAction,
+} from "../data/locations";
 
 type Player = {
   name: string;
@@ -9,27 +17,42 @@ type Player = {
   logs: string[];
 };
 
-type LocationKey = "broken-hamlet" | "dead-river" | "blackwood" | "old-chapel";
-
-type LocationData = {
-  name: string;
-  subtitle: string;
-  description: string;
-  actions: {
-    id: string;
-    label: string;
-    description: string;
-  }[];
+type DialogueOption = {
+  id: string;
+  label: string;
 };
 
 type WorldMapProps = {
   player: Player;
   currentLocation: LocationKey;
-  contextState: "expanded" | "minimized";
+  contextState: "hidden" | "expanded" | "minimized";
   locations: Record<LocationKey, LocationData>;
   onTravel: (location: LocationKey) => void;
   onMinimizeContext: () => void;
   onExpandContext: () => void;
+  onAction: (action: ContextAction) => void;
+
+  npcDialogOpen: boolean;
+  npcName: string;
+  npcRole: string;
+  npcDialogueLines: string[];
+  npcDialogueOptions: DialogueOption[];
+  npcLoreNotes: string[];
+  onCloseNpcDialog: () => void;
+  onNpcOptionSelect: (optionId: string) => void;
+  onNpcBuy: () => void;
+  onNpcSell: () => void;
+
+  combatDialogOpen: boolean;
+  combatEnemyName: string;
+  combatEnemyTitle: string;
+  combatEnemyHp: number;
+  combatEnemyMaxHp: number;
+  combatLog: string[];
+  combatResolved: boolean;
+  onCombatAttack: () => void;
+  onCombatRetreat: () => void;
+  onCloseCombatDialog: () => void;
 };
 
 export default function WorldMap({
@@ -40,67 +63,98 @@ export default function WorldMap({
   onTravel,
   onMinimizeContext,
   onExpandContext,
+  onAction,
+  npcDialogOpen,
+  npcName,
+  npcRole,
+  npcDialogueLines,
+  npcDialogueOptions,
+  npcLoreNotes,
+  onCloseNpcDialog,
+  onNpcOptionSelect,
+  onNpcBuy,
+  onNpcSell,
+  combatDialogOpen,
+  combatEnemyName,
+  combatEnemyTitle,
+  combatEnemyHp,
+  combatEnemyMaxHp,
+  combatLog,
+  combatResolved,
+  onCombatAttack,
+  onCombatRetreat,
+  onCloseCombatDialog,
 }: WorldMapProps) {
   const activeLocation = locations[currentLocation];
+  const locationEntries = Object.entries(locations) as [
+    LocationKey,
+    LocationData,
+  ][];
 
   return (
-    <div className="world-stage">
-      <div className="terrain-overlay" />
-      <div className="terrain-noise" />
+    <div className="world-stage world-map-shell">
+      <div className="world-map" style={{ backgroundImage: `url(${mapImage})` }}>
+        {locationEntries.map(([locationKey, location]) => {
+          const isActive = currentLocation === locationKey;
 
-      <button
-        className={`poi poi-village ${
-          currentLocation === "broken-hamlet" ? "active-poi" : ""
-        }`}
-        type="button"
-        onClick={() => onTravel("broken-hamlet")}
-      >
-        Broken Hamlet
-      </button>
+          return (
+            <button
+              key={locationKey}
+              className={`poi poi-${location.poiVariant} ${
+                isActive ? "is-active" : ""
+              }`}
+              type="button"
+              style={{
+                top: location.mapPosition.top,
+                left: location.mapPosition.left,
+              }}
+              onClick={() => onTravel(locationKey)}
+            >
+              <span className="poi-dot" aria-hidden="true" />
+              <span className="poi-label-group">
+                <span className="poi-name">{location.name}</span>
+                <span className="poi-subtitle">{location.subtitle}</span>
+              </span>
+            </button>
+          );
+        })}
 
-      <button
-        className={`poi poi-river ${
-          currentLocation === "dead-river" ? "active-poi" : ""
-        }`}
-        type="button"
-        onClick={() => onTravel("dead-river")}
-      >
-        Dead River
-      </button>
+        <ContextActions
+          state={contextState}
+          locationName={activeLocation.name}
+          locationDescription={activeLocation.description}
+          actions={activeLocation.actions}
+          onMinimize={onMinimizeContext}
+          onExpand={onExpandContext}
+          onAction={onAction}
+        />
 
-      <button
-        className={`poi poi-forest ${
-          currentLocation === "blackwood" ? "active-poi" : ""
-        }`}
-        type="button"
-        onClick={() => onTravel("blackwood")}
-      >
-        Blackwood
-      </button>
+        <NpcDialog
+          isOpen={npcDialogOpen}
+          npcName={npcName}
+          npcRole={npcRole}
+          dialogueLines={npcDialogueLines}
+          dialogueOptions={npcDialogueOptions}
+          loreNotes={npcLoreNotes}
+          onClose={onCloseNpcDialog}
+          onOptionSelect={onNpcOptionSelect}
+          onBuy={onNpcBuy}
+          onSell={onNpcSell}
+        />
 
-      <button
-        className={`poi poi-ruins ${
-          currentLocation === "old-chapel" ? "active-poi" : ""
-        }`}
-        type="button"
-        onClick={() => onTravel("old-chapel")}
-      >
-        Old Chapel
-      </button>
-
-      <div className="player-marker">
-        <div className="player-sprite" />
-        <span>{player.name}</span>
+        <CombatDialog
+          isOpen={combatDialogOpen}
+          enemyName={combatEnemyName}
+          enemyTitle={combatEnemyTitle}
+          enemyHp={combatEnemyHp}
+          enemyMaxHp={combatEnemyMaxHp}
+          combatLog={combatLog}
+          isResolved={combatResolved}
+          onAttack={onCombatAttack}
+          onRetreat={onCombatRetreat}
+          onClose={onCloseCombatDialog}
+        />
       </div>
-
-      <ContextActions
-        state={contextState}
-        locationName={activeLocation.name}
-        locationDescription={activeLocation.description}
-        actions={activeLocation.actions}
-        onMinimize={onMinimizeContext}
-        onExpand={onExpandContext}
-      />
     </div>
   );
 }

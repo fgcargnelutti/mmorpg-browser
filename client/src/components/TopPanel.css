@@ -1,21 +1,44 @@
-.world-header {
+.top-panel {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 14px 18px;
-  background: linear-gradient(180deg, #35281c 0%, #241b14 100%);
+  padding: 4px 10px;
+  height: 36px;
+
+  background: linear-gradient(180deg, #1f1712 0%, #140f0c 100%);
   border-bottom: 2px solid #000;
+
+  font-size: 12px;
 }
 
-.world-header h1 {
-  margin: 0;
-  font-size: 28px;
-  letter-spacing: 0.5px;
+/* LEFT SIDE */
+.top-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.world-header p {
-  margin: 4px 0 0;
-  color: var(--muted);
-  font-size: 14px;
+.location-name {
+  font-weight: bold;
+  color: #e7d8c1;
+}
+
+.location-subtitle {
+  color: #aa967d;
+  font-size: 11px;
+}
+
+/* RIGHT SIDE */
+.top-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.world-status {
+  padding: 2px 6px;
+  border: 1px solid #4f3c2c;
+  background: #1a130f;
+  color: #c9b37e;
+  font-size: 11px;
 }

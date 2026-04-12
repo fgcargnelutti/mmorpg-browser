@@ -6,45 +6,53 @@
   z-index: 5;
 }
 
+.inventory-title-row {
+  align-items: center;
+}
+
+.inventory-weight {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
 .inventory-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 6px;
+  gap: 8px;
   align-content: start;
 }
 
-.inventory-slot {
-  min-height: 46px;
-  padding: 6px 8px;
-  background: rgba(0, 0, 0, 0.2);
+.inventory-grid-slots {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.inventory-square-slot {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  min-height: 58px;
+  padding: 6px;
+  background: linear-gradient(180deg, #2e2118 0%, #1a120d 100%);
   border: 1px solid var(--line-soft);
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  cursor: default;
 }
 
-.grouped-slot {
-  align-items: center;
+.inventory-item-icon {
+  font-size: 22px;
+  line-height: 1;
 }
 
-.slot-icon {
-  color: #b89562;
-}
-
-.slot-content {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.slot-label {
-  font-size: 12px;
-  line-height: 1.1;
-}
-
-.slot-amount {
-  color: var(--muted);
-  font-size: 11px;
+.inventory-item-count {
+  position: absolute;
+  right: 4px;
+  bottom: 2px;
+  font-size: 10px;
+  color: #d9c9b1;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 1px 4px;
+  border-radius: 4px;
 }
 
 .inventory-panel::-webkit-scrollbar {
@@ -58,4 +66,16 @@
 .inventory-panel::-webkit-scrollbar-thumb {
   background: #4f3c2c;
   border: 1px solid #2b2018;
+}
+
+@media (max-width: 780px) {
+  .inventory-grid-slots {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .inventory-grid-slots {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }

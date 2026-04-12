@@ -1,18 +1,15 @@
+import GameDialog from "./GameDialog";
 import "./ContextActions.css";
-
-type ContextAction = {
-  id: string;
-  label: string;
-  description: string;
-};
+import type { ContextAction } from "../data/locations";
 
 type ContextActionsProps = {
-  state: "expanded" | "minimized";
+  state: "hidden" | "expanded" | "minimized";
   locationName: string;
   locationDescription: string;
   actions: ContextAction[];
   onMinimize: () => void;
   onExpand: () => void;
+  onAction: (action: ContextAction) => void;
 };
 
 export default function ContextActions({
@@ -22,48 +19,34 @@ export default function ContextActions({
   actions,
   onMinimize,
   onExpand,
+  onAction,
 }: ContextActionsProps) {
-  if (state === "minimized") {
-    return (
-      <button
-        className="context-fab"
-        type="button"
-        onClick={onExpand}
-        aria-label="Expand context actions"
-        title="Expand context actions"
-      >
-        ✦
-      </button>
-    );
+  if (state === "hidden") {
+    return null;
   }
 
   return (
-    <section className="context-dialog">
-      <div className="context-dialog__header">
-        <div>
-          <h3>{locationName}</h3>
-          <p>{locationDescription}</p>
-        </div>
-
-        <button
-          className="context-dialog__minimize"
-          type="button"
-          onClick={onMinimize}
-          aria-label="Minimize context actions"
-          title="Minimize"
-        >
-          _
-        </button>
-      </div>
-
+    <GameDialog
+      title={locationName}
+      subtitle={locationDescription}
+      isMinimized={state === "minimized"}
+      minimizedIcon="✦"
+      onMinimize={onMinimize}
+      onExpand={onExpand}
+    >
       <div className="context-dialog__actions">
         {actions.map((action) => (
-          <button key={action.id} className="context-dialog__action" type="button">
+          <button
+            key={action.id}
+            className="context-dialog__action"
+            type="button"
+            onClick={() => onAction(action)}
+          >
             <strong>{action.label}</strong>
             <span>{action.description}</span>
           </button>
         ))}
       </div>
-    </section>
+    </GameDialog>
   );
 }

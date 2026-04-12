@@ -1,0 +1,304 @@
+.npc-dialog-anchor {
+  position: absolute;
+  inset: 0;
+  z-index: 18;
+  pointer-events: none;
+}
+
+.npc-dialog-anchor .game-dialog {
+  pointer-events: auto;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(920px, calc(100% - 24px));
+  max-height: calc(100% - 28px);
+  overflow: hidden;
+}
+
+.npc-dialog-layout {
+  display: block;
+}
+
+.npc-dialog-layout--with-trade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.npc-dialog-main {
+  display: grid;
+  grid-template-rows: 180px 150px 140px auto;
+  gap: 10px;
+  min-width: 0;
+}
+
+.npc-dialog-portrait {
+  min-width: 0;
+}
+
+.npc-dialog-portrait-box {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid #6b5038;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at top, rgba(132, 97, 62, 0.18), transparent 35%),
+    linear-gradient(180deg, #2e2017 0%, #1a120d 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(203, 168, 120, 0.14),
+    0 6px 14px rgba(0, 0, 0, 0.22);
+}
+
+.npc-dialog-portrait-box::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(203, 168, 120, 0.18);
+  border-radius: 7px;
+  pointer-events: none;
+}
+
+.npc-dialog-portrait-box::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 235, 210, 0.06),
+      transparent 22%,
+      transparent 78%,
+      rgba(0, 0, 0, 0.18)
+    );
+  pointer-events: none;
+}
+
+.npc-dialog-portrait-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  padding: 10px;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.25));
+}
+
+.npc-dialog-main-text {
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid #6b5038;
+  background: rgba(0, 0, 0, 0.18);
+  padding: 10px;
+}
+
+.npc-dialog-main-text p {
+  margin: 0 0 8px;
+  color: #e7d8c1;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.npc-dialog-main-text p:last-child {
+  margin-bottom: 0;
+}
+
+.npc-dialog-interaction-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  min-height: 0;
+}
+
+.npc-dialog-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  border: 1px solid #6b5038;
+  background: rgba(0, 0, 0, 0.14);
+  padding: 10px;
+}
+
+.npc-dialog-option-button {
+  padding: 8px 10px;
+  border: 1px solid #6b5038;
+  background: linear-gradient(180deg, #3f2d20 0%, #251a13 100%);
+  color: #eadbc4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.npc-dialog-option-button:hover {
+  background: linear-gradient(180deg, #533a29 0%, #2f2118 100%);
+}
+
+.npc-dialog-lore {
+  overflow-y: auto;
+  border: 1px solid #6b5038;
+  background: rgba(0, 0, 0, 0.14);
+  padding: 10px;
+}
+
+.npc-dialog-lore p {
+  margin: 0 0 8px;
+  color: #c8b294;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.npc-dialog-lore p:last-child {
+  margin-bottom: 0;
+}
+
+.npc-dialog-lore-empty {
+  color: #a99074;
+}
+
+.npc-dialog-footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.npc-dialog-footer-button {
+  min-width: 90px;
+  padding: 8px 12px;
+  border: 1px solid #6b5038;
+  background: linear-gradient(180deg, #4f3927 0%, #2f2118 100%);
+  color: #eadbc4;
+  cursor: pointer;
+}
+
+.npc-dialog-footer-button:hover:not(:disabled),
+.npc-dialog-footer-button.is-active {
+  background: linear-gradient(180deg, #61452f 0%, #39281c 100%);
+}
+
+.npc-dialog-footer-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.npc-trade-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid #6b5038;
+  background: rgba(0, 0, 0, 0.16);
+  padding: 10px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.npc-trade-panel__header h4 {
+  margin: 0 0 4px;
+  color: #eadbc4;
+  font-size: 14px;
+}
+
+.npc-trade-panel__header p {
+  margin: 0;
+  color: #bba589;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.npc-trade-panel__content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.trade-item-card,
+.trade-drop-zone {
+  border: 1px solid #6b5038;
+  background: linear-gradient(180deg, #35261b 0%, #221811 100%);
+  padding: 10px;
+}
+
+.trade-item-card strong,
+.trade-drop-zone strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #eadbc4;
+}
+
+.trade-item-card span,
+.trade-drop-zone p {
+  display: block;
+  color: #bba589;
+  font-size: 12px;
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+
+.trade-item-card button,
+.trade-sell-all-button {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #6b5038;
+  background: linear-gradient(180deg, #4f3927 0%, #2f2118 100%);
+  color: #eadbc4;
+  cursor: pointer;
+}
+
+.trade-item-card button:hover,
+.trade-sell-all-button:hover {
+  background: linear-gradient(180deg, #61452f 0%, #39281c 100%);
+}
+
+.npc-dialog-main-text::-webkit-scrollbar,
+.npc-dialog-options::-webkit-scrollbar,
+.npc-dialog-lore::-webkit-scrollbar,
+.npc-trade-panel__content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.npc-dialog-main-text::-webkit-scrollbar-track,
+.npc-dialog-options::-webkit-scrollbar-track,
+.npc-dialog-lore::-webkit-scrollbar-track,
+.npc-trade-panel__content::-webkit-scrollbar-track {
+  background: #140f0b;
+}
+
+.npc-dialog-main-text::-webkit-scrollbar-thumb,
+.npc-dialog-options::-webkit-scrollbar-thumb,
+.npc-dialog-lore::-webkit-scrollbar-thumb,
+.npc-trade-panel__content::-webkit-scrollbar-thumb {
+  background: #4f3c2c;
+  border: 1px solid #2b2018;
+}
+
+@media (max-width: 900px) {
+  .npc-dialog-anchor .game-dialog {
+    width: min(760px, calc(100% - 20px));
+  }
+
+  .npc-dialog-layout--with-trade {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .npc-dialog-main {
+    grid-template-rows: 140px 140px auto auto;
+  }
+
+  .npc-dialog-interaction-row {
+    grid-template-columns: 1fr;
+  }
+
+  .npc-dialog-footer {
+    justify-content: stretch;
+  }
+
+  .npc-dialog-footer-button {
+    flex: 1;
+  }
+}

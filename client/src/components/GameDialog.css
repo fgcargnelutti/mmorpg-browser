@@ -1,0 +1,99 @@
+.game-dialog {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  width: min(520px, calc(100% - 24px));
+  padding: 12px;
+  z-index: 20;
+  background:
+    linear-gradient(180deg, rgba(72, 51, 33, 0.96) 0%, rgba(38, 27, 19, 0.98) 100%);
+  border: 1px solid #6b5038;
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 1px rgba(184, 148, 101, 0.18);
+  border-radius: 12px;
+}
+
+.game-dialog::before,
+.game-dialog::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(203, 168, 120, 0.12);
+  pointer-events: none;
+  border-radius: 8px;
+}
+
+.game-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.game-dialog__heading h3 {
+  margin: 0 0 2px;
+  font-size: 16px;
+  color: #eadbc4;
+}
+
+.game-dialog__heading p {
+  margin: 0;
+  font-size: 12px;
+  color: #b9a286;
+  line-height: 1.35;
+}
+
+.game-dialog__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.game-dialog__minimize,
+.game-dialog__close {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border: 1px solid #6b5038;
+  background: linear-gradient(180deg, #4f3927 0%, #2f2118 100%);
+  color: #e0d0b8;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.game-dialog__minimize:hover,
+.game-dialog__close:hover {
+  background: linear-gradient(180deg, #61452f 0%, #39281c 100%);
+}
+
+.game-dialog__body {
+  min-width: 0;
+}
+
+.game-dialog-fab {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  width: 42px;
+  height: 42px;
+  z-index: 20;
+  border-radius: 999px;
+  border: 1px solid #6b5038;
+  background: linear-gradient(180deg, #5e432d 0%, #312219 100%);
+  color: #eadbc4;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+
+.game-dialog-fab:hover {
+  background: linear-gradient(180deg, #755338 0%, #3b291d 100%);
+}
+
+@media (max-width: 700px) {
+  .game-dialog {
+    width: min(460px, calc(100% - 20px));
+  }
+}

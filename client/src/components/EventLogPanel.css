@@ -5,6 +5,7 @@
 
 .event-log-scroll {
   min-height: 0;
+  scroll-behavior: smooth;
 }
 
 .log-line {
@@ -13,4 +14,7 @@
   background: rgba(0, 0, 0, 0.16);
   border: 1px solid #3a2b20;
   font-size: 13px;
+  text-align: left;
+  line-height: 1.4;
+  color: #d8ccb8;
 }

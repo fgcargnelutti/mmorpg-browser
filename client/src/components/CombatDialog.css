@@ -1,0 +1,117 @@
+.combat-dialog-anchor {
+  position: absolute;
+  inset: 0;
+  z-index: 22;
+  pointer-events: none;
+}
+
+.combat-dialog-anchor .game-dialog {
+  pointer-events: auto;
+  top: 50%;
+  left: 50%;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  width: min(620px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  overflow: hidden;
+}
+
+.combat-dialog-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.combat-dialog-enemy-card {
+  border: 1px solid #6b5038;
+  background: rgba(0, 0, 0, 0.16);
+  padding: 10px;
+}
+
+.combat-dialog-enemy-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.combat-dialog-enemy-header strong {
+  color: #eadbc4;
+  font-size: 14px;
+}
+
+.combat-dialog-enemy-header span {
+  color: #bba589;
+  font-size: 12px;
+}
+
+.combat-dialog-hp-bar {
+  height: 10px;
+  border: 1px solid #6b5038;
+  background: #1a120d;
+  overflow: hidden;
+}
+
+.combat-dialog-hp-bar-fill {
+  height: 100%;
+  background: linear-gradient(180deg, #8b2f2f 0%, #5c1b1b 100%);
+}
+
+.combat-dialog-log {
+  min-height: 160px;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid #6b5038;
+  background: rgba(0, 0, 0, 0.18);
+  padding: 10px;
+}
+
+.combat-dialog-log p {
+  margin: 0 0 8px;
+  color: #e7d8c1;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.combat-dialog-log p:last-child {
+  margin-bottom: 0;
+}
+
+.combat-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.combat-dialog-button {
+  min-width: 96px;
+  padding: 8px 12px;
+  border: 1px solid #6b5038;
+  background: linear-gradient(180deg, #4f3927 0%, #2f2118 100%);
+  color: #eadbc4;
+  cursor: pointer;
+}
+
+.combat-dialog-button:hover {
+  background: linear-gradient(180deg, #61452f 0%, #39281c 100%);
+}
+
+.combat-dialog-button--primary {
+  border-color: #8f6340;
+  background: linear-gradient(180deg, #6d4b32 0%, #3a271b 100%);
+}
+
+.combat-dialog-log::-webkit-scrollbar {
+  width: 8px;
+}
+
+.combat-dialog-log::-webkit-scrollbar-track {
+  background: #140f0b;
+}
+
+.combat-dialog-log::-webkit-scrollbar-thumb {
+  background: #4f3c2c;
+  border: 1px solid #2b2018;
+}
