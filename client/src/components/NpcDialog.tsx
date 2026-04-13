@@ -3,9 +3,17 @@ import GameDialog from "./GameDialog";
 import "./NpcDialog.css";
 import npcJanePortrait from "../assets/NpcJane.png";
 
-type DialogueOption = {
+export type DialogueTopicState =
+  | "unlocked"
+  | "new"
+  | "completed"
+  | "locked";
+
+export type DialogueOption = {
   id: string;
   label: string;
+  state?: DialogueTopicState;
+  category?: string;
 };
 
 type TradeMode = "buy" | "sell" | null;
@@ -21,7 +29,24 @@ type NpcDialogProps = {
   onOptionSelect: (optionId: string) => void;
   onBuy?: () => void;
   onSell?: () => void;
+  narrativeHint?: string;
+  showNarrativeStatus?: boolean;
+  narrativeStatusText?: string;
+  portraitSrc?: string;
 };
+
+function getOptionStateClass(state: DialogueTopicState | undefined) {
+  switch (state) {
+    case "new":
+      return "is-new";
+    case "completed":
+      return "is-completed";
+    case "locked":
+      return "is-locked";
+    default:
+      return "is-unlocked";
+  }
+}
 
 export default function NpcDialog({
   isOpen,
@@ -34,9 +59,12 @@ export default function NpcDialog({
   onOptionSelect,
   onBuy,
   onSell,
+  narrativeHint = "This NPC still has an important role in the story.",
+  portraitSrc,
 }: NpcDialogProps) {
   const dialogueScrollRef = useRef<HTMLDivElement | null>(null);
   const [tradeMode, setTradeMode] = useState<TradeMode>(null);
+  const resolvedPortrait = portraitSrc ?? npcJanePortrait;
 
   useEffect(() => {
     if (!dialogueScrollRef.current) return;
@@ -49,6 +77,10 @@ export default function NpcDialog({
     }
   }, [isOpen]);
 
+  const visibleTopics = dialogueOptions.filter(
+    (option) => option.state !== "locked"
+  );
+
   if (!isOpen) return null;
 
   return (
@@ -60,79 +92,118 @@ export default function NpcDialog({
           }`}
         >
           <div className="npc-dialog-main">
-            <div className="npc-dialog-portrait">
-              <div className="npc-dialog-portrait-box">
-                <img
-                  src={npcJanePortrait}
-                  alt={npcName}
-                  className="npc-dialog-portrait-image"
-                />
+            <div className="npc-dialog-top-row">
+              <div className="npc-dialog-portrait">
+                <div className="npc-dialog-portrait-box">
+                  <img
+                    src={resolvedPortrait}
+                    alt={npcName}
+                    className="npc-dialog-portrait-image"
+                  />
+                </div>
+              </div>
+
+              <div className="npc-dialog-notes-panel">
+                <div className="npc-dialog-panel-header">
+                  <strong>Notes</strong>
+                </div>
+
+                <div className="npc-dialog-notes-content">
+                  {loreNotes.length === 0 ? (
+                    <p className="npc-dialog-lore-empty">No notes yet.</p>
+                  ) : (
+                    loreNotes.map((note, index) => (
+                      <p key={`${note}-${index}`}>{note}</p>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
 
-            <div ref={dialogueScrollRef} className="npc-dialog-main-text">
-              {dialogueLines.map((line, index) => (
-                <p key={`${line}-${index}`}>{line}</p>
-              ))}
-            </div>
+            <div className="npc-dialog-bottom-row">
+              <div className="npc-dialog-topics-panel">
+                <div className="npc-dialog-topics-list">
+                  {visibleTopics.map((option) => {
+                    const optionStateClass = getOptionStateClass(option.state);
 
-            <div className="npc-dialog-interaction-row">
-              <div className="npc-dialog-options">
-                {dialogueOptions.map((option) => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    className="npc-dialog-option-button"
-                    onClick={() => onOptionSelect(option.id)}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        className={`npc-dialog-topic-button ${optionStateClass}`}
+                        onClick={() => onOptionSelect(option.id)}
+                      >
+                        <span className="npc-dialog-topic-label">
+                          {option.label}
+                        </span>
+
+                        {option.state === "new" ? (
+                          <span className="npc-dialog-topic-pill">NEW</span>
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="npc-dialog-lore">
-                {loreNotes.length === 0 ? (
-                  <p className="npc-dialog-lore-empty">No extra notes.</p>
-                ) : (
-                  loreNotes.map((note, index) => (
-                    <p key={`${note}-${index}`}>{note}</p>
-                  ))
-                )}
+              <div className="npc-dialog-conversation-panel">
+                <div className="npc-dialog-panel-header">
+                  <strong>Conversation</strong>
+                </div>
+
+                <div ref={dialogueScrollRef} className="npc-dialog-main-text">
+                  {dialogueLines.length === 0 ? (
+                    <p className="npc-dialog-main-text-empty">
+                      This character has nothing to say right now.
+                    </p>
+                  ) : (
+                    dialogueLines.map((line, index) => (
+                      <p key={`${line}-${index}`}>{line}</p>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
 
             <div className="npc-dialog-footer">
-              <button
-                type="button"
-                className="npc-dialog-footer-button"
-                onClick={onClose}
-              >
-                Close
-              </button>
+              <div className="npc-dialog-footer-hint">
+                <span className="npc-dialog-footer-hint-icon">✦</span>
+                <span>{narrativeHint}</span>
+              </div>
 
-              <button
-                type="button"
-                className={`npc-dialog-footer-button ${
-                  tradeMode === "buy" ? "is-active" : ""
-                }`}
-                onClick={() =>
-                  setTradeMode((prev) => (prev === "buy" ? null : "buy"))
-                }
-              >
-                Buy
-              </button>
+              <div className="npc-dialog-footer-actions">
+                <button
+                  type="button"
+                  className="npc-dialog-footer-button"
+                  onClick={onClose}
+                >
+                  Close
+                </button>
 
-              <button
-                type="button"
-                className={`npc-dialog-footer-button ${
-                  tradeMode === "sell" ? "is-active" : ""
-                }`}
-                onClick={() =>
-                  setTradeMode((prev) => (prev === "sell" ? null : "sell"))
-                }
-              >
-                Sell
-              </button>
+                <button
+                  type="button"
+                  className={`npc-dialog-footer-button ${
+                    tradeMode === "buy" ? "is-active" : ""
+                  }`}
+                  onClick={() =>
+                    setTradeMode((prev) => (prev === "buy" ? null : "buy"))
+                  }
+                >
+                  Buy
+                </button>
+
+                <button
+                  type="button"
+                  className={`npc-dialog-footer-button ${
+                    tradeMode === "sell" ? "is-active" : ""
+                  }`}
+                  onClick={() =>
+                    setTradeMode((prev) => (prev === "sell" ? null : "sell"))
+                  }
+                >
+                  Sell
+                </button>
+              </div>
             </div>
           </div>
 

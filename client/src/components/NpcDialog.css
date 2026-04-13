@@ -10,31 +10,51 @@
   bottom: 14px;
   left: 50%;
   transform: translateX(-50%);
-  width: min(920px, calc(100% - 24px));
+  width: min(1040px, calc(100% - 24px));
   max-height: calc(100% - 28px);
   overflow: hidden;
 }
 
+/* ========================= */
+/* LAYOUT BASE */
+/* ========================= */
+
 .npc-dialog-layout {
   display: block;
+  min-height: 0;
 }
 
 .npc-dialog-layout--with-trade {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 260px;
+  grid-template-columns: minmax(0, 1fr) 280px;
   gap: 12px;
   align-items: stretch;
+  min-height: 0;
 }
 
 .npc-dialog-main {
   display: grid;
-  grid-template-rows: 180px 150px 140px auto;
+  grid-template-rows: 270px minmax(0, 1fr) auto;
+  gap: 10px;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* ========================= */
+/* TOP ROW (imagem + notes) */
+/* ========================= */
+
+.npc-dialog-top-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(260px, 0.9fr);
   gap: 10px;
   min-width: 0;
 }
 
-.npc-dialog-portrait {
+.npc-dialog-portrait,
+.npc-dialog-notes-panel {
   min-width: 0;
+  min-height: 0;
 }
 
 .npc-dialog-portrait-box {
@@ -78,79 +98,47 @@
 .npc-dialog-portrait-image {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
   display: block;
-  padding: 10px;
-  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.25));
 }
 
-.npc-dialog-main-text {
-  min-height: 0;
-  overflow-y: auto;
+/* ========================= */
+/* NOTES */
+/* ========================= */
+
+.npc-dialog-notes-panel {
   border: 1px solid #6b5038;
-  background: rgba(0, 0, 0, 0.18);
-  padding: 10px;
+  background: rgba(0, 0, 0, 0.16);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
-.npc-dialog-main-text p {
+.npc-dialog-panel-header {
+  margin-bottom: 10px;
+}
+
+.npc-dialog-panel-header strong {
+  color: #eadbc4;
+  font-size: 14px;
+}
+
+.npc-dialog-notes-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.npc-dialog-notes-content p {
   margin: 0 0 8px;
-  color: #e7d8c1;
-  font-size: 13px;
+  color: #c8b294;
+  font-size: 12px;
   line-height: 1.45;
   text-align: left;
 }
 
-.npc-dialog-main-text p:last-child {
-  margin-bottom: 0;
-}
-
-.npc-dialog-interaction-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  min-height: 0;
-}
-
-.npc-dialog-options {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow-y: auto;
-  border: 1px solid #6b5038;
-  background: rgba(0, 0, 0, 0.14);
-  padding: 10px;
-}
-
-.npc-dialog-option-button {
-  padding: 8px 10px;
-  border: 1px solid #6b5038;
-  background: linear-gradient(180deg, #3f2d20 0%, #251a13 100%);
-  color: #eadbc4;
-  text-align: left;
-  cursor: pointer;
-}
-
-.npc-dialog-option-button:hover {
-  background: linear-gradient(180deg, #533a29 0%, #2f2118 100%);
-}
-
-.npc-dialog-lore {
-  overflow-y: auto;
-  border: 1px solid #6b5038;
-  background: rgba(0, 0, 0, 0.14);
-  padding: 10px;
-}
-
-.npc-dialog-lore p {
-  margin: 0 0 8px;
-  color: #c8b294;
-  font-size: 12px;
-  line-height: 1.4;
-  text-align: left;
-}
-
-.npc-dialog-lore p:last-child {
+.npc-dialog-notes-content p:last-child {
   margin-bottom: 0;
 }
 
@@ -158,10 +146,142 @@
   color: #a99074;
 }
 
+/* ========================= */
+/* BOTTOM ROW */
+/* ========================= */
+
+.npc-dialog-bottom-row {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  gap: 10px;
+  min-height: 0;
+  height: 320px; /* 🔥 controla altura total da área */
+}
+
+/* ========================= */
+/* TOPICS */
+/* ========================= */
+
+.npc-dialog-topics-panel {
+  border: 1px solid #6b5038;
+  background: rgba(0, 0, 0, 0.16);
+  padding: 12px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.npc-dialog-topics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.npc-dialog-topic-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid #6b5038;
+  background: linear-gradient(180deg, #3f2d20 0%, #251a13 100%);
+  color: #eadbc4;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.npc-dialog-topic-button:hover {
+  background: linear-gradient(180deg, #533a29 0%, #2f2118 100%);
+  transform: translateY(-1px);
+}
+
+.npc-dialog-topic-button.is-new {
+  border-color: #a77949;
+  box-shadow: 0 0 0 1px rgba(167, 121, 73, 0.18);
+}
+
+.npc-dialog-topic-button.is-completed {
+  opacity: 0.85;
+}
+
+.npc-dialog-topic-button.is-locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.npc-dialog-topic-label {
+  font-size: 14px;
+}
+
+.npc-dialog-topic-pill {
+  padding: 2px 6px;
+  border: 1px solid #9b714a;
+  background: rgba(120, 77, 40, 0.22);
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* ========================= */
+/* CONVERSATION */
+/* ========================= */
+
+.npc-dialog-conversation-panel {
+  border: 1px solid #6b5038;
+  background: rgba(0, 0, 0, 0.16);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.npc-dialog-main-text {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid #6b5038;
+  background: rgba(0, 0, 0, 0.18);
+  padding: 12px;
+  text-align: left; /* 🔥 adicionar */
+}
+
+.npc-dialog-main-text {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid #6b5038;
+  background: rgba(0, 0, 0, 0.18);
+  padding: 12px;
+  text-align: left; /* 🔥 adicionar */
+}
+
+.npc-dialog-main-text-empty {
+  color: #a99074;
+}
+
+/* ========================= */
+/* FOOTER */
+/* ========================= */
+
 .npc-dialog-footer {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.npc-dialog-footer-hint {
+  display: flex;
   gap: 8px;
-  justify-content: flex-end;
+  color: #d6c0a1;
+  font-size: 12px;
+}
+
+.npc-dialog-footer-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .npc-dialog-footer-button {
@@ -173,15 +293,14 @@
   cursor: pointer;
 }
 
-.npc-dialog-footer-button:hover:not(:disabled),
+.npc-dialog-footer-button:hover,
 .npc-dialog-footer-button.is-active {
   background: linear-gradient(180deg, #61452f 0%, #39281c 100%);
 }
 
-.npc-dialog-footer-button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
+/* ========================= */
+/* TRADE */
+/* ========================= */
 
 .npc-trade-panel {
   display: flex;
@@ -190,115 +309,40 @@
   border: 1px solid #6b5038;
   background: rgba(0, 0, 0, 0.16);
   padding: 10px;
-  min-width: 0;
-  min-height: 0;
-}
-
-.npc-trade-panel__header h4 {
-  margin: 0 0 4px;
-  color: #eadbc4;
-  font-size: 14px;
-}
-
-.npc-trade-panel__header p {
-  margin: 0;
-  color: #bba589;
-  font-size: 12px;
-  line-height: 1.35;
 }
 
 .npc-trade-panel__content {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-height: 0;
   overflow-y: auto;
 }
 
-.trade-item-card,
-.trade-drop-zone {
-  border: 1px solid #6b5038;
-  background: linear-gradient(180deg, #35261b 0%, #221811 100%);
-  padding: 10px;
-}
-
-.trade-item-card strong,
-.trade-drop-zone strong {
-  display: block;
-  margin-bottom: 4px;
-  color: #eadbc4;
-}
-
-.trade-item-card span,
-.trade-drop-zone p {
-  display: block;
-  color: #bba589;
-  font-size: 12px;
-  line-height: 1.35;
-  margin-bottom: 8px;
-}
-
-.trade-item-card button,
-.trade-sell-all-button {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #6b5038;
-  background: linear-gradient(180deg, #4f3927 0%, #2f2118 100%);
-  color: #eadbc4;
-  cursor: pointer;
-}
-
-.trade-item-card button:hover,
-.trade-sell-all-button:hover {
-  background: linear-gradient(180deg, #61452f 0%, #39281c 100%);
-}
+/* ========================= */
+/* SCROLL */
+/* ========================= */
 
 .npc-dialog-main-text::-webkit-scrollbar,
-.npc-dialog-options::-webkit-scrollbar,
-.npc-dialog-lore::-webkit-scrollbar,
-.npc-trade-panel__content::-webkit-scrollbar {
+.npc-dialog-topics-list::-webkit-scrollbar,
+.npc-dialog-notes-content::-webkit-scrollbar {
   width: 8px;
 }
 
-.npc-dialog-main-text::-webkit-scrollbar-track,
-.npc-dialog-options::-webkit-scrollbar-track,
-.npc-dialog-lore::-webkit-scrollbar-track,
-.npc-trade-panel__content::-webkit-scrollbar-track {
-  background: #140f0b;
-}
-
 .npc-dialog-main-text::-webkit-scrollbar-thumb,
-.npc-dialog-options::-webkit-scrollbar-thumb,
-.npc-dialog-lore::-webkit-scrollbar-thumb,
-.npc-trade-panel__content::-webkit-scrollbar-thumb {
+.npc-dialog-topics-list::-webkit-scrollbar-thumb,
+.npc-dialog-notes-content::-webkit-scrollbar-thumb {
   background: #4f3c2c;
-  border: 1px solid #2b2018;
 }
 
-@media (max-width: 900px) {
-  .npc-dialog-anchor .game-dialog {
-    width: min(760px, calc(100% - 20px));
-  }
+/* ========================= */
+/* RESPONSIVE */
+/* ========================= */
 
+@media (max-width: 980px) {
+  .npc-dialog-top-row,
+  .npc-dialog-bottom-row,
   .npc-dialog-layout--with-trade {
     grid-template-columns: 1fr;
   }
-}
 
-@media (max-width: 700px) {
-  .npc-dialog-main {
-    grid-template-rows: 140px 140px auto auto;
-  }
-
-  .npc-dialog-interaction-row {
-    grid-template-columns: 1fr;
-  }
-
-  .npc-dialog-footer {
-    justify-content: stretch;
-  }
-
-  .npc-dialog-footer-button {
-    flex: 1;
+  .npc-dialog-bottom-row {
+    height: auto;
   }
 }
