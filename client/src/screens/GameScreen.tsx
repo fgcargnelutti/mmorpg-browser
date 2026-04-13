@@ -34,6 +34,7 @@ import { equipmentRows } from "../data/equipmentData";
 import { skillsData } from "../data/skillsData";
 import { conditionsData } from "../data/conditionsData";
 import { discoverablePoisData } from "../data/discoverablePoisData";
+import { mapsData, type MapId } from "../data/mapsData";
 import { useCharacterProgression } from "../hooks/useCharacterProgression";
 import type { CharacterSummary } from "./CharacterSelectScreen";
 import type { DialogueOption } from "../components/NpcDialog";
@@ -80,6 +81,8 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     null
   );
 
+  const [currentMap, setCurrentMap] = useState<MapId>("town");
+
   const {
     player,
     setPlayer,
@@ -102,6 +105,8 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     setEventLogs,
   });
 
+  const currentMapData = mapsData[currentMap];
+
   const sewerRumorLearned =
     player?.learnedRumors.includes("jane-sewer-rumor") ?? false;
 
@@ -110,19 +115,16 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       id: "who-are-you",
       label: "Who are you?",
       state: "unlocked",
-      category: "Introduction",
     },
     {
       id: "what-do-you-sell",
       label: "What do you sell?",
       state: "unlocked",
-      category: "Trade",
     },
     {
       id: "any-rumors",
       label: "Any rumors?",
       state: sewerRumorLearned ? "completed" : "new",
-      category: "Rumors",
     },
   ];
 
@@ -134,11 +136,38 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     ? encountersData[activeEncounter.key]
     : null;
 
+  const handleMapTravel = (destinationMapId?: MapId) => {
+    if (!destinationMapId) return;
+
+    setCurrentMap(destinationMapId);
+    setNpcDialogOpen(false);
+    setActiveEncounter(null);
+    setContextState("expanded");
+
+    if (destinationMapId === "town") {
+      handleTravel("merchant");
+    }
+
+    if (destinationMapId === "sewer") {
+      handleTravel("sewer");
+    }
+
+    setEventLogs((prev) => [
+      ...prev,
+      `System: You travel to ${mapsData[destinationMapId].name}.`,
+    ]);
+  };
+
   const handleTravelAndOpenContext = (location: LocationKey) => {
     setNpcDialogOpen(false);
     setActiveEncounter(null);
     setContextState("expanded");
+
     handleTravel(location);
+
+    if (location === "sewer" && currentMap === "town") {
+      handleMapTravel("sewer");
+    }
   };
 
   const handleOpenNpcDialog = (npcName?: string) => {
@@ -452,13 +481,18 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     0
   );
 
+  const topPanelSubtitle =
+    currentMap === "town"
+      ? locations[currentLocation].subtitle
+      : "Underground tunnels";
+
   return (
     <main className="game-shell">
       <section className="game-grid">
         <section className="world-panel">
           <TopPanel
-            locationName={locations[currentLocation].name}
-            locationSubtitle={locations[currentLocation].subtitle}
+            locationName={currentMapData.name}
+            locationSubtitle={topPanelSubtitle}
             worldStatus={[
               `Level ${computedLevel}`,
               xpProgress
@@ -472,7 +506,9 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
             currentLocation={currentLocation}
             contextState={contextState}
             locations={locations}
+            mapData={currentMapData}
             onTravel={handleTravelAndOpenContext}
+            onMapTravel={handleMapTravel}
             onMinimizeContext={() => setContextState("minimized")}
             onExpandContext={() => setContextState("expanded")}
             onAction={handleAction}

@@ -55,8 +55,8 @@ export const locations: Record<LocationKey, LocationData> = {
     subtitle: "Exit route",
     description: "A road leading north. The next map is not ready yet.",
     mapPosition: {
-      top: "14%",
-      left: "41%",
+      top: "22%",
+      left: "35%",
     },
     poiVariant: "road",
     actions: [
@@ -77,8 +77,8 @@ export const locations: Record<LocationKey, LocationData> = {
     description:
       "Broken shelves, dust, and loose pages. You might find scraps worth keeping.",
     mapPosition: {
-      top: "28%",
-      left: "52%",
+      top: "32%",
+      left: "48%",
     },
     poiVariant: "building",
     actions: [
@@ -107,8 +107,8 @@ export const locations: Record<LocationKey, LocationData> = {
     description:
       "A ruined forge. You can still trade, buy gear, or salvage debris.",
     mapPosition: {
-      top: "36%",
-      left: "62%",
+      top: "37%",
+      left: "58%",
     },
     poiVariant: "building",
     actions: [
@@ -151,8 +151,8 @@ export const locations: Record<LocationKey, LocationData> = {
     description:
       "A sheltered stall still in use. You can sell goods or talk to Jane.",
     mapPosition: {
-      top: "22%",
-      left: "34%",
+      top: "16%",
+      left: "25%",
     },
     poiVariant: "merchant",
     actions: [
@@ -177,8 +177,8 @@ export const locations: Record<LocationKey, LocationData> = {
     subtitle: "Map transition",
     description: "The sewer leads to another map we do not have yet.",
     mapPosition: {
-      top: "49%",
-      left: "52%",
+      top: "53%",
+      left: "50%",
     },
     poiVariant: "danger",
     actions: [
@@ -198,8 +198,8 @@ export const locations: Record<LocationKey, LocationData> = {
     description:
       "A quiet ruin where you can recover a little strength or search debris.",
     mapPosition: {
-      top: "74%",
-      left: "52%",
+      top: "71%",
+      left: "50%",
     },
     poiVariant: "temple",
     actions: [
@@ -234,8 +234,8 @@ export const locations: Record<LocationKey, LocationData> = {
     subtitle: "Map transition",
     description: "These stairs lead somewhere we still need to build.",
     mapPosition: {
-      top: "52%",
-      left: "69%",
+      top: "51%",
+      left: "70%",
     },
     poiVariant: "transition",
     actions: [
@@ -255,7 +255,7 @@ export const locations: Record<LocationKey, LocationData> = {
     description: "A road leading out of town. The destination is not ready yet.",
     mapPosition: {
       top: "82%",
-      left: "34%",
+      left: "26%",
     },
     poiVariant: "road",
     actions: [
@@ -274,8 +274,8 @@ export const locations: Record<LocationKey, LocationData> = {
     subtitle: "Map transition",
     description: "A road leaving the town. The destination is not ready yet.",
     mapPosition: {
-      top: "70%",
-      left: "67%",
+      top: "80%",
+      left: "73%",
     },
     poiVariant: "road",
     actions: [
