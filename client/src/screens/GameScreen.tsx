@@ -33,6 +33,7 @@ import { inventoryCatalog } from "../data/inventoryCatalog";
 import { equipmentRows } from "../data/equipmentData";
 import { skillsData } from "../data/skillsData";
 import { conditionsData } from "../data/conditionsData";
+import { buffsData } from "../data/buffsData";
 import { discoverablePoisData } from "../data/discoverablePoisData";
 import { mapsData, type MapId } from "../data/mapsData";
 import { useCharacterProgression } from "../hooks/useCharacterProgression";
@@ -481,10 +482,9 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     0
   );
 
-  const topPanelSubtitle =
-    currentMap === "town"
-      ? locations[currentLocation].subtitle
-      : "Underground tunnels";
+  const xpText = xpProgress
+    ? `${xpProgress.xpIntoLevel}/${xpProgress.xpToNextLevel} XP`
+    : "0/0 XP";
 
   return (
     <main className="game-shell">
@@ -492,12 +492,27 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
         <section className="world-panel">
           <TopPanel
             locationName={currentMapData.name}
-            locationSubtitle={topPanelSubtitle}
-            worldStatus={[
-              `Level ${computedLevel}`,
-              xpProgress
-                ? `${xpProgress.xpIntoLevel}/${xpProgress.xpToNextLevel} XP`
-                : "0/0 XP",
+            locationSubtitle=""
+            worldStatus={[]}
+            stats={[
+              {
+                label: "HP",
+                value: computedHp,
+                max: computedMaxHp,
+                className: "bar-hp",
+              },
+              {
+                label: "SP",
+                value: computedSp,
+                max: computedSp,
+                className: "bar-sp",
+              },
+              {
+                label: "Stamina",
+                value: player.stamina,
+                max: player.maxStamina,
+                className: "bar-stamina",
+              },
             ]}
           />
 
@@ -566,29 +581,11 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
         <aside className="right-sidebar">
           <CharacterPanel
             level={computedLevel}
+            xpText={xpText}
             name={player.name}
             characterClass={selectedClass.name}
-            stats={[
-              {
-                label: "HP",
-                value: computedHp,
-                max: computedMaxHp,
-                className: "bar-hp",
-              },
-              {
-                label: "SP",
-                value: computedSp,
-                max: computedSp,
-                className: "bar-sp",
-              },
-              {
-                label: "Stamina",
-                value: player.stamina,
-                max: player.maxStamina,
-                className: "bar-stamina",
-              },
-            ]}
             conditions={conditionsData}
+            buffs={buffsData}
           />
 
           <EquipmentPanel equipmentRows={equipmentRows} />

@@ -1,5 +1,3 @@
-import { useEffect, useRef } from "react";
-
 type ChatPanelProps = {
   messages: string[];
   inputValue: string;
@@ -7,10 +5,16 @@ type ChatPanelProps = {
   onSend: () => void;
 };
 
-function getMessageType(message: string) {
-  if (message.startsWith("NPC ")) return "npc";
-  if (message.startsWith("You:")) return "player";
-  return "player";
+function getMessageClass(message: string) {
+  if (message.startsWith("You:")) {
+    return "chat-message chat-message--player";
+  }
+
+  if (message.startsWith("NPC")) {
+    return "chat-message chat-message--npc";
+  }
+
+  return "chat-message chat-message--other";
 }
 
 export default function ChatPanel({
@@ -19,49 +23,33 @@ export default function ChatPanel({
   onInputChange,
   onSend,
 }: ChatPanelProps) {
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!scrollRef.current) return;
-    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages]);
-
   return (
-    <section className="ui-panel bottom-box chat-panel">
-      <div className="panel-title-row">
-        <h2>Chat</h2>
+    <section className="ui-panel chat-panel">
+      <div className="panel-title">Chat</div>
+
+      <div className="chat-messages">
+        {messages.map((message, index) => (
+          <div key={`${message}-${index}`} className={getMessageClass(message)}>
+            {message}
+          </div>
+        ))}
       </div>
 
-      <div ref={scrollRef} className="scroll-box chat-scroll">
-        {messages.length === 0 ? (
-          <div className="empty-box">No chat messages yet.</div>
-        ) : (
-          messages.map((message, index) => {
-            const messageType = getMessageType(message);
-
-            return (
-              <div
-                key={`${message}-${index}`}
-                className={`chat-line chat-line-${messageType}`}
-              >
-                {message}
-              </div>
-            );
-          })
-        )}
-      </div>
-
-      <div className="chat-row">
+      <div className="chat-input-row">
         <input
+          className="chat-input"
           type="text"
-          placeholder="Say something to the wasteland..."
           value={inputValue}
-          onChange={(e) => onInputChange(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") onSend();
+          onChange={(event) => onInputChange(event.target.value)}
+          placeholder="Say something to the wasteland..."
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              onSend();
+            }
           }}
         />
-        <button className="chat-send" onClick={onSend}>
+
+        <button className="chat-send-button" type="button" onClick={onSend}>
           Send
         </button>
       </div>

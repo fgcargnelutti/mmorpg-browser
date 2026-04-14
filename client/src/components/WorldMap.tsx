@@ -194,12 +194,17 @@ export default function WorldMap({
 
     const poiData = discoverablePois[poiKey];
 
+    if (hoverAnimationFrameRef.current !== null) {
+      cancelAnimationFrame(hoverAnimationFrameRef.current);
+      hoverAnimationFrameRef.current = null;
+    }
+
     setHoveredDiscoverablePoi(poiKey);
     setHoverProgressPercent(0);
     hoverStartTimeRef.current = performance.now();
 
     const tick = (timestamp: number) => {
-      if (!hoverStartTimeRef.current) return;
+      if (hoverStartTimeRef.current === null) return;
 
       const elapsed = timestamp - hoverStartTimeRef.current;
       const nextProgress = Math.min(

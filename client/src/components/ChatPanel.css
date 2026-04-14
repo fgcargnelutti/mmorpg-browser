@@ -1,27 +1,100 @@
 .chat-panel {
-  min-width: 0;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.chat-scroll {
+.chat-messages {
+  flex: 1;
   min-height: 0;
-  scroll-behavior: smooth;
+  overflow-y: auto;
+  margin-bottom: 8px;
+  padding-right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.chat-line {
+.chat-message {
   padding: 6px 8px;
-  margin-bottom: 6px;
+  border: 1px solid var(--line-soft);
   background: rgba(0, 0, 0, 0.16);
-  border: 1px solid #3a2b20;
-  font-size: 13px;
+  color: #e7d8c1;
+  font-size: 12px;
+  line-height: 1.35;
   text-align: left;
-  line-height: 1.4;
+  word-break: break-word;
 }
 
-.chat-line-player {
+.chat-message--npc {
+  border-color: #6c5338;
+  background: rgba(58, 41, 25, 0.18);
+  color: #d9c197;
+}
+
+.chat-message--player {
+  border-color: #4b5e79;
+  background: rgba(28, 38, 54, 0.18);
+  color: #cfdcf0;
+}
+
+.chat-message--other {
+  border-color: var(--line-soft);
+  background: rgba(0, 0, 0, 0.16);
   color: #e7d8c1;
 }
 
-.chat-line-npc {
-  color: #c9b37e;
+.chat-input-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.chat-input {
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--line-soft);
+  background: #140f0c;
+  color: #e7d8c1;
+  font: inherit;
+}
+
+.chat-input::placeholder {
+  color: var(--muted);
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: #7d5b36;
+}
+
+.chat-send-button {
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, #4f3927 0%, #2f2118 100%);
+  color: #eadbc4;
+  cursor: pointer;
+  font: inherit;
+}
+
+.chat-send-button:hover {
+  background: linear-gradient(180deg, #61452f 0%, #39281c 100%);
+}
+
+.chat-messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+  background: #140f0b;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+  background: #4f3c2c;
+  border: 1px solid #2b2018;
 }

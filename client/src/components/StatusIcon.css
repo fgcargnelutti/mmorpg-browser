@@ -1,0 +1,70 @@
+.status-icon {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-soft);
+  background: #140f0c;
+  cursor: default;
+  position: relative;
+}
+
+/* 🔹 GLYPH (corrige ícones desalinhados) */
+.status-icon__glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* 🔹 SIZES */
+.status-icon.sm {
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+}
+
+.status-icon.md {
+  width: 30px;
+  height: 30px;
+  font-size: 15px;
+}
+
+.status-icon.lg {
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+}
+
+/* 🔹 STATES */
+.status-icon.active {
+  border-color: #7d5b36;
+  background: #241a13;
+}
+
+.status-icon.inactive {
+  opacity: 0.4;
+}
+
+/* 🔹 VARIANTS */
+
+/* default = conditions */
+.status-icon.default.active {
+  border-color: #7d5b36;
+  background: #241a13;
+}
+
+/* buffs (leve roxo) */
+.status-icon.buff.active {
+  border-color: #7b5fa3;
+  background: #22182e;
+}
+
+/* specialization (neutro, levemente mais clean) */
+.status-icon.specialization {
+  border-color: var(--line-soft);
+  background: #140f0c;
+}
+
+.status-icon.specialization.active {
+  border-color: #6b533c;
+  background: #1d1510;
+}

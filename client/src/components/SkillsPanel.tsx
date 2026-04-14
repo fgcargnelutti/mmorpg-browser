@@ -1,4 +1,5 @@
 import Tooltip from "./Tooltip";
+import StatusIcon from "./StatusIcon";
 import "./SkillsPanel.css";
 
 type Specialization = {
@@ -29,9 +30,9 @@ export default function SkillsPanel({ skills }: SkillsPanelProps) {
         <h2>Skills</h2>
       </div>
 
-      <div className="skills-list compact-skills">
+      <div className="skills-list">
         {skills.map((skill) => (
-          <div key={skill.key} className="skill-card compact-skill-card">
+          <div key={skill.key} className="skill-card">
             <div className="skill-main-row">
               <Tooltip
                 content={
@@ -48,96 +49,81 @@ export default function SkillsPanel({ skills }: SkillsPanelProps) {
               <strong className="skill-value">{skill.progress}%</strong>
             </div>
 
-            <div className="skill-specializations-row">
-              <div className="skill-tier-inline">
-                <span
-                  className={`tier-label ${
-                    skill.level >= 30 ? "unlocked" : "locked"
-                  }`}
-                >
-                  30
-                </span>
-                <div className="tier-icons one-line-icons">
+            <div className="skill-tiers-grid">
+              <div className="skill-tier-block">
+                <div className="skill-tier-header">
+                  <span
+                    className={`tier-label ${
+                      skill.level >= 30 ? "unlocked" : "locked"
+                    }`}
+                  >
+                    Tier 30
+                  </span>
+                </div>
+
+                <div className="tier-icons">
                   {skill.tier30.map((spec) => (
-                    <Tooltip
+                    <StatusIcon
                       key={`30-${skill.key}-${spec.title}`}
-                      content={
-                        <>
-                          <strong>{spec.title}</strong>
-                          <p>{spec.description}</p>
-                        </>
-                      }
-                    >
-                      <div
-                        className={`spec-icon ${
-                          skill.level >= 30 ? "unlocked" : "locked"
-                        }`}
-                      >
-                        <span>{spec.icon}</span>
-                      </div>
-                    </Tooltip>
+                      icon={spec.icon}
+                      label={spec.title}
+                      description={spec.description}
+                      active={skill.level >= 30}
+                      variant="specialization"
+                      size="md"
+                    />
                   ))}
                 </div>
               </div>
 
-              <div className="skill-tier-inline">
-                <span
-                  className={`tier-label ${
-                    skill.level >= 60 ? "unlocked" : "locked"
-                  }`}
-                >
-                  60
-                </span>
-                <div className="tier-icons one-line-icons">
+              <div className="skill-tier-block">
+                <div className="skill-tier-header">
+                  <span
+                    className={`tier-label ${
+                      skill.level >= 60 ? "unlocked" : "locked"
+                    }`}
+                  >
+                    Tier 60
+                  </span>
+                </div>
+
+                <div className="tier-icons">
                   {skill.tier60.map((spec) => (
-                    <Tooltip
+                    <StatusIcon
                       key={`60-${skill.key}-${spec.title}`}
-                      content={
-                        <>
-                          <strong>{spec.title}</strong>
-                          <p>{spec.description}</p>
-                        </>
-                      }
-                    >
-                      <div
-                        className={`spec-icon ${
-                          skill.level >= 60 ? "unlocked" : "locked"
-                        }`}
-                      >
-                        <span>{spec.icon}</span>
-                      </div>
-                    </Tooltip>
+                      icon={spec.icon}
+                      label={spec.title}
+                      description={spec.description}
+                      active={skill.level >= 60}
+                      variant="specialization"
+                      size="md"
+                    />
                   ))}
                 </div>
               </div>
 
-              <div className="skill-tier-inline">
-                <span
-                  className={`tier-label ${
-                    skill.level >= 100 ? "unlocked" : "locked"
-                  }`}
-                >
-                  100
-                </span>
-                <div className="tier-icons one-line-icons">
+              <div className="skill-tier-block">
+                <div className="skill-tier-header">
+                  <span
+                    className={`tier-label ${
+                      skill.level >= 100 ? "unlocked" : "locked"
+                    }`}
+                  >
+                    Tier 100
+                  </span>
+                </div>
+
+                <div className="tier-icons">
                   {skill.tier100.map((spec) => (
-                    <Tooltip
+                    <StatusIcon
                       key={`100-${skill.key}-${spec.title}`}
-                      content={
-                        <>
-                          <strong>{spec.title}</strong>
-                          <p>{spec.description}</p>
-                        </>
-                      }
-                    >
-                      <div
-                        className={`spec-icon ${
-                          skill.level >= 100 ? "unlocked" : "locked"
-                        }`}
-                      >
-                        <span>{spec.icon}</span>
-                      </div>
-                    </Tooltip>
+                      icon={spec.icon}
+                      label={spec.title}
+                      description={spec.description}
+                      active={skill.level >= 100}
+                      variant="specialization"
+                      size="md"
+                    />
                   ))}
                 </div>
               </div>

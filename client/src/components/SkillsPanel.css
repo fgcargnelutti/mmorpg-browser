@@ -6,33 +6,32 @@
   z-index: 30;
 }
 
+/* LIST */
 .skills-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
   padding-right: 4px;
 }
 
-.compact-skills {
-  gap: 6px;
-}
-
+/* CARD */
 .skill-card {
-  padding: 6px 8px;
+  padding: 10px;
   background: rgba(0, 0, 0, 0.18);
   border: 1px solid var(--line-soft);
 }
 
+/* TOP ROW */
 .skill-main-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .skill-name {
-  font-size: 12px;
+  font-size: 13px;
   color: #e7d8c1;
   cursor: help;
 }
@@ -45,26 +44,31 @@
 
 .skill-value {
   font-size: 11px;
+  color: #c9b37e;
   white-space: nowrap;
 }
 
-.skill-specializations-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: center;
+/* TIERS */
+.skill-tiers-grid {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
-.skill-tier-inline {
+/* EACH TIER BLOCK */
+.skill-tier-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* TIER HEADER */
+.skill-tier-header {
   display: flex;
   align-items: center;
-  gap: 4px;
-  min-width: 0;
 }
 
 .tier-label {
-  width: auto;
-  min-width: 22px;
   font-size: 10px;
   color: var(--muted);
 }
@@ -73,33 +77,18 @@
   color: #e7d8c1;
 }
 
-.one-line-icons {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 3px;
-  min-width: 0;
-}
-
-.spec-icon {
-  width: 16px;
-  height: 16px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--line-soft);
-  background: #140f0c;
-  font-size: 9px;
-  cursor: default;
-}
-
-.spec-icon.unlocked {
-  border-color: #7d5b36;
-  background: #241a13;
-}
-
-.spec-icon.locked {
+.tier-label.locked {
   opacity: 0.4;
 }
 
+/* ICON ROW */
+.tier-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* SCROLLBAR */
 .skills-panel::-webkit-scrollbar {
   width: 8px;
 }
@@ -113,9 +102,9 @@
   border: 1px solid #2b2018;
 }
 
+/* MOBILE */
 @media (max-width: 780px) {
-  .skill-specializations-row {
-    grid-template-columns: 1fr;
+  .skill-tiers-grid {
     gap: 6px;
   }
 }

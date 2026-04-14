@@ -1,9 +1,10 @@
 .top-panel {
-  display: flex;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr) 220px;
   align-items: center;
-  justify-content: space-between;
-  padding: 4px 10px;
-  height: 36px;
+  gap: 12px;
+  padding: 6px 12px;
+  min-height: 74px;
 
   background: linear-gradient(180deg, #1f1712 0%, #140f0c 100%);
   border-bottom: 2px solid #000;
@@ -11,34 +12,103 @@
   font-size: 12px;
 }
 
-/* LEFT SIDE */
+/* LEFT */
 .top-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: flex-start;
+  min-width: 0;
 }
 
 .location-name {
-  font-weight: bold;
+  font-weight: 700;
+  color: #e7d8c1;
+  font-size: 14px;
+}
+
+/* CENTER */
+.top-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.top-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: min(760px, 100%);
+}
+
+.top-stat-block {
+  min-width: 140px;
+  max-width: 190px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.top-stat-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
   color: #e7d8c1;
 }
 
-.location-subtitle {
-  color: #aa967d;
-  font-size: 11px;
+.top-stat-bar-shell {
+  width: 100%;
+  height: 12px;
+  background: #110d0a;
+  border: 1px solid #000;
 }
 
-/* RIGHT SIDE */
+.top-stat-bar-fill {
+  height: 100%;
+}
+
+/* COLORS */
+.bar-hp {
+  background: linear-gradient(90deg, #733126 0%, #b15442 100%);
+}
+
+.bar-sp {
+  background: linear-gradient(90deg, #2f4465 0%, #5c81bc 100%);
+}
+
+.bar-stamina {
+  background: linear-gradient(90deg, #536327 0%, #91a744 100%);
+}
+
+/* RIGHT */
 .top-right {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  min-height: 1px;
 }
 
-.world-status {
-  padding: 2px 6px;
-  border: 1px solid #4f3c2c;
-  background: #1a130f;
-  color: #c9b37e;
-  font-size: 11px;
+/* RESPONSIVE */
+@media (max-width: 1100px) {
+  .top-panel {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .top-left {
+    justify-content: center;
+  }
+
+  .top-right {
+    display: none;
+  }
+}
+
+@media (max-width: 780px) {
+  .top-stats {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .top-stat-block {
+    width: 100%;
+  }
 }

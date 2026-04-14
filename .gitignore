@@ -1,4 +1,29 @@
-node_modules
-dist
+node_modules/
+dist/
+build/
+coverage/
+
+# Environment files
 .env
+.env.*
+!.env.example
+!.env.sample
+
+# Agent/local context files
+AGENTS.md
+PROJECT_CONTEXT.md
+Old_Context.md
+TASKS.md
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS / editor files
 .DS_Store
+Thumbs.db
+.vscode/
+.idea/
