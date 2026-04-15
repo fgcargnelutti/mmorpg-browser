@@ -84,6 +84,10 @@
 /* RIGHT */
 .top-right {
   min-height: 1px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-width: 0;
 }
 
 /* RESPONSIVE */

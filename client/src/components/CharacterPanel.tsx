@@ -34,7 +34,7 @@ export default function CharacterPanel({
   buffs,
 }: CharacterPanelProps) {
   return (
-    <section className="ui-panel character-panel no-scroll-panel">
+    <section className="ui-panel sidebar-panel sidebar-panel--content character-panel">
       <div className="char-name">{name}</div>
       <div className="char-subtitle">{characterClass}</div>
 

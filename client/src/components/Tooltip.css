@@ -1,6 +1,11 @@
 .portal-tooltip-trigger {
   display: inline-flex;
   position: relative;
+  transition: transform 0.14s ease;
+}
+
+.portal-tooltip-trigger:hover {
+  transform: translateY(-1px);
 }
 
 .portal-tooltip {
@@ -14,6 +19,8 @@
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
   color: #d8ccb8;
   pointer-events: none;
+  border-radius: 10px;
+  backdrop-filter: blur(6px);
 }
 
 .portal-tooltip strong {

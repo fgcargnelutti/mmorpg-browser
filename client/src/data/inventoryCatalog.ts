@@ -88,4 +88,28 @@ export const inventoryCatalog: Record<string, InventoryCatalogItem> = {
     description: "Currency used for simple trade.",
     stats: ["Trade currency"],
   },
+  cookie: {
+    key: "cookie",
+    name: "Cookie",
+    icon: "🍪",
+    weight: 0.1,
+    description: "A hard travel biscuit that somehow survived the damp.",
+    stats: ["Food item"],
+  },
+  fruit: {
+    key: "fruit",
+    name: "Wild Fruit",
+    icon: "🍎",
+    weight: 0.2,
+    description: "A handful of fruit gathered from the old rural outskirts.",
+    stats: ["Natural good"],
+  },
+  "rabbit-meat": {
+    key: "rabbit-meat",
+    name: "Rabbit Meat",
+    icon: "🍖",
+    weight: 0.6,
+    description: "Freshly hunted small game from the hills and brush.",
+    stats: ["Food item"],
+  },
 };

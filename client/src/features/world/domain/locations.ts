@@ -1,4 +1,6 @@
-import type { EncounterKey } from "./encountersData";
+import type { EncounterKey } from "../../../data/encountersData";
+import type { MapId } from "./mapsData";
+import type { NpcProfileKey } from "./npcProfilesData";
 
 export type LocationKey =
   | "north-road"
@@ -30,11 +32,20 @@ export type ContextAction = {
     | "rest"
     | "sell_resources"
     | "npc_dialog"
+    | "learn_rumor"
+    | "log_message"
+    | "travel_map"
     | "travel_placeholder"
     | "trigger_encounter";
   targetMapName?: string;
+  destinationMapId?: MapId;
   npcName?: string;
+  npcProfileId?: NpcProfileKey;
   encounterKey?: EncounterKey;
+  rumorKey?: string;
+  eventLogMessage?: string;
+  sellableItemKeys?: string[];
+  goldPerItem?: number;
 };
 
 export type LocationData = {
@@ -63,10 +74,10 @@ export const locations: Record<LocationKey, LocationData> = {
       {
         id: "travel-north",
         label: "Travel North",
-        description: "Attempt to move toward the northern outskirts.",
-        effect: "trigger_encounter",
-        encounterKey: "north-road-goblin",
-        targetMapName: "Northern Outskirts",
+        description: "Travel into the North Forest.",
+        effect: "travel_map",
+        destinationMapId: "north-forest",
+        targetMapName: "North Forest",
       },
     ],
   },
@@ -252,7 +263,7 @@ export const locations: Record<LocationKey, LocationData> = {
   "southwest-road": {
     name: "Southwest Road",
     subtitle: "Map transition",
-    description: "A road leading out of town. The destination is not ready yet.",
+    description: "A road leading toward old farms and fields beyond the outpost.",
     mapPosition: {
       top: "82%",
       left: "26%",
@@ -262,9 +273,10 @@ export const locations: Record<LocationKey, LocationData> = {
       {
         id: "travel-sw",
         label: "Take Southwest Road",
-        description: "This would take you to another map.",
-        effect: "travel_placeholder",
-        targetMapName: "Southwest Wilds",
+        description: "Travel toward the decayed rural outskirts.",
+        effect: "travel_map",
+        destinationMapId: "southwest-farm",
+        targetMapName: "Southwest Farm",
       },
     ],
   },

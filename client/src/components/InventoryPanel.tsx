@@ -22,7 +22,7 @@ export default function InventoryPanel({
   maxWeight,
 }: InventoryPanelProps) {
   return (
-    <section className="ui-panel inventory-panel">
+    <section className="ui-panel sidebar-panel sidebar-panel--scroll inventory-panel">
       <div className="panel-title-row inventory-title-row">
         <h2>Inventory</h2>
         <span className="inventory-weight">

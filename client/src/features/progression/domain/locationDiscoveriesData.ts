@@ -1,5 +1,5 @@
-import type { LocationKey } from "./locations";
-import { experienceSources } from "./experienceSources";
+import type { LocationKey } from "../../world/domain/locations";
+import { experienceSources } from "../../../data/experienceSources";
 
 export type LocationDiscoveryData = {
   locationKey: LocationKey;

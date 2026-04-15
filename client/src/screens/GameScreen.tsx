@@ -12,31 +12,34 @@ import "../components/NpcDialog.css";
 import "../components/CombatDialog.css";
 
 import SkillsPanel from "../components/SkillsPanel";
-import WorldMap from "../components/WorldMap";
 import InventoryPanel from "../components/InventoryPanel";
 import CharacterPanel from "../components/CharacterPanel";
 import EquipmentPanel from "../components/EquipmentPanel";
 import EventLogPanel from "../components/EventLogPanel";
 import ChatPanel from "../components/ChatPanel";
 import TopPanel from "../components/TopPanel";
+import RegionPlayersIndicator from "../components/RegionPlayersIndicator";
 
 import {
+  WorldMap,
   locations,
+  discoverablePoisData,
+  mapsData,
+  npcProfilesData,
   type ContextAction,
   type LocationKey,
-} from "../data/locations";
+  type MapId,
+  type NpcProfileKey,
+} from "../features/world";
 import {
   encountersData,
   type EncounterKey,
 } from "../data/encountersData";
 import { inventoryCatalog } from "../data/inventoryCatalog";
 import { equipmentRows } from "../data/equipmentData";
-import { skillsData } from "../data/skillsData";
 import { conditionsData } from "../data/conditionsData";
 import { buffsData } from "../data/buffsData";
-import { discoverablePoisData } from "../data/discoverablePoisData";
-import { mapsData, type MapId } from "../data/mapsData";
-import { useCharacterProgression } from "../hooks/useCharacterProgression";
+import { useCharacterProgression } from "../features/progression";
 import type { CharacterSummary } from "./CharacterSelectScreen";
 import type { DialogueOption } from "../components/NpcDialog";
 
@@ -68,11 +71,11 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
   >("hidden");
 
   const [npcDialogOpen, setNpcDialogOpen] = useState(false);
-
-  const [npcDialogueLines, setNpcDialogueLines] = useState<string[]>([
-    "Jane watches the road in silence before finally speaking.",
-    "Bring me useful scraps, and I can keep you supplied for another day.",
-  ]);
+  const [activeNpcProfileKey, setActiveNpcProfileKey] =
+    useState<NpcProfileKey>("jane");
+  const [npcDialogueLines, setNpcDialogueLines] = useState<string[]>(
+    npcProfilesData.jane.initialDialogueLines
+  );
 
   const [triggeredEncounters, setTriggeredEncounters] = useState<EncounterKey[]>(
     []
@@ -95,43 +98,38 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     computedSp,
     computedCarryWeight,
     xpProgress,
+    skills,
     handleTravel,
     tryTriggerLoreDiscovery,
     gainCharacterXp,
     applyDamageToPlayer,
     learnRumor,
     discoverPoi,
+    recordSkillTraining,
   } = useCharacterProgression({
     selectedCharacter,
     setEventLogs,
   });
 
   const currentMapData = mapsData[currentMap];
-
+  const activeNpcProfile = npcProfilesData[activeNpcProfileKey];
   const sewerRumorLearned =
     player?.learnedRumors.includes("jane-sewer-rumor") ?? false;
 
-  const npcDialogueOptions: DialogueOption[] = [
-    {
-      id: "who-are-you",
-      label: "Who are you?",
-      state: "unlocked",
-    },
-    {
-      id: "what-do-you-sell",
-      label: "What do you sell?",
-      state: "unlocked",
-    },
-    {
-      id: "any-rumors",
-      label: "Any rumors?",
-      state: sewerRumorLearned ? "completed" : "new",
-    },
-  ];
+  const npcDialogueOptions: DialogueOption[] = activeNpcProfile.dialogueOptions.map(
+    (option) => {
+      if (activeNpcProfileKey === "jane" && option.id === "any-rumors") {
+        return {
+          ...option,
+          state: sewerRumorLearned ? "completed" : "new",
+        };
+      }
 
-  const npcLoreNotes = [
-    "Jane has kept this trading post alive longer than most people expected.",
-  ];
+      return option;
+    }
+  );
+
+  const npcLoreNotes = activeNpcProfile.loreNotes;
 
   const activeEncounterData = activeEncounter
     ? encountersData[activeEncounter.key]
@@ -145,17 +143,15 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     setActiveEncounter(null);
     setContextState("expanded");
 
-    if (destinationMapId === "town") {
-      handleTravel("merchant");
-    }
+    const destinationMap = mapsData[destinationMapId];
 
-    if (destinationMapId === "sewer") {
-      handleTravel("sewer");
+    if (destinationMap.entryLocationKey) {
+      handleTravel(destinationMap.entryLocationKey);
     }
 
     setEventLogs((prev) => [
       ...prev,
-      `System: You travel to ${mapsData[destinationMapId].name}.`,
+      `System: You travel to ${destinationMap.name}.`,
     ]);
   };
 
@@ -171,13 +167,17 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     }
   };
 
-  const handleOpenNpcDialog = (npcName?: string) => {
+  const handleOpenNpcDialog = (profileKey: NpcProfileKey = "jane") => {
+    const profile = npcProfilesData[profileKey];
+
     setContextState("hidden");
+    setActiveNpcProfileKey(profileKey);
+    setNpcDialogueLines(profile.initialDialogueLines);
     setNpcDialogOpen(true);
 
     setEventLogs((prev) => [
       ...prev,
-      `System: You started a conversation with ${npcName ?? "the NPC"}.`,
+      `System: You started a conversation with ${profile.name}.`,
     ]);
   };
 
@@ -213,6 +213,12 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     if (!activeEncounter || !player) return;
 
     const encounter = encountersData[activeEncounter.key];
+    recordSkillTraining({
+      type: "combat.attack",
+      combatStyle: "melee",
+      encounterKey: activeEncounter.key,
+    });
+
     const nextEnemyHp = Math.max(
       0,
       activeEncounter.enemyHp - encounter.playerAttackDamage
@@ -231,6 +237,11 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       });
 
       gainCharacterXp(encounter.rewardXp, `Defeated ${encounter.enemyName}`);
+      recordSkillTraining({
+        type: "combat.victory",
+        combatStyle: "melee",
+        encounterKey: activeEncounter.key,
+      });
 
       setEventLogs((prev) => [
         ...prev,
@@ -294,10 +305,11 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     setContextState("expanded");
   };
 
-  const handleSellResources = () => {
+  const handleSellResources = (action?: ContextAction) => {
     if (!player) return;
 
-    const sellableItems = ["stone", "wood", "herb", "fish", "rope", "paper"];
+    const sellableItems =
+      action?.sellableItemKeys ?? ["stone", "wood", "herb", "fish", "rope", "paper"];
 
     const soldItems = player.inventory.filter((item) =>
       sellableItems.includes(item)
@@ -315,7 +327,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       return;
     }
 
-    const goldEarned = soldItems.length * 2;
+    const goldEarned = soldItems.length * (action?.goldPerItem ?? 2);
     const nextInventory = [...keptItems];
 
     for (let i = 0; i < goldEarned; i += 1) {
@@ -334,34 +346,61 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
   };
 
   const handleNpcOptionSelect = (optionId: string) => {
-    if (optionId === "who-are-you") {
-      setNpcDialogueLines((prev) => [
-        ...prev,
-        "Jane: I trade what still has value. In this town, that is already rare.",
-      ]);
-      return;
-    }
-
-    if (optionId === "what-do-you-sell") {
-      setNpcDialogueLines((prev) => [
-        ...prev,
-        "Jane: Tools, scraps, and whatever still keeps a traveler alive one more night.",
-      ]);
-      return;
-    }
-
-    if (optionId === "any-rumors") {
-      setNpcDialogueLines((prev) => [
-        ...prev,
-        "Jane: The sewer is not as empty as it sounds. And the temple still attracts desperate souls.",
-      ]);
-
-      if (player && !player.learnedRumors.includes("jane-sewer-rumor")) {
-        learnRumor("jane-sewer-rumor");
-        gainCharacterXp(10, "Learned a useful rumor from Jane");
+    if (activeNpcProfileKey === "jane") {
+      if (optionId === "who-are-you") {
+        setNpcDialogueLines((prev) => [
+          ...prev,
+          "Jane: I trade what still has value. In this town, that is already rare.",
+        ]);
+        return;
       }
 
-      return;
+      if (optionId === "what-do-you-sell") {
+        setNpcDialogueLines((prev) => [
+          ...prev,
+          "Jane: Tools, scraps, and whatever still keeps a traveler alive one more night.",
+        ]);
+        return;
+      }
+
+      if (optionId === "any-rumors") {
+        setNpcDialogueLines((prev) => [
+          ...prev,
+          "Jane: The sewer is not as empty as it sounds. And the temple still attracts desperate souls.",
+        ]);
+
+        if (player && !player.learnedRumors.includes("jane-sewer-rumor")) {
+          learnRumor("jane-sewer-rumor");
+          gainCharacterXp(10, "Learned a useful rumor from Jane");
+        }
+
+        return;
+      }
+    }
+
+    if (activeNpcProfileKey === "maria") {
+      if (optionId === "who-are-you") {
+        setNpcDialogueLines((prev) => [
+          ...prev,
+          "Maria: I keep medicines, tinctures, and old field remedies alive for anyone who can still pay.",
+        ]);
+        return;
+      }
+
+      if (optionId === "what-do-you-sell") {
+        setNpcDialogueLines((prev) => [
+          ...prev,
+          "Maria: Potions, herbs, and stranger mixtures. The stock is small for now, but it will grow.",
+        ]);
+        return;
+      }
+
+      if (optionId === "why-live-here") {
+        setNpcDialogueLines((prev) => [
+          ...prev,
+          "Maria: The city forgot these farms. That means rare roots still grow here, and fewer people ask dangerous questions.",
+        ]);
+      }
     }
   };
 
@@ -369,7 +408,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     if (!player) return;
 
     if (action.effect === "npc_dialog") {
-      handleOpenNpcDialog(action.npcName);
+      handleOpenNpcDialog(action.npcProfileId ?? "jane");
       return;
     }
 
@@ -386,6 +425,11 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       return;
     }
 
+    if (action.effect === "travel_map" && action.destinationMapId) {
+      handleMapTravel(action.destinationMapId);
+      return;
+    }
+
     if (action.effect === "travel_placeholder") {
       setEventLogs((prev) => [
         ...prev,
@@ -394,8 +438,19 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       return;
     }
 
+    if (action.effect === "learn_rumor" && action.rumorKey) {
+      learnRumor(action.rumorKey);
+      return;
+    }
+
+    if (action.effect === "log_message" && action.eventLogMessage) {
+      const eventLogMessage = action.eventLogMessage;
+      setEventLogs((prev) => [...prev, eventLogMessage]);
+      return;
+    }
+
     if (action.effect === "sell_resources") {
-      handleSellResources();
+      handleSellResources(action);
       return;
     }
 
@@ -443,6 +498,17 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
         `System: Action performed: ${action.label}.`,
         `System: You obtained ${amount}x ${action.rewardItem}.`,
       ]);
+
+      recordSkillTraining({
+        type: "world.action.completed",
+        action: {
+          id: action.id,
+          label: action.label,
+          rewardItem: action.rewardItem,
+          amount,
+          effect: action.effect,
+        },
+      });
 
       tryTriggerLoreDiscovery(action);
     }
@@ -494,6 +560,26 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
             locationName={currentMapData.name}
             locationSubtitle=""
             worldStatus={[]}
+            rightContent={
+              <RegionPlayersIndicator
+                key={currentMap}
+                currentMapId={currentMap}
+                currentMapName={currentMapData.name}
+                currentPlayerName={player.name}
+                onSendMessage={(_, playerName) => {
+                  setEventLogs((previousLogs) => [
+                    ...previousLogs,
+                    `System: Direct message to ${playerName} is still a placeholder.`,
+                  ]);
+                }}
+                onInviteToHunt={(_, playerName) => {
+                  setEventLogs((previousLogs) => [
+                    ...previousLogs,
+                    `System: Hunt invite sent to ${playerName} (placeholder).`,
+                  ]);
+                }}
+              />
+            }
             stats={[
               {
                 label: "HP",
@@ -517,7 +603,6 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
           />
 
           <WorldMap
-            player={player}
             currentLocation={currentLocation}
             contextState={contextState}
             locations={locations}
@@ -528,17 +613,34 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
             onExpandContext={() => setContextState("expanded")}
             onAction={handleAction}
             npcDialogOpen={npcDialogOpen}
-            npcName="Jane"
-            npcRole="Merchant"
+            npcName={activeNpcProfile.name}
+            npcRole={activeNpcProfile.role}
             npcDialogueLines={npcDialogueLines}
             npcDialogueOptions={npcDialogueOptions}
             npcLoreNotes={npcLoreNotes}
             onCloseNpcDialog={handleCloseNpcDialog}
             onNpcOptionSelect={handleNpcOptionSelect}
             onNpcBuy={() =>
-              setEventLogs((prev) => [...prev, "System: Buy flow placeholder."])
+              setEventLogs((prev) => [
+                ...prev,
+                activeNpcProfile.buyPlaceholderMessage,
+              ])
             }
-            onNpcSell={handleSellResources}
+            onNpcSell={() => {
+              if (activeNpcProfileKey === "maria") {
+                handleSellResources({
+                  id: "maria-sell-natural-goods",
+                  label: "Sell Natural Goods",
+                  description: "Sell fruit and natural goods to Maria.",
+                  effect: "sell_resources",
+                  sellableItemKeys: ["fruit", "herb", "fish", "rabbit-meat"],
+                  goldPerItem: 3,
+                });
+                return;
+              }
+
+              handleSellResources();
+            }}
             combatDialogOpen={Boolean(activeEncounter && activeEncounterData)}
             combatEnemyName={activeEncounterData?.enemyName ?? ""}
             combatEnemyTitle={activeEncounterData?.enemyTitle ?? ""}
@@ -553,12 +655,12 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
             revealedPois={player.revealedPois}
             discoveredPois={player.discoveredPois}
             onDiscoverPoi={discoverPoi}
-            npcNarrativeHint="This NPC still has an important role in the story."
+            npcNarrativeHint={activeNpcProfile.narrativeHint}
             showNpcNarrativeStatus={true}
             npcNarrativeStatusText={
-              sewerRumorLearned
+              activeNpcProfileKey === "jane" && sewerRumorLearned
                 ? "Jane may still respond to what you uncover in the world."
-                : "Jane still seems to be holding back information."
+                : activeNpcProfile.narrativeStatusText
             }
           />
 
@@ -596,7 +698,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
             maxWeight={computedCarryWeight}
           />
 
-          <SkillsPanel skills={skillsData} />
+          <SkillsPanel skills={skills} />
         </aside>
       </section>
     </main>

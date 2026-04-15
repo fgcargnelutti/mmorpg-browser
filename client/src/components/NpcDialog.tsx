@@ -71,15 +71,10 @@ export default function NpcDialog({
     dialogueScrollRef.current.scrollTop = dialogueScrollRef.current.scrollHeight;
   }, [dialogueLines]);
 
-  useEffect(() => {
-    if (!isOpen) {
-      setTradeMode(null);
-    }
-  }, [isOpen]);
-
   const visibleTopics = dialogueOptions.filter(
     (option) => option.state !== "locked"
   );
+  const activeTradeMode = isOpen ? tradeMode : null;
 
   if (!isOpen) return null;
 
@@ -88,7 +83,7 @@ export default function NpcDialog({
       <GameDialog title={npcName} subtitle={npcRole} onClose={onClose}>
         <div
           className={`npc-dialog-layout ${
-            tradeMode ? "npc-dialog-layout--with-trade" : ""
+            activeTradeMode ? "npc-dialog-layout--with-trade" : ""
           }`}
         >
           <div className="npc-dialog-main">
@@ -183,7 +178,7 @@ export default function NpcDialog({
                 <button
                   type="button"
                   className={`npc-dialog-footer-button ${
-                    tradeMode === "buy" ? "is-active" : ""
+                    activeTradeMode === "buy" ? "is-active" : ""
                   }`}
                   onClick={() =>
                     setTradeMode((prev) => (prev === "buy" ? null : "buy"))
@@ -195,7 +190,7 @@ export default function NpcDialog({
                 <button
                   type="button"
                   className={`npc-dialog-footer-button ${
-                    tradeMode === "sell" ? "is-active" : ""
+                    activeTradeMode === "sell" ? "is-active" : ""
                   }`}
                   onClick={() =>
                     setTradeMode((prev) => (prev === "sell" ? null : "sell"))
@@ -207,18 +202,18 @@ export default function NpcDialog({
             </div>
           </div>
 
-          {tradeMode ? (
+          {activeTradeMode ? (
             <aside className="npc-trade-panel">
               <div className="npc-trade-panel__header">
-                <h4>{tradeMode === "buy" ? "Buy Items" : "Sell Items"}</h4>
+                <h4>{activeTradeMode === "buy" ? "Buy Items" : "Sell Items"}</h4>
                 <p>
-                  {tradeMode === "buy"
+                  {activeTradeMode === "buy"
                     ? "Merchant stock for testing."
                     : "Trade area prepared for future drag and drop."}
                 </p>
               </div>
 
-              {tradeMode === "buy" ? (
+              {activeTradeMode === "buy" ? (
                 <div className="npc-trade-panel__content">
                   <div className="trade-item-card">
                     <strong>Short Sword</strong>

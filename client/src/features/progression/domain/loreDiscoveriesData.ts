@@ -1,4 +1,4 @@
-import type { LocationKey } from "./locations";
+import type { LocationKey } from "../../world/domain/locations";
 
 export type LoreDiscoveryKey = "old-library-ancient-book";
 

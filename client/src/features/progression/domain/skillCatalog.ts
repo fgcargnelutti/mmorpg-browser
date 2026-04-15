@@ -1,26 +1,37 @@
+export type SkillKey =
+  | "survival"
+  | "melee"
+  | "archery"
+  | "stealth"
+  | "arcane";
+
 export type SkillSpecialization = {
   icon: string;
   title: string;
   description: string;
 };
 
-export type SkillData = {
-  key: string;
+export type SkillDefinition = {
+  key: SkillKey;
   name: string;
-  level: number;
-  progress: number;
   tooltip: string;
   tier30: SkillSpecialization[];
   tier60: SkillSpecialization[];
   tier100: SkillSpecialization[];
 };
 
-export const skillsData: SkillData[] = [
-  {
+export const skillOrder: SkillKey[] = [
+  "survival",
+  "melee",
+  "archery",
+  "stealth",
+  "arcane",
+];
+
+export const skillCatalog: Record<SkillKey, SkillDefinition> = {
+  survival: {
     key: "survival",
     name: "Survival",
-    level: 63,
-    progress: 24,
     tooltip: "Hunting, fishing, breaking rocks, woodcutting, cooking.",
     tier30: [
       {
@@ -69,11 +80,9 @@ export const skillsData: SkillData[] = [
       },
     ],
   },
-  {
+  melee: {
     key: "melee",
     name: "Melee",
-    level: 41,
-    progress: 58,
     tooltip:
       "Close combat efficiency with swords, axes, maces and other melee weapons.",
     tier30: [
@@ -123,13 +132,10 @@ export const skillsData: SkillData[] = [
       },
     ],
   },
-  {
+  archery: {
     key: "archery",
     name: "Archery",
-    level: 18,
-    progress: 37,
-    tooltip:
-      "Accuracy and performance with bows, arrows and long-range shots.",
+    tooltip: "Accuracy and performance with bows, arrows and long-range shots.",
     tier30: [
       {
         icon: "🏹",
@@ -177,11 +183,9 @@ export const skillsData: SkillData[] = [
       },
     ],
   },
-  {
+  stealth: {
     key: "stealth",
     name: "Stealth",
-    level: 67,
-    progress: 11,
     tooltip: "Sneaking, lockpicking, ambushes, escape and hidden movement.",
     tier30: [
       {
@@ -230,11 +234,9 @@ export const skillsData: SkillData[] = [
       },
     ],
   },
-  {
+  arcane: {
     key: "arcane",
     name: "Arcane",
-    level: 9,
-    progress: 13,
     tooltip:
       "Ancient knowledge, magical manipulation, curses, rituals and arcane relics.",
     tier30: [
@@ -284,4 +286,4 @@ export const skillsData: SkillData[] = [
       },
     ],
   },
-];
+};

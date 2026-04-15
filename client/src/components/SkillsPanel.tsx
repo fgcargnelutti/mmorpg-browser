@@ -25,7 +25,7 @@ type SkillsPanelProps = {
 
 export default function SkillsPanel({ skills }: SkillsPanelProps) {
   return (
-    <section className="ui-panel skills-panel">
+    <section className="ui-panel sidebar-panel sidebar-panel--scroll skills-panel">
       <div className="panel-title-row">
         <h2>Skills</h2>
       </div>

@@ -8,17 +8,11 @@ type TooltipProps = {
   children: ReactNode;
 };
 
-type Position = {
-  top: number;
-  left: number;
-};
-
 export default function Tooltip({ content, children }: TooltipProps) {
   const triggerRef = useRef<HTMLDivElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
   const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState<Position>({ top: 0, left: 0 });
 
   const updatePosition = () => {
     if (!triggerRef.current || !tooltipRef.current) return;
@@ -60,7 +54,8 @@ export default function Tooltip({ content, children }: TooltipProps) {
       left = viewportWidth - tooltipRect.width - margin;
     }
 
-    setPosition({ top, left });
+    tooltipRef.current.style.top = `${top}px`;
+    tooltipRef.current.style.left = `${left}px`;
   };
 
   useLayoutEffect(() => {
@@ -98,10 +93,7 @@ export default function Tooltip({ content, children }: TooltipProps) {
           <div
             ref={tooltipRef}
             className="portal-tooltip"
-            style={{
-              top: `${position.top}px`,
-              left: `${position.left}px`,
-            }}
+            style={{ top: "0px", left: "0px" }}
           >
             {content}
           </div>,

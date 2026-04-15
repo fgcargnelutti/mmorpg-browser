@@ -19,6 +19,21 @@
   padding: 10px;
   background: rgba(0, 0, 0, 0.18);
   border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.skill-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(188, 149, 101, 0.5);
+  box-shadow:
+    0 10px 18px rgba(0, 0, 0, 0.16),
+    0 0 0 1px rgba(188, 149, 101, 0.08);
+  background: rgba(10, 7, 6, 0.26);
 }
 
 /* TOP ROW */
@@ -34,6 +49,7 @@
   font-size: 13px;
   color: #e7d8c1;
   cursor: help;
+  transition: color 0.16s ease, text-shadow 0.16s ease;
 }
 
 .skill-level {
@@ -60,6 +76,14 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  padding: 6px 7px;
+  border-radius: 8px;
+  border: 1px solid rgba(72, 56, 42, 0.45);
+  background: linear-gradient(180deg, rgba(17, 12, 10, 0.3) 0%, rgba(11, 8, 7, 0.18) 100%);
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
 }
 
 /* TIER HEADER */
@@ -86,6 +110,16 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.skill-card:hover .skill-name {
+  color: #f0e1cb;
+  text-shadow: 0 0 8px rgba(214, 178, 125, 0.08);
+}
+
+.skill-card:hover .skill-tier-block {
+  border-color: rgba(188, 149, 101, 0.32);
+  background: linear-gradient(180deg, rgba(22, 17, 14, 0.4) 0%, rgba(11, 8, 7, 0.22) 100%);
 }
 
 /* SCROLLBAR */

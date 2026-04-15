@@ -3,8 +3,24 @@
   place-items: center;
   border: 1px solid var(--line-soft);
   background: #140f0c;
-  cursor: default;
+  cursor: var(--cursor-interactive, pointer);
   position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease,
+    opacity 0.16s ease;
+}
+
+.status-icon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 244, 223, 0.05) 0%, transparent 45%);
+  pointer-events: none;
 }
 
 /* 🔹 GLYPH (corrige ícones desalinhados) */
@@ -42,6 +58,37 @@
 
 .status-icon.inactive {
   opacity: 0.4;
+}
+
+.portal-tooltip-trigger:hover .status-icon.active {
+  transform: translateY(-1px);
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(216, 177, 123, 0.08);
+}
+
+.portal-tooltip-trigger:hover .status-icon.default.active {
+  border-color: #a37a4c;
+  background: #2a1d13;
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.24),
+    0 0 12px rgba(176, 130, 71, 0.12);
+}
+
+.portal-tooltip-trigger:hover .status-icon.buff.active {
+  border-color: #9571c3;
+  background: #2a1d37;
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.24),
+    0 0 12px rgba(145, 114, 193, 0.14);
+}
+
+.portal-tooltip-trigger:hover .status-icon.specialization.active {
+  border-color: #9d7957;
+  background: #241912;
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.24),
+    0 0 12px rgba(171, 137, 97, 0.12);
 }
 
 /* 🔹 VARIANTS */

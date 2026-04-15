@@ -1,33 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./WorldMap.css";
-import ContextActions from "./ContextActions";
-import NpcDialog from "./NpcDialog";
-import CombatDialog from "./CombatDialog";
+import ContextActions from "../../../../components/ContextActions";
+import NpcDialog from "../../../../components/NpcDialog";
+import CombatDialog from "../../../../components/CombatDialog";
+import { mapAtmosphereData } from "../../domain/mapAtmosphereData";
 import type {
   LocationData,
   LocationKey,
   ContextAction,
-} from "../data/locations";
+} from "../../domain/locations";
 import type {
   DiscoverablePoiData,
   DiscoverablePoiKey,
-} from "../data/discoverablePoisData";
-import type { MapData, MapId, MapPoi } from "../data/mapsData";
-import type { DialogueOption } from "./NpcDialog";
-
-type Player = {
-  name: string;
-  stamina: number;
-  maxStamina: number;
-  inventory: string[];
-  logs: string[];
-  learnedRumors: string[];
-  revealedPois: string[];
-  discoveredPois: string[];
-};
+} from "../../domain/discoverablePoisData";
+import type { MapData, MapId, MapPoi } from "../../domain/mapsData";
+import type { DialogueOption } from "../../../../components/NpcDialog";
 
 type WorldMapProps = {
-  player: Player;
   currentLocation: LocationKey;
   contextState: "hidden" | "expanded" | "minimized";
   locations: Record<LocationKey, LocationData>;
@@ -71,7 +60,6 @@ type WorldMapProps = {
 };
 
 export default function WorldMap({
-  player,
   currentLocation,
   contextState,
   locations,
@@ -123,50 +111,63 @@ export default function WorldMap({
 
   const hoverStartTimeRef = useRef<number | null>(null);
   const hoverAnimationFrameRef = useRef<number | null>(null);
-
-  const sewerDiscoverablePoi = discoverablePois["sewer-hidden-entrance"];
-
-  const isSewerRevealEnabled = revealedPois.includes(sewerDiscoverablePoi.key);
-  const isSewerAlreadyDiscovered = discoveredPois.includes(
-    sewerDiscoverablePoi.key
-  );
+  const atmosphereProfile = mapAtmosphereData[mapData.id];
 
   const interactiveMapPois = useMemo(
-    () => mapData.pois.filter((poi) => poi.type !== "travel"),
-    [mapData.pois]
+    () =>
+      mapData.pois
+        .filter(
+          (poi) =>
+            !poi.discoverablePoiKey || discoveredPois.includes(poi.discoverablePoiKey)
+        )
+        .filter((poi) => poi.type !== "travel"),
+    [discoveredPois, mapData.pois]
+  );
+
+  const visibleMapPois = useMemo(
+    () =>
+      mapData.pois.filter(
+        (poi) =>
+          !poi.discoverablePoiKey || discoveredPois.includes(poi.discoverablePoiKey)
+      ),
+    [discoveredPois, mapData.pois]
+  );
+
+  const activeDiscoverablePois = useMemo(
+    () =>
+      (Object.values(discoverablePois) as DiscoverablePoiData[]).filter(
+        (poi) =>
+          poi.mapId === mapData.id &&
+          revealedPois.includes(poi.key) &&
+          !discoveredPois.includes(poi.key)
+      ),
+    [discoverablePois, discoveredPois, mapData.id, revealedPois]
   );
 
   const selectedMapPoi: MapPoi | null = useMemo(() => {
-    if (mapData.id !== "sewer") return null;
-
-    const selected =
-      mapData.pois.find((poi) => poi.id === selectedMapPoiId) ?? null;
+    const selected = selectedMapPoiId
+      ? visibleMapPois.find((poi) => poi.id === selectedMapPoiId) ?? null
+      : null;
 
     if (selected) return selected;
 
     return interactiveMapPois[0] ?? null;
-  }, [interactiveMapPois, mapData.id, mapData.pois, selectedMapPoiId]);
-
-  useEffect(() => {
-    if (mapData.id !== "sewer") {
-      setSelectedMapPoiId(null);
-      return;
-    }
-
-    const firstInteractivePoi = interactiveMapPois[0] ?? null;
-    setSelectedMapPoiId(firstInteractivePoi?.id ?? null);
-  }, [interactiveMapPois, mapData.id]);
+  }, [interactiveMapPois, selectedMapPoiId, visibleMapPois]);
 
   const shouldRenderLocationPoi = (locationKey: LocationKey) => {
-    if (mapData.id === "sewer") {
+    if (mapData.id !== "town") {
       return false;
     }
 
-    if (locationKey !== "sewer") {
+    const requiredDiscovery = (
+      Object.values(discoverablePois) as DiscoverablePoiData[]
+    ).find((poi) => poi.locationKey === locationKey && poi.mapId === "town");
+
+    if (!requiredDiscovery) {
       return true;
     }
 
-    return isSewerAlreadyDiscovered;
+    return discoveredPois.includes(requiredDiscovery.key);
   };
 
   const clearHoverTracking = () => {
@@ -201,10 +202,12 @@ export default function WorldMap({
 
     setHoveredDiscoverablePoi(poiKey);
     setHoverProgressPercent(0);
-    hoverStartTimeRef.current = performance.now();
+    hoverStartTimeRef.current = null;
 
     const tick = (timestamp: number) => {
-      if (hoverStartTimeRef.current === null) return;
+      if (hoverStartTimeRef.current === null) {
+        hoverStartTimeRef.current = timestamp;
+      }
 
       const elapsed = timestamp - hoverStartTimeRef.current;
       const nextProgress = Math.min(
@@ -257,7 +260,7 @@ export default function WorldMap({
 
   return (
     <div className="world-stage world-map-shell">
-      <div className="world-map-frame">
+      <div className={`world-map-frame world-map-frame--${mapData.id}`}>
         <img
           src={mapData.background}
           alt={mapData.name}
@@ -266,6 +269,35 @@ export default function WorldMap({
         />
 
         <div className="world-map-overlay">
+          <div
+            className={`world-map-atmosphere world-map-atmosphere--${atmosphereProfile.theme}`}
+            aria-hidden="true"
+          >
+            <div className="world-map-atmosphere__veil world-map-atmosphere__veil--a" />
+            <div className="world-map-atmosphere__veil world-map-atmosphere__veil--b" />
+            <div className="world-map-atmosphere__grain" />
+            <div className="world-map-atmosphere__vignette" />
+            {atmosphereProfile.effects.map((effect) => (
+              <div
+                key={effect.id}
+                className={`world-map-effect world-map-effect--${effect.type}`}
+                style={{
+                  top: effect.top,
+                  left: effect.left,
+                  width: effect.width,
+                  height: effect.height,
+                  opacity: effect.opacity,
+                  animationDelay: effect.delayMs
+                    ? `${effect.delayMs}ms`
+                    : undefined,
+                  animationDuration: effect.durationMs
+                    ? `${effect.durationMs}ms`
+                    : undefined,
+                }}
+              />
+            ))}
+          </div>
+
           {mapData.id === "town" &&
             locationEntries
               .filter(([locationKey]) => shouldRenderLocationPoi(locationKey))
@@ -294,14 +326,18 @@ export default function WorldMap({
                 );
               })}
 
-          {mapData.id === "sewer" &&
-            mapData.pois.map((poi) => {
+          {mapData.id !== "town" &&
+            visibleMapPois.map((poi) => {
               const isSelected = selectedMapPoi?.id === poi.id;
+              const poiVariant = poi.poiVariant ?? mapData.defaultPoiVariant ?? "danger";
+              const isTravelPoi = poi.type === "travel";
 
               return (
                 <button
                   key={poi.id}
-                  className={`poi poi-danger ${isSelected ? "is-active" : ""}`}
+                  className={`poi poi-${poiVariant} ${isSelected ? "is-active" : ""} ${
+                    isTravelPoi ? "poi--travel" : "poi--interactive"
+                  }`}
                   type="button"
                   style={{
                     top: poi.position.top,
@@ -320,30 +356,27 @@ export default function WorldMap({
                     </span>
                   </span>
                 </button>
-              );
-            })}
+                );
+              })}
 
-          {mapData.id === "town" &&
-          !isSewerAlreadyDiscovered &&
-          isSewerRevealEnabled ? (
+          {activeDiscoverablePois.map((discoverablePoi) => (
             <div
+              key={discoverablePoi.key}
               className={`poi-discovery-zone ${
-                hoveredDiscoverablePoi === sewerDiscoverablePoi.key
+                hoveredDiscoverablePoi === discoverablePoi.key
                   ? "is-hovering"
                   : ""
               }`}
               style={{
-                top: `calc(${locations.sewer.mapPosition.top} - 18px)`,
-                left: locations.sewer.mapPosition.left,
+                top: discoverablePoi.discoveryZonePosition.top,
+                left: discoverablePoi.discoveryZonePosition.left,
               }}
-              onMouseEnter={() =>
-                startPoiDiscoveryHover(sewerDiscoverablePoi.key)
-              }
+              onMouseEnter={() => startPoiDiscoveryHover(discoverablePoi.key)}
               onMouseLeave={stopPoiDiscoveryHover}
             >
               <div className="poi-discovery-zone__inner">
                 <div className="poi-discovery-zone__hint">
-                  {sewerDiscoverablePoi.hintText}
+                  {discoverablePoi.hintText}
                 </div>
 
                 <div className="poi-discovery-zone__progress">
@@ -354,7 +387,7 @@ export default function WorldMap({
                 </div>
               </div>
             </div>
-          ) : null}
+          ))}
 
           <ContextActions
             state={contextState}

@@ -1,6 +1,6 @@
 import GameDialog from "./GameDialog";
 import "./ContextActions.css";
-import type { ContextAction } from "../data/locations";
+import type { ContextAction } from "../features/world";
 
 type ContextActionsProps = {
   state: "hidden" | "expanded" | "minimized";

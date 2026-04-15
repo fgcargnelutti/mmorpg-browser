@@ -15,7 +15,7 @@ export default function EquipmentPanel({
   equipmentRows,
 }: EquipmentPanelProps) {
   return (
-    <section className="ui-panel equipment-panel">
+    <section className="ui-panel sidebar-panel sidebar-panel--content equipment-panel">
       <div className="panel-title-row">
         <h2>Equipment</h2>
       </div>

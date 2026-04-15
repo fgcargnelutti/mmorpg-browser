@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 type Stat = {
   label: string;
   value: number;
@@ -10,6 +12,7 @@ type TopPanelProps = {
   locationSubtitle: string;
   worldStatus?: string[];
   stats?: Stat[];
+  rightContent?: ReactNode;
 };
 
 export default function TopPanel({
@@ -17,11 +20,15 @@ export default function TopPanel({
   locationSubtitle,
   worldStatus = [],
   stats = [],
+  rightContent,
 }: TopPanelProps) {
   return (
     <header className="top-panel">
       <div className="top-left">
         <span className="location-name">{locationName}</span>
+        {locationSubtitle ? (
+          <span className="location-subtitle">{locationSubtitle}</span>
+        ) : null}
       </div>
 
       <div className="top-center">
@@ -55,7 +62,14 @@ export default function TopPanel({
         ) : null}
       </div>
 
-      <div className="top-right" />
+      <div className="top-right">
+        {rightContent ??
+          worldStatus.map((status) => (
+            <span key={status} className="world-status-chip">
+              {status}
+            </span>
+          ))}
+      </div>
     </header>
   );
 }
