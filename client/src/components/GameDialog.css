@@ -4,25 +4,29 @@
   bottom: 14px;
   transform: translateX(-50%);
   width: min(520px, calc(100% - 24px));
-  padding: 12px;
-  z-index: 20;
-  background:
-    linear-gradient(180deg, rgba(72, 51, 33, 0.96) 0%, rgba(38, 27, 19, 0.98) 100%);
-  border: 1px solid #6b5038;
+  padding: 14px;
+  z-index: 24;
+  background: linear-gradient(
+    180deg,
+    rgba(25, 35, 52, 0.98) 0%,
+    rgba(14, 21, 33, 0.99) 100%
+  );
+  border: 1px solid rgba(104, 127, 161, 0.46);
   box-shadow:
-    0 12px 24px rgba(0, 0, 0, 0.35),
-    inset 0 0 0 1px rgba(184, 148, 101, 0.18);
-  border-radius: 12px;
+    0 28px 56px rgba(1, 7, 16, 0.46),
+    inset 0 0 0 1px rgba(182, 205, 238, 0.08);
+  border-radius: 18px;
+  backdrop-filter: blur(10px) saturate(0.95);
 }
 
 .game-dialog::before,
 .game-dialog::after {
   content: "";
   position: absolute;
-  inset: 6px;
-  border: 1px solid rgba(203, 168, 120, 0.12);
+  inset: 8px;
+  border: 1px solid rgba(172, 196, 231, 0.08);
   pointer-events: none;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .game-dialog__header {
@@ -36,13 +40,13 @@
 .game-dialog__heading h3 {
   margin: 0 0 2px;
   font-size: 16px;
-  color: #eadbc4;
+  color: var(--text);
 }
 
 .game-dialog__heading p {
   margin: 0;
   font-size: 12px;
-  color: #b9a286;
+  color: var(--muted);
   line-height: 1.35;
 }
 
@@ -57,16 +61,24 @@
   width: 28px;
   height: 28px;
   flex: 0 0 auto;
-  border: 1px solid #6b5038;
-  background: linear-gradient(180deg, #4f3927 0%, #2f2118 100%);
-  color: #e0d0b8;
+  border: 1px solid rgba(90, 110, 140, 0.56);
+  background: linear-gradient(180deg, #243447 0%, #172231 100%);
+  color: var(--text-soft);
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 10px;
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease,
+    box-shadow 0.16s ease;
 }
 
 .game-dialog__minimize:hover,
 .game-dialog__close:hover {
-  background: linear-gradient(180deg, #61452f 0%, #39281c 100%);
+  background: linear-gradient(180deg, #2f4662 0%, #1d2d40 100%);
+  border-color: rgba(136, 162, 205, 0.62);
+  box-shadow: 0 12px 18px rgba(1, 6, 13, 0.2);
+  transform: translateY(-1px);
 }
 
 .game-dialog__body {
@@ -81,15 +93,15 @@
   height: 42px;
   z-index: 20;
   border-radius: 999px;
-  border: 1px solid #6b5038;
-  background: linear-gradient(180deg, #5e432d 0%, #312219 100%);
-  color: #eadbc4;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(103, 126, 161, 0.56);
+  background: linear-gradient(180deg, #2a3d55 0%, #182536 100%);
+  color: var(--text);
+  box-shadow: 0 14px 26px rgba(1, 6, 13, 0.34);
   cursor: pointer;
 }
 
 .game-dialog-fab:hover {
-  background: linear-gradient(180deg, #755338 0%, #3b291d 100%);
+  background: linear-gradient(180deg, #355070 0%, #203146 100%);
 }
 
 @media (max-width: 700px) {

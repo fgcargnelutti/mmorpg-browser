@@ -12,7 +12,7 @@
 
 .inventory-weight {
   font-size: 11px;
-  color: var(--muted);
+  color: var(--muted-strong);
   white-space: nowrap;
 }
 
@@ -31,12 +31,30 @@
   aspect-ratio: 1 / 1;
   min-height: 58px;
   padding: 6px;
-  background: linear-gradient(180deg, #2e2118 0%, #1a120d 100%);
+  background: linear-gradient(180deg, rgba(24, 34, 50, 0.94) 0%, rgba(12, 18, 29, 0.98) 100%);
   border: 1px solid var(--line-soft);
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: default;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 8px 14px rgba(1, 5, 12, 0.1);
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease;
+}
+
+.inventory-square-slot:hover {
+  transform: translateY(-1px);
+  border-color: rgba(142, 166, 204, 0.5);
+  background: linear-gradient(180deg, rgba(29, 40, 58, 0.96) 0%, rgba(14, 21, 34, 1) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 12px 18px rgba(1, 6, 13, 0.14);
 }
 
 .inventory-item-icon {
@@ -49,10 +67,11 @@
   right: 4px;
   bottom: 2px;
   font-size: 10px;
-  color: #d9c9b1;
-  background: rgba(0, 0, 0, 0.45);
+  color: var(--text-soft);
+  background: rgba(6, 10, 18, 0.68);
   padding: 1px 4px;
-  border-radius: 4px;
+  border: 1px solid rgba(120, 143, 179, 0.2);
+  border-radius: 999px;
 }
 
 .inventory-panel::-webkit-scrollbar {
@@ -60,12 +79,13 @@
 }
 
 .inventory-panel::-webkit-scrollbar-track {
-  background: #140f0b;
+  background: rgba(8, 13, 21, 0.8);
 }
 
 .inventory-panel::-webkit-scrollbar-thumb {
-  background: #4f3c2c;
-  border: 1px solid #2b2018;
+  background: rgba(85, 108, 141, 0.54);
+  border: 1px solid rgba(10, 16, 25, 0.84);
+  border-radius: 999px;
 }
 
 @media (max-width: 780px) {

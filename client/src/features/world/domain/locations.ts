@@ -1,4 +1,6 @@
 import type { EncounterKey } from "../../../data/encountersData";
+import type { FishingSpotKey } from "../../fishing";
+import type { MiningSpotKey } from "../../mining";
 import type { MapId } from "./mapsData";
 import type { NpcProfileKey } from "./npcProfilesData";
 
@@ -31,6 +33,8 @@ export type ContextAction = {
   effect?:
     | "rest"
     | "sell_resources"
+    | "start_fishing"
+    | "start_mining"
     | "npc_dialog"
     | "learn_rumor"
     | "log_message"
@@ -46,6 +50,8 @@ export type ContextAction = {
   eventLogMessage?: string;
   sellableItemKeys?: string[];
   goldPerItem?: number;
+  fishingSpotKey?: FishingSpotKey;
+  miningSpotKey?: MiningSpotKey;
 };
 
 export type LocationData = {

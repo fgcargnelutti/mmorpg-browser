@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import "./RegionPlayersIndicator.css";
 import { useRegionPlayers } from "../hooks/useRegionPlayers";
 import type { MapId } from "../features/world";
@@ -20,10 +20,26 @@ export default function RegionPlayersIndicator({
 }: RegionPlayersIndicatorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const panelId = useId();
   const { players, onlineCount } = useRegionPlayers({
     currentMapId,
     currentPlayerName,
   });
+  const regionPlayerActions = useMemo(
+    () => [
+      {
+        id: "send-message",
+        label: "Send message",
+        onSelect: onSendMessage,
+      },
+      {
+        id: "invite-to-hunt",
+        label: "Invite to hunt",
+        onSelect: onInviteToHunt,
+      },
+    ],
+    [onInviteToHunt, onSendMessage]
+  );
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
@@ -32,10 +48,18 @@ export default function RegionPlayersIndicator({
       setIsOpen(false);
     };
 
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
     document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
@@ -47,6 +71,7 @@ export default function RegionPlayersIndicator({
         onClick={() => setIsOpen((previous) => !previous)}
         aria-expanded={isOpen}
         aria-haspopup="dialog"
+        aria-controls={panelId}
       >
         <span className="region-players__status-dot" aria-hidden="true" />
         <span className="region-players__label">
@@ -56,7 +81,11 @@ export default function RegionPlayersIndicator({
       </button>
 
       {isOpen ? (
-        <section className="region-players__panel" aria-label="Players online here">
+        <section
+          id={panelId}
+          className="region-players__panel"
+          aria-label="Players online here"
+        >
           <div className="region-players__panel-header">
             <strong>Players online here</strong>
             <span>{currentMapName}</span>
@@ -80,21 +109,16 @@ export default function RegionPlayersIndicator({
                   </div>
 
                   <div className="region-players__actions">
-                    <button
-                      type="button"
-                      className="region-players__action-button"
-                      onClick={() => onSendMessage?.(player.id, player.name)}
-                    >
-                      Send message
-                    </button>
-
-                    <button
-                      type="button"
-                      className="region-players__action-button"
-                      onClick={() => onInviteToHunt?.(player.id, player.name)}
-                    >
-                      Invite to hunt
-                    </button>
+                    {regionPlayerActions.map((action) => (
+                      <button
+                        key={action.id}
+                        type="button"
+                        className="region-players__action-button"
+                        onClick={() => action.onSelect?.(player.id, player.name)}
+                      >
+                        {action.label}
+                      </button>
+                    ))}
                   </div>
                 </article>
               ))}

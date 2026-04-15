@@ -2,7 +2,7 @@
   display: grid;
   place-items: center;
   border: 1px solid var(--line-soft);
-  background: #140f0c;
+  background: rgba(12, 18, 29, 0.9);
   cursor: var(--cursor-interactive, pointer);
   position: relative;
   border-radius: 8px;
@@ -19,7 +19,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(255, 244, 223, 0.05) 0%, transparent 45%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 45%);
   pointer-events: none;
 }
 
@@ -52,8 +52,8 @@
 
 /* 🔹 STATES */
 .status-icon.active {
-  border-color: #7d5b36;
-  background: #241a13;
+  border-color: rgba(126, 162, 216, 0.42);
+  background: rgba(20, 29, 42, 0.94);
 }
 
 .status-icon.inactive {
@@ -68,24 +68,24 @@
 }
 
 .portal-tooltip-trigger:hover .status-icon.default.active {
-  border-color: #a37a4c;
-  background: #2a1d13;
+  border-color: rgba(210, 177, 115, 0.54);
+  background: rgba(37, 31, 19, 0.94);
   box-shadow:
     0 6px 14px rgba(0, 0, 0, 0.24),
     0 0 12px rgba(176, 130, 71, 0.12);
 }
 
 .portal-tooltip-trigger:hover .status-icon.buff.active {
-  border-color: #9571c3;
-  background: #2a1d37;
+  border-color: rgba(157, 129, 205, 0.56);
+  background: rgba(32, 25, 46, 0.94);
   box-shadow:
     0 6px 14px rgba(0, 0, 0, 0.24),
     0 0 12px rgba(145, 114, 193, 0.14);
 }
 
 .portal-tooltip-trigger:hover .status-icon.specialization.active {
-  border-color: #9d7957;
-  background: #241912;
+  border-color: rgba(132, 160, 205, 0.54);
+  background: rgba(20, 29, 42, 0.94);
   box-shadow:
     0 6px 14px rgba(0, 0, 0, 0.24),
     0 0 12px rgba(171, 137, 97, 0.12);
@@ -95,23 +95,23 @@
 
 /* default = conditions */
 .status-icon.default.active {
-  border-color: #7d5b36;
-  background: #241a13;
+  border-color: rgba(210, 177, 115, 0.46);
+  background: rgba(37, 31, 19, 0.9);
 }
 
 /* buffs (leve roxo) */
 .status-icon.buff.active {
-  border-color: #7b5fa3;
-  background: #22182e;
+  border-color: rgba(157, 129, 205, 0.5);
+  background: rgba(32, 25, 46, 0.9);
 }
 
 /* specialization (neutro, levemente mais clean) */
 .status-icon.specialization {
   border-color: var(--line-soft);
-  background: #140f0c;
+  background: rgba(12, 18, 29, 0.9);
 }
 
 .status-icon.specialization.active {
-  border-color: #6b533c;
-  background: #1d1510;
+  border-color: rgba(126, 162, 216, 0.42);
+  background: rgba(20, 29, 42, 0.92);
 }

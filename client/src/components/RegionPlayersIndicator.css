@@ -2,6 +2,7 @@
   position: relative;
   display: flex;
   justify-content: flex-end;
+  z-index: 20;
 }
 
 .region-players__trigger {
@@ -70,7 +71,7 @@
     0 14px 30px rgba(0, 0, 0, 0.38),
     0 0 0 1px rgba(177, 142, 101, 0.08);
   backdrop-filter: blur(8px);
-  z-index: 120;
+  z-index: 40;
 }
 
 .region-players__panel-header {

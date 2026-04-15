@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import "./WorldMap.css";
 import ContextActions from "../../../../components/ContextActions";
 import NpcDialog from "../../../../components/NpcDialog";
@@ -57,6 +57,7 @@ type WorldMapProps = {
   revealedPois: string[];
   discoveredPois: string[];
   onDiscoverPoi: (poiKey: string) => void;
+  overlayContent?: ReactNode;
 };
 
 export default function WorldMap({
@@ -96,6 +97,7 @@ export default function WorldMap({
   revealedPois,
   discoveredPois,
   onDiscoverPoi,
+  overlayContent,
 }: WorldMapProps) {
   const activeLocation = locations[currentLocation];
   const locationEntries = Object.entries(locations) as [
@@ -257,6 +259,8 @@ export default function WorldMap({
     mapData.id === "town"
       ? activeLocation.actions
       : selectedMapPoi?.actions ?? mapData.actions ?? [];
+  const hasForegroundDialog =
+    npcDialogOpen || combatDialogOpen || Boolean(overlayContent);
 
   return (
     <div className="world-stage world-map-shell">
@@ -269,6 +273,10 @@ export default function WorldMap({
         />
 
         <div className="world-map-overlay">
+          {hasForegroundDialog ? (
+            <div className="world-map-backdrop" aria-hidden="true" />
+          ) : null}
+
           <div
             className={`world-map-atmosphere world-map-atmosphere--${atmosphereProfile.theme}`}
             aria-hidden="true"
@@ -427,6 +435,8 @@ export default function WorldMap({
             onRetreat={onCombatRetreat}
             onClose={onCloseCombatDialog}
           />
+
+          {overlayContent}
         </div>
       </div>
     </div>

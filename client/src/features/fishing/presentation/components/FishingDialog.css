@@ -1,0 +1,305 @@
+.fishing-dialog-anchor {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.fishing-dialog-anchor .game-dialog {
+  pointer-events: auto;
+  top: 50%;
+  left: 50%;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  width: min(880px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  overflow: hidden;
+}
+
+.fishing-dialog-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+  gap: 14px;
+}
+
+.fishing-panel {
+  min-width: 0;
+  border: 1px solid rgba(82, 101, 130, 0.4);
+  border-radius: 16px;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 22, 34, 0.78) 0%,
+    rgba(10, 15, 24, 0.9) 100%
+  );
+  padding: 12px;
+}
+
+.fishing-panel__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.fishing-panel__header strong {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.fishing-panel__header span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.fishing-lake {
+  position: relative;
+  min-height: 360px;
+  overflow: hidden;
+  border: 1px solid rgba(102, 132, 164, 0.34);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% 36%, rgba(96, 155, 179, 0.24) 0%, rgba(30, 57, 72, 0.14) 36%, rgba(10, 16, 24, 0.72) 100%),
+    linear-gradient(180deg, rgba(16, 31, 48, 0.98) 0%, rgba(8, 16, 28, 1) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(190, 230, 255, 0.04),
+    inset 0 -18px 36px rgba(0, 0, 0, 0.18);
+}
+
+.fishing-lake__water {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 24%, rgba(165, 226, 243, 0.08) 0%, transparent 18%),
+    radial-gradient(circle at 72% 62%, rgba(120, 194, 214, 0.08) 0%, transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 24%);
+  animation: fishingLakeDrift 7.4s ease-in-out infinite;
+}
+
+.fishing-lake__reed {
+  position: absolute;
+  bottom: 0;
+  width: 90px;
+  height: 140px;
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(83, 110, 72, 0.16) 28%, rgba(58, 84, 51, 0.52) 100%);
+  filter: blur(1px);
+  opacity: 0.88;
+}
+
+.fishing-lake__reed--left {
+  left: 0;
+}
+
+.fishing-lake__reed--right {
+  right: 0;
+}
+
+.fishing-hotspot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  border: none;
+  background: transparent;
+  display: grid;
+  place-items: center;
+}
+
+.fishing-hotspot__ring,
+.fishing-hotspot__core {
+  position: absolute;
+  border-radius: 999px;
+}
+
+.fishing-hotspot__ring {
+  inset: 0;
+  border: 2px solid rgba(199, 234, 247, 0.86);
+  box-shadow:
+    0 0 24px rgba(164, 219, 237, 0.3),
+    inset 0 0 16px rgba(190, 235, 247, 0.12);
+  animation: fishingHotspotPulse 0.9s ease-in-out infinite;
+}
+
+.fishing-hotspot__core {
+  width: 12px;
+  height: 12px;
+  background: #d7f5ff;
+  box-shadow: 0 0 14px rgba(215, 245, 255, 0.72);
+}
+
+.fishing-lake__status {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(115, 143, 179, 0.46);
+  background: rgba(10, 17, 27, 0.86);
+  color: var(--text-soft);
+  font-size: 12px;
+}
+
+.fishing-lake__status--success {
+  border-color: rgba(118, 179, 143, 0.56);
+  color: #dff4e6;
+}
+
+.fishing-lake__status--failure {
+  border-color: rgba(211, 116, 116, 0.56);
+  color: #f5dada;
+}
+
+.fishing-struggle {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 360px;
+}
+
+.fishing-struggle__hud {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(11, 17, 27, 0.52);
+  border: 1px solid rgba(83, 103, 132, 0.3);
+}
+
+.fishing-struggle__hud-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.fishing-struggle__hud-row strong {
+  color: var(--text-soft);
+}
+
+.fishing-struggle__body {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  flex: 1;
+}
+
+.fishing-struggle__bar {
+  position: relative;
+  height: 280px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(8, 13, 21, 0.98) 0%, rgba(15, 24, 38, 0.98) 100%);
+  border: 1px solid rgba(98, 122, 156, 0.36);
+  overflow: hidden;
+}
+
+.fishing-struggle__ideal-zone {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(122, 190, 158, 0.36) 0%, rgba(90, 147, 119, 0.42) 100%);
+  box-shadow:
+    0 0 18px rgba(118, 179, 143, 0.14),
+    inset 0 1px 0 rgba(235, 255, 242, 0.08);
+}
+
+.fishing-struggle__marker {
+  position: absolute;
+  left: 50%;
+  width: 44px;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #d9eef8 0%, #8fc7e5 100%);
+  box-shadow: 0 0 16px rgba(143, 199, 229, 0.34);
+  transform: translate(-50%, -50%);
+}
+
+.fishing-struggle__instructions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--muted-strong);
+}
+
+.fishing-struggle__instructions span {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(79, 99, 127, 0.32);
+  background: rgba(10, 15, 24, 0.48);
+}
+
+.fishing-struggle__result {
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(98, 122, 156, 0.3);
+  background: rgba(10, 15, 24, 0.56);
+}
+
+.fishing-struggle__result strong {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+
+.fishing-struggle__result-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.fishing-struggle__result-actions button {
+  min-width: 96px;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid rgba(89, 110, 140, 0.46);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #243447 0%, #172231 100%);
+  color: var(--text-soft);
+}
+
+.fishing-struggle__result-actions button.is-secondary {
+  background: rgba(13, 20, 31, 0.8);
+}
+
+@keyframes fishingHotspotPulse {
+  0%,
+  100% {
+    transform: scale(0.88);
+    opacity: 0.82;
+  }
+
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes fishingLakeDrift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(0, -1%, 0) scale(1.02);
+  }
+}
+
+@media (max-width: 900px) {
+  .fishing-dialog-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .fishing-struggle__body {
+    grid-template-columns: 1fr;
+  }
+
+  .fishing-struggle__bar {
+    width: 78px;
+    justify-self: center;
+  }
+}

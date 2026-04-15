@@ -2,6 +2,9 @@
   overflow: visible;
   position: relative;
   z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 /* NAME + CLASS */
@@ -10,10 +13,10 @@
   margin-bottom: 2px;
   line-height: 1.1;
   text-align: left;
+  color: var(--text);
 }
 
 .char-subtitle {
-  margin-bottom: 10px;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.1;
@@ -22,15 +25,8 @@
 
 /* PROGRESS */
 .character-progress-section {
-  margin-bottom: 10px;
-  padding: 8px 10px;
-  border: 1px solid var(--line-soft);
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 10px;
-  transition:
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    background 0.18s ease;
+  padding: 8px 0 0;
+  border-top: 1px solid rgba(91, 112, 143, 0.28);
 }
 
 .character-progress-value {
@@ -42,7 +38,7 @@
 }
 
 .character-progress-level {
-  color: #e7d8c1;
+  color: var(--text);
   font-weight: bold;
 }
 
@@ -51,28 +47,22 @@
 }
 
 .character-progress-xp {
-  color: #c9b37e;
+  color: var(--accent-gold);
 }
 
 /* CONDITIONS */
 .conditions-section {
-  margin-top: 4px;
-  margin-bottom: 10px;
   text-align: left;
-  padding: 8px 10px 10px;
-  border: 1px solid rgba(77, 59, 42, 0.7);
-  border-radius: 10px;
-  background: linear-gradient(180deg, rgba(16, 12, 10, 0.42) 0%, rgba(10, 8, 6, 0.28) 100%);
-  transition:
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    background 0.18s ease;
+  padding-top: 10px;
+  border-top: 1px solid rgba(91, 112, 143, 0.22);
 }
 
 .conditions-label {
-  margin-bottom: 6px;
-  color: var(--muted);
-  font-size: 11px;
+  margin-bottom: 8px;
+  color: var(--muted-strong);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   text-align: left;
 }
 
@@ -88,22 +78,17 @@
 
 /* BUFFS */
 .buffs-section {
-  margin-top: 6px;
   text-align: left;
-  padding: 8px 10px 10px;
-  border: 1px solid rgba(77, 59, 42, 0.7);
-  border-radius: 10px;
-  background: linear-gradient(180deg, rgba(16, 12, 10, 0.42) 0%, rgba(10, 8, 6, 0.28) 100%);
-  transition:
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    background 0.18s ease;
+  padding-top: 10px;
+  border-top: 1px solid rgba(91, 112, 143, 0.22);
 }
 
 .buffs-label {
-  margin-bottom: 6px;
-  color: var(--muted);
-  font-size: 11px;
+  margin-bottom: 8px;
+  color: var(--muted-strong);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   text-align: left;
 }
 
@@ -120,7 +105,5 @@
 .character-progress-section:hover,
 .conditions-section:hover,
 .buffs-section:hover {
-  border-color: rgba(184, 145, 98, 0.5);
-  box-shadow: 0 0 0 1px rgba(184, 145, 98, 0.08);
-  background: linear-gradient(180deg, rgba(21, 16, 13, 0.58) 0%, rgba(12, 9, 7, 0.34) 100%);
+  border-top-color: rgba(135, 164, 209, 0.34);
 }

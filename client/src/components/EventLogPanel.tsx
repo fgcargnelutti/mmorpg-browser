@@ -12,6 +12,28 @@ export default function EventLogPanel({ logs }: EventLogPanelProps) {
     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [logs]);
 
+  const formatEventLogLine = (log: string) =>
+    log.startsWith("System: ") ? log.slice("System: ".length) : log;
+
+  const getLogLineClassName = (log: string) => {
+    const normalizedLog = log.toLowerCase();
+    const isExperienceEvent =
+      normalizedLog.includes("you gained") || normalizedLog.includes("level up");
+    const isDiscoveryEvent =
+      normalizedLog.includes("you learned") ||
+      normalizedLog.includes("you discovered") ||
+      normalizedLog.includes("you noticed") ||
+      normalizedLog.includes("you uncovered");
+
+    return [
+      "log-line",
+      isDiscoveryEvent ? "log-line--discovery" : "",
+      isExperienceEvent ? "log-line--experience" : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+  };
+
   return (
     <section className="ui-panel bottom-box event-log-panel">
       <div className="panel-title-row">
@@ -23,8 +45,8 @@ export default function EventLogPanel({ logs }: EventLogPanelProps) {
           <div className="empty-box">No events yet.</div>
         ) : (
           logs.map((log, index) => (
-            <div key={`${log}-${index}`} className="log-line">
-              {log}
+            <div key={`${log}-${index}`} className={getLogLineClassName(log)}>
+              {formatEventLogLine(log)}
             </div>
           ))
         )}

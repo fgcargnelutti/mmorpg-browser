@@ -230,8 +230,23 @@ export function useCharacterProgression({
     const poisUnlocked = Object.values(discoverablePoisData).filter(
       (poi) => poi.requiredRumorKey === rumorKey
     );
-    const revealedPoisKeys = poisUnlocked.map((poi) => poi.key);
+    const newlyRevealedPois = poisUnlocked.filter(
+      (poi) => !player.revealedPois.includes(poi.key)
+    );
+    const revealedPoisKeys = newlyRevealedPois.map((poi) => poi.key);
     const learningMessages = poisUnlocked.map((poi) => poi.learningMessage);
+    const xpReward = newlyRevealedPois.reduce(
+      (total, poi) => total + (poi.xpReward ?? 0),
+      0
+    );
+    const xpReason =
+      newlyRevealedPois.length === 1
+        ? newlyRevealedPois[0]?.xpReason
+        : newlyRevealedPois.length > 1
+          ? "Learned about multiple hidden routes"
+          : undefined;
+    const previousLevel = getLevelFromTotalXp(player.totalXp);
+    const nextLevel = getLevelFromTotalXp(player.totalXp + xpReward);
 
     setPlayer((previousPlayer) => {
       if (previousPlayer.learnedRumors.includes(rumorKey)) {
@@ -240,17 +255,30 @@ export function useCharacterProgression({
 
       return {
         ...previousPlayer,
+        totalXp: previousPlayer.totalXp + xpReward,
         learnedRumors: [...previousPlayer.learnedRumors, rumorKey],
         revealedPois: [...previousPlayer.revealedPois, ...revealedPoisKeys],
       };
     });
 
-    setEventLogs((previousLogs) => [
-      ...previousLogs,
-      ...(learningMessages.length > 0
-        ? learningMessages.map((message) => `System: ${message}`)
-        : ["System: You learned something useful."]),
-    ]);
+    setEventLogs((previousLogs) => {
+      const nextLogs = [
+        ...previousLogs,
+        ...(learningMessages.length > 0
+          ? learningMessages.map((message) => `System: ${message}`)
+          : ["System: You learned something useful."]),
+      ];
+
+      if (xpReward > 0 && xpReason) {
+        nextLogs.push(`System: You gained ${xpReward} XP. (${xpReason})`);
+      }
+
+      if (nextLevel > previousLevel) {
+        nextLogs.push(`System: Level up! You reached level ${nextLevel}.`);
+      }
+
+      return nextLogs;
+    });
 
     recordSkillTraining({
       type: "npc.rumor.learned",

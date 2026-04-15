@@ -112,4 +112,12 @@ export const inventoryCatalog: Record<string, InventoryCatalogItem> = {
     description: "Freshly hunted small game from the hills and brush.",
     stats: ["Food item"],
   },
+  "iron-ore": {
+    key: "iron-ore",
+    name: "Iron Ore",
+    icon: "⛏️",
+    weight: 1.8,
+    description: "A rough iron-bearing chunk taken from a shallow seam.",
+    stats: ["Mining material"],
+  },
 };

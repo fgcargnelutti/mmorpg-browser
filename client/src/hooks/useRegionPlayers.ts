@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import {
-  onlineRegionPlayersData,
-  type OnlineRegionPlayer,
-} from "../data/onlineRegionPlayersData";
+  type RegionPresencePlayer as OnlineRegionPlayer,
+} from "../features/multiplayer/domain/regionPresenceTypes";
+import { useRegionPresence } from "../features/multiplayer/application/hooks/useRegionPresence";
 import type { MapId } from "../features/world";
 
 type UseRegionPlayersParams = {
@@ -19,19 +19,15 @@ export function useRegionPlayers({
   currentMapId,
   currentPlayerName,
 }: UseRegionPlayersParams): UseRegionPlayersResult {
+  const snapshot = useRegionPresence({
+    currentMapId,
+    currentPlayerName,
+  });
+
   return useMemo(() => {
-    const normalizedCurrentPlayerName = currentPlayerName?.trim().toLowerCase();
-
-    const players = onlineRegionPlayersData.filter((player) => {
-      if (!player.isOnline) return false;
-      if (player.currentMapId !== currentMapId) return false;
-
-      return player.name.trim().toLowerCase() !== normalizedCurrentPlayerName;
-    });
-
     return {
-      players,
-      onlineCount: players.length,
+      players: snapshot.players,
+      onlineCount: snapshot.onlineCount,
     };
-  }, [currentMapId, currentPlayerName]);
+  }, [snapshot.onlineCount, snapshot.players]);
 }

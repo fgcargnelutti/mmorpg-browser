@@ -7,7 +7,7 @@
 .equipment-rows {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   overflow: visible;
 }
 
@@ -36,15 +36,27 @@
   height: 50px;
   display: grid;
   place-items: center;
-  background: linear-gradient(180deg, #3a2b20 0%, #201710 100%);
-  border: 1px solid #4a3626;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(180deg, rgba(24, 34, 51, 0.96) 0%, rgba(12, 18, 29, 1) 100%);
+  border: 1px solid rgba(76, 96, 123, 0.48);
+  border-radius: 12px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 8px 14px rgba(1, 6, 12, 0.1);
   cursor: default;
   z-index: 1;
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
 }
 
 .equip-slot:hover {
   z-index: 9999;
+  transform: translateY(-1px);
+  border-color: rgba(152, 177, 216, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 12px 18px rgba(1, 7, 14, 0.14);
 }
 
 .equip-slot-icon {

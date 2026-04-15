@@ -32,6 +32,16 @@ import {
   type NpcProfileKey,
 } from "../features/world";
 import {
+  FishingDialog,
+  fishingConfigs,
+  type FishingSpotKey,
+} from "../features/fishing";
+import {
+  MiningDialog,
+  miningConfigs,
+  type MiningSpotKey,
+} from "../features/mining";
+import {
   encountersData,
   type EncounterKey,
 } from "../data/encountersData";
@@ -42,6 +52,7 @@ import { buffsData } from "../data/buffsData";
 import { useCharacterProgression } from "../features/progression";
 import type { CharacterSummary } from "./CharacterSelectScreen";
 import type { DialogueOption } from "../components/NpcDialog";
+import type { ChatMessage } from "../components/ChatPanel";
 
 type ActiveEncounter = {
   key: EncounterKey;
@@ -54,6 +65,30 @@ type GameScreenProps = {
   selectedCharacter: CharacterSummary;
 };
 
+type ActiveFishingSession = {
+  action: ContextAction;
+  configKey: FishingSpotKey;
+};
+
+type ActiveMiningSession = {
+  action: ContextAction;
+  configKey: MiningSpotKey;
+};
+
+function formatChatTimestamp(date = new Date()) {
+  return new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function createChatMessage(content: string, date = new Date()): ChatMessage {
+  return {
+    content,
+    timestamp: formatChatTimestamp(date),
+  };
+}
+
 export default function GameScreen({ selectedCharacter }: GameScreenProps) {
   const [eventLogs, setEventLogs] = useState<string[]>([
     "System: The wasteland is silent today.",
@@ -61,9 +96,11 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
   ]);
 
   const [chatInput, setChatInput] = useState("");
-  const [chatMessages, setChatMessages] = useState<string[]>([
-    "NPC Mara: Keep your hood on. The wind cuts deep near the river.",
-    "Ronan: Anyone heading to Blackwood?",
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    createChatMessage(
+      "NPC Mara: Keep your hood on. The wind cuts deep near the river."
+    ),
+    createChatMessage("Ronan: Anyone heading to Blackwood?"),
   ]);
 
   const [contextState, setContextState] = useState<
@@ -84,6 +121,10 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
   const [activeEncounter, setActiveEncounter] = useState<ActiveEncounter | null>(
     null
   );
+  const [activeFishingSession, setActiveFishingSession] =
+    useState<ActiveFishingSession | null>(null);
+  const [activeMiningSession, setActiveMiningSession] =
+    useState<ActiveMiningSession | null>(null);
 
   const [currentMap, setCurrentMap] = useState<MapId>("town");
 
@@ -133,6 +174,12 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
   const activeEncounterData = activeEncounter
     ? encountersData[activeEncounter.key]
+    : null;
+  const activeFishingConfig = activeFishingSession
+    ? fishingConfigs[activeFishingSession.configKey]
+    : null;
+  const activeMiningConfig = activeMiningSession
+    ? miningConfigs[activeMiningSession.configKey]
     : null;
 
   const handleMapTravel = (destinationMapId?: MapId) => {
@@ -305,6 +352,157 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     setContextState("expanded");
   };
 
+  const handleOpenFishing = (action: ContextAction) => {
+    if (!player || !action.fishingSpotKey) return;
+
+    const attemptCost = action.staminaCost ?? 0;
+
+    if (player.stamina < attemptCost) {
+      setEventLogs((prev) => [
+        ...prev,
+        `Not enough stamina to ${action.label.toLowerCase()}.`,
+      ]);
+      return;
+    }
+
+    setPlayer((previousPlayer) => ({
+      ...previousPlayer,
+      stamina: Math.max(0, previousPlayer.stamina - attemptCost),
+    }));
+
+    setNpcDialogOpen(false);
+    setActiveEncounter(null);
+    setContextState("hidden");
+    setActiveFishingSession({
+      action,
+      configKey: action.fishingSpotKey,
+    });
+
+    setEventLogs((prev) => [...prev, `You start fishing at ${currentMapData.name}.`]);
+  };
+
+  const handleCloseFishing = () => {
+    setActiveFishingSession(null);
+    setContextState("expanded");
+  };
+
+  const handleFishingSuccess = () => {
+    if (!player || !activeFishingSession || !activeFishingConfig) return;
+
+    setPlayer((previousPlayer) => {
+      const nextInventory = [...previousPlayer.inventory];
+
+      for (let i = 0; i < activeFishingConfig.rewardAmount; i += 1) {
+        nextInventory.push(activeFishingConfig.rewardItemKey);
+      }
+
+      return {
+        ...previousPlayer,
+        inventory: nextInventory,
+      };
+    });
+
+    recordSkillTraining({
+      type: "world.action.completed",
+      action: {
+        id: activeFishingSession.action.id,
+        label: activeFishingSession.action.label,
+        rewardItem: activeFishingConfig.rewardItemKey,
+        amount: activeFishingConfig.rewardAmount,
+        effect: activeFishingSession.action.effect,
+      },
+    });
+
+    setEventLogs((prev) => [
+      ...prev,
+      activeFishingConfig.successLog,
+      `You obtained ${activeFishingConfig.rewardAmount}x ${activeFishingConfig.rewardItemKey}.`,
+    ]);
+  };
+
+  const handleFishingFailure = () => {
+    if (!activeFishingConfig) return;
+
+    setEventLogs((prev) => [...prev, activeFishingConfig.failureLog]);
+  };
+
+  const handleOpenMining = (action: ContextAction) => {
+    if (!player || !action.miningSpotKey) return;
+
+    const attemptCost = action.staminaCost ?? 0;
+
+    if (player.stamina < attemptCost) {
+      setEventLogs((prev) => [
+        ...prev,
+        `Not enough stamina to ${action.label.toLowerCase()}.`,
+      ]);
+      return;
+    }
+
+    setPlayer((previousPlayer) => ({
+      ...previousPlayer,
+      stamina: Math.max(0, previousPlayer.stamina - attemptCost),
+    }));
+
+    setNpcDialogOpen(false);
+    setActiveEncounter(null);
+    setContextState("hidden");
+    setActiveMiningSession({
+      action,
+      configKey: action.miningSpotKey,
+    });
+
+    setEventLogs((prev) => [
+      ...prev,
+      `You begin mining at ${currentMapData.name}.`,
+    ]);
+  };
+
+  const handleCloseMining = () => {
+    setActiveMiningSession(null);
+    setContextState("expanded");
+  };
+
+  const handleMiningSuccess = () => {
+    if (!player || !activeMiningSession || !activeMiningConfig) return;
+
+    setPlayer((previousPlayer) => {
+      const nextInventory = [...previousPlayer.inventory];
+
+      for (let i = 0; i < activeMiningConfig.rewardAmount; i += 1) {
+        nextInventory.push(activeMiningConfig.rewardItemKey);
+      }
+
+      return {
+        ...previousPlayer,
+        inventory: nextInventory,
+      };
+    });
+
+    recordSkillTraining({
+      type: "world.action.completed",
+      action: {
+        id: activeMiningSession.action.id,
+        label: activeMiningSession.action.label,
+        rewardItem: activeMiningConfig.rewardItemKey,
+        amount: activeMiningConfig.rewardAmount,
+        effect: activeMiningSession.action.effect,
+      },
+    });
+
+    setEventLogs((prev) => [
+      ...prev,
+      activeMiningConfig.successLog,
+      `You obtained ${activeMiningConfig.rewardAmount}x ${activeMiningConfig.rewardItemKey}.`,
+    ]);
+  };
+
+  const handleMiningFailure = () => {
+    if (!activeMiningConfig) return;
+
+    setEventLogs((prev) => [...prev, activeMiningConfig.failureLog]);
+  };
+
   const handleSellResources = (action?: ContextAction) => {
     if (!player) return;
 
@@ -451,6 +649,16 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
     if (action.effect === "sell_resources") {
       handleSellResources(action);
+      return;
+    }
+
+    if (action.effect === "start_fishing") {
+      handleOpenFishing(action);
+      return;
+    }
+
+    if (action.effect === "start_mining") {
+      handleOpenMining(action);
       return;
     }
 
@@ -662,6 +870,25 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
                 ? "Jane may still respond to what you uncover in the world."
                 : activeNpcProfile.narrativeStatusText
             }
+            overlayContent={
+              activeFishingConfig ? (
+                <FishingDialog
+                  isOpen={Boolean(activeFishingConfig)}
+                  config={activeFishingConfig}
+                  onClose={handleCloseFishing}
+                  onSuccess={handleFishingSuccess}
+                  onFailure={handleFishingFailure}
+                />
+              ) : activeMiningConfig ? (
+                <MiningDialog
+                  isOpen={Boolean(activeMiningConfig)}
+                  config={activeMiningConfig}
+                  onClose={handleCloseMining}
+                  onSuccess={handleMiningSuccess}
+                  onFailure={handleMiningFailure}
+                />
+              ) : null
+            }
           />
 
           <section className="bottom-left-panel">
@@ -672,8 +899,12 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
               inputValue={chatInput}
               onInputChange={setChatInput}
               onSend={() => {
-                if (!chatInput.trim()) return;
-                setChatMessages((prev) => [...prev, `You: ${chatInput}`]);
+                const nextMessage = chatInput.trim().slice(0, 200);
+                if (!nextMessage) return;
+                setChatMessages((prev) => [
+                  ...prev,
+                  createChatMessage(`You: ${nextMessage}`),
+                ]);
                 setChatInput("");
               }}
             />
