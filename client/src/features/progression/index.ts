@@ -8,6 +8,15 @@ export {
   getSkillLevelFromTotalXp,
   getSkillProgress,
 } from "./domain/skillProgression";
+export { unlockableSkillsData } from "./domain/unlockableSkillsData";
+export {
+  applySkillUnlockDescriptor,
+  createInitialSkillUnlockState,
+  unlockSkillBySource,
+} from "./application/systems/skillUnlockSystem";
+export { getUnlockedSkills } from "./application/selectors/getUnlockedSkills";
+export { getLockedSkills } from "./application/selectors/getLockedSkills";
+export type { PlayerBestiaryProgressState } from "../bestiary";
 
 export type { LocationDiscoveryData } from "./domain/locationDiscoveriesData";
 export type {
@@ -24,6 +33,11 @@ export type {
   CharacterSkillSummary,
   SkillProgressState,
 } from "./domain/skillProgression";
+export type {
+  SkillUnlockDefinition,
+  SkillUnlockProgressState,
+  SkillUnlockSource,
+} from "./domain/skillUnlockTypes";
 export type {
   SkillTrainingEvent,
   SkillTrainingReward,

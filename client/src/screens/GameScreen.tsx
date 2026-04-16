@@ -10,6 +10,7 @@ import "../components/TopPanel.css";
 import "../components/GameDialog.css";
 import "../components/NpcDialog.css";
 import "../components/CombatDialog.css";
+import "../components/SideNavRail.css";
 
 import SkillsPanel from "../components/SkillsPanel";
 import InventoryPanel from "../components/InventoryPanel";
@@ -19,6 +20,7 @@ import EventLogPanel from "../components/EventLogPanel";
 import ChatPanel from "../components/ChatPanel";
 import TopPanel from "../components/TopPanel";
 import RegionPlayersIndicator from "../components/RegionPlayersIndicator";
+import SideNavRail, { sideNavIcons } from "../components/SideNavRail";
 
 import {
   WorldMap,
@@ -42,6 +44,20 @@ import {
   type MiningSpotKey,
 } from "../features/mining";
 import {
+  HideoutDialog,
+  consumeHideoutUpgradeCosts,
+  useHideout,
+  type HideoutStructureKey,
+} from "../features/hideout";
+import {
+  QuestLogDialog,
+  questsData,
+  useQuestLog,
+  useQuestProgression,
+} from "../features/quests";
+import { BestiaryDialog, useBestiary } from "../features/bestiary";
+import { SkillTreeDialog, useTalentTree } from "../features/specializations";
+import {
   encountersData,
   type EncounterKey,
 } from "../data/encountersData";
@@ -49,6 +65,7 @@ import { inventoryCatalog } from "../data/inventoryCatalog";
 import { equipmentRows } from "../data/equipmentData";
 import { conditionsData } from "../data/conditionsData";
 import { buffsData } from "../data/buffsData";
+import { collectRewardMessages } from "../features/systems/application/systems/rewardResolutionSystem";
 import { useCharacterProgression } from "../features/progression";
 import type { CharacterSummary } from "./CharacterSelectScreen";
 import type { DialogueOption } from "../components/NpcDialog";
@@ -59,6 +76,7 @@ type ActiveEncounter = {
   enemyHp: number;
   combatLog: string[];
   isResolved: boolean;
+  resolution: "victory" | "defeat" | null;
 };
 
 type GameScreenProps = {
@@ -86,6 +104,28 @@ function createChatMessage(content: string, date = new Date()): ChatMessage {
   return {
     content,
     timestamp: formatChatTimestamp(date),
+  };
+}
+
+function resolveInventoryDisplayItem(itemKey: string, count: number) {
+  const catalogItem = inventoryCatalog[itemKey] ?? {
+    key: itemKey,
+    name: itemKey,
+    icon: "📦",
+    weight: 1,
+    description: "An unidentified item recovered from the wasteland.",
+    stats: ["Unknown properties"],
+  };
+
+  return {
+    key: catalogItem.key,
+    itemKey: catalogItem.key,
+    name: catalogItem.name,
+    icon: catalogItem.icon,
+    count,
+    weight: catalogItem.weight,
+    description: catalogItem.description,
+    stats: catalogItem.stats,
   };
 }
 
@@ -125,6 +165,10 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     useState<ActiveFishingSession | null>(null);
   const [activeMiningSession, setActiveMiningSession] =
     useState<ActiveMiningSession | null>(null);
+  const [bestiaryDialogOpen, setBestiaryDialogOpen] = useState(false);
+  const [skillTreeDialogOpen, setSkillTreeDialogOpen] = useState(false);
+  const [hideoutDialogOpen, setHideoutDialogOpen] = useState(false);
+  const [questLogDialogOpen, setQuestLogDialogOpen] = useState(false);
 
   const [currentMap, setCurrentMap] = useState<MapId>("town");
 
@@ -147,9 +191,33 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     learnRumor,
     discoverPoi,
     recordSkillTraining,
+    registerBestiaryKill,
+    spendTalentPoint,
+    selectSkillSpecialization,
   } = useCharacterProgression({
     selectedCharacter,
     setEventLogs,
+  });
+  const { entries: bestiaryEntries } = useBestiary({
+    progress: player?.bestiaryProgress ?? {},
+  });
+  const {
+    trees: talentTrees,
+    pointsEarned: talentPointsEarned,
+    pointsSpent: talentPointsSpent,
+    pointsAvailable: talentPointsAvailable,
+  } = useTalentTree({
+    progress: player?.talentProgress ?? { unlockedNodeKeys: [] },
+    characterLevel: computedLevel,
+  });
+  const questDefinitions = Object.values(questsData);
+  const {
+    progressStates: questProgressStates,
+    activateQuestByKey,
+    applyEvent: applyQuestEvent,
+    claimQuestRewardsByKey,
+  } = useQuestProgression({
+    quests: questDefinitions,
   });
 
   const currentMapData = mapsData[currentMap];
@@ -181,6 +249,34 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
   const activeMiningConfig = activeMiningSession
     ? miningConfigs[activeMiningSession.configKey]
     : null;
+  const {
+    hideoutState,
+    structures: hideoutStructures,
+    storageEntries,
+    upgradeStructure,
+    depositItem,
+    withdrawItem,
+  } = useHideout({
+    inventory: player?.inventory ?? [],
+    playerLevel: computedLevel,
+  });
+  const questLog = useQuestLog({
+    quests: questDefinitions,
+    progressStates: questProgressStates,
+    context: {
+      inventoryItemCounts: (player?.inventory ?? []).reduce<Record<string, number>>(
+        (counts, itemKey) => {
+          counts[itemKey] = (counts[itemKey] ?? 0) + 1;
+          return counts;
+        },
+        {}
+      ),
+      revealedPoiKeys: player?.revealedPois ?? [],
+      completedQuestKeys: questProgressStates
+        .filter((entry) => entry.state === "completed")
+        .map((entry) => entry.questKey),
+    },
+  });
 
   const handleMapTravel = (destinationMapId?: MapId) => {
     if (!destinationMapId) return;
@@ -208,6 +304,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     setContextState("expanded");
 
     handleTravel(location);
+    logQuestUpdates(applyQuestEvent({ type: "poi", poiKey: location }));
 
     if (location === "sewer" && currentMap === "town") {
       handleMapTravel("sewer");
@@ -248,6 +345,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       enemyHp: encounter.enemyMaxHp,
       combatLog: [encounter.introText],
       isResolved: false,
+      resolution: null,
     });
 
     setEventLogs((prev) => [
@@ -258,6 +356,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
   const handleAttackEncounter = () => {
     if (!activeEncounter || !player) return;
+    if (activeEncounter.isResolved || activeEncounter.resolution !== null) return;
 
     const encounter = encountersData[activeEncounter.key];
     recordSkillTraining({
@@ -276,6 +375,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
         ...activeEncounter,
         enemyHp: 0,
         isResolved: true,
+        resolution: "victory",
         combatLog: [
           ...activeEncounter.combatLog,
           `You strike the ${encounter.enemyName} for ${encounter.playerAttackDamage} damage.`,
@@ -284,6 +384,13 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       });
 
       gainCharacterXp(encounter.rewardXp, `Defeated ${encounter.enemyName}`);
+      registerBestiaryKill(encounter.creatureKey, encounter.enemyName);
+      logQuestUpdates(
+        applyQuestEvent({
+          type: "encounter",
+          encounterKey: activeEncounter.key,
+        })
+      );
       recordSkillTraining({
         type: "combat.victory",
         combatStyle: "melee",
@@ -310,6 +417,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
         ...activeEncounter,
         enemyHp: nextEnemyHp,
         isResolved: true,
+        resolution: "defeat",
         combatLog: [
           ...activeEncounter.combatLog,
           `You strike the ${encounter.enemyName} for ${encounter.playerAttackDamage} damage.`,
@@ -503,6 +611,307 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     setEventLogs((prev) => [...prev, activeMiningConfig.failureLog]);
   };
 
+  const handleOpenHideout = () => {
+    setBestiaryDialogOpen(false);
+    setSkillTreeDialogOpen(false);
+    setQuestLogDialogOpen(false);
+    setNpcDialogOpen(false);
+    setActiveEncounter(null);
+    setActiveFishingSession(null);
+    setActiveMiningSession(null);
+    setContextState("hidden");
+    setHideoutDialogOpen(true);
+    setEventLogs((prev) => [...prev, "You step into your hideout and review the camp."]);
+  };
+
+  const handleCloseHideout = () => {
+    setHideoutDialogOpen(false);
+    setContextState("expanded");
+  };
+
+  const handleOpenBestiary = () => {
+    setHideoutDialogOpen(false);
+    setSkillTreeDialogOpen(false);
+    setQuestLogDialogOpen(false);
+    setNpcDialogOpen(false);
+    setActiveEncounter(null);
+    setActiveFishingSession(null);
+    setActiveMiningSession(null);
+    setContextState("hidden");
+    setBestiaryDialogOpen(true);
+    setEventLogs((prev) => [...prev, "Bestiary: You review the creatures documented so far."]);
+  };
+
+  const handleCloseBestiary = () => {
+    setBestiaryDialogOpen(false);
+    setContextState("expanded");
+  };
+
+  const handleOpenSkillTree = () => {
+    setHideoutDialogOpen(false);
+    setBestiaryDialogOpen(false);
+    setQuestLogDialogOpen(false);
+    setNpcDialogOpen(false);
+    setActiveEncounter(null);
+    setActiveFishingSession(null);
+    setActiveMiningSession(null);
+    setContextState("hidden");
+    setSkillTreeDialogOpen(true);
+    setEventLogs((prev) => [
+      ...prev,
+      "Skill Tree: You open the full progression window.",
+    ]);
+  };
+
+  const handleCloseSkillTree = () => {
+    setSkillTreeDialogOpen(false);
+    setContextState("expanded");
+  };
+
+  const handleOpenQuestLog = () => {
+    setHideoutDialogOpen(false);
+    setBestiaryDialogOpen(false);
+    setSkillTreeDialogOpen(false);
+    setNpcDialogOpen(false);
+    setActiveEncounter(null);
+    setActiveFishingSession(null);
+    setActiveMiningSession(null);
+    setContextState("hidden");
+    setQuestLogDialogOpen(true);
+    setEventLogs((prev) => [
+      ...prev,
+      "Quest Log: You review the active mission categories and future contracts.",
+    ]);
+  };
+
+  const handleCloseQuestLog = () => {
+    setQuestLogDialogOpen(false);
+    setContextState("expanded");
+  };
+
+  const logQuestUpdates = (
+    updates: Array<{
+      questKey: string;
+      previousState: string;
+      nextState: string;
+    }>
+  ) => {
+    if (updates.length === 0) {
+      return;
+    }
+
+    const questByKey = new Map(questDefinitions.map((quest) => [quest.key, quest]));
+    const messages = updates.flatMap((update) => {
+      const quest = questByKey.get(update.questKey);
+      if (!quest || update.previousState === update.nextState) {
+        return [];
+      }
+
+      if (update.nextState === "completed") {
+        return [`Quest completed: ${quest.title}. Return to the source for your reward.`];
+      }
+
+      if (update.previousState === "available" && update.nextState === "active") {
+        return [`Quest accepted: ${quest.title}.`];
+      }
+
+      return [`Quest updated: ${quest.title} is now ${update.nextState}.`];
+    });
+
+    if (messages.length > 0) {
+      setEventLogs((prev) => [...prev, ...messages]);
+    }
+  };
+
+  const applyQuestRewards = (questKey: string) => {
+    const questEntry = questLog.entries.find((entry) => entry.quest.key === questKey);
+
+    if (!questEntry || !questEntry.canClaimRewards || !questEntry.quest.rewards?.length) {
+      return false;
+    }
+
+    const rewards = questEntry.quest.rewards;
+    const rewardMessages = collectRewardMessages(rewards);
+
+    setPlayer((previousPlayer) => {
+      const nextInventory = [...previousPlayer.inventory];
+      let nextTotalXp = previousPlayer.totalXp;
+      let nextStamina = previousPlayer.stamina;
+
+      for (const reward of rewards) {
+        if (reward.type === "item") {
+          for (let count = 0; count < reward.amount; count += 1) {
+            nextInventory.push(reward.itemKey);
+          }
+        }
+
+        if (reward.type === "gold") {
+          for (let count = 0; count < reward.amount; count += 1) {
+            nextInventory.push("gold");
+          }
+        }
+
+        if (reward.type === "xp") {
+          nextTotalXp += reward.amount;
+        }
+
+        if (reward.type === "stamina") {
+          nextStamina = Math.min(previousPlayer.maxStamina, nextStamina + reward.amount);
+        }
+      }
+
+      return {
+        ...previousPlayer,
+        inventory: nextInventory,
+        totalXp: nextTotalXp,
+        stamina: nextStamina,
+      };
+    });
+
+    const didClaim = claimQuestRewardsByKey(questKey);
+
+    if (!didClaim) {
+      return false;
+    }
+
+    setEventLogs((prev) => [...prev, ...rewardMessages]);
+    return true;
+  };
+
+  const handleQuestInteraction = (questKey: string) => {
+    const questEntry = questLog.entries.find((entry) => entry.quest.key === questKey);
+
+    if (!questEntry) {
+      setEventLogs((prev) => [...prev, "Quest data is not available for this interaction."]);
+      return;
+    }
+
+    if (questEntry.state === "available") {
+      const didActivate = activateQuestByKey(questKey);
+
+      if (didActivate) {
+        setEventLogs((prev) => [
+          ...prev,
+          `Maria: Clear the goblin out of the ruins in North Forest, then come back to me.`,
+          `Quest accepted: ${questEntry.quest.title}.`,
+        ]);
+      }
+
+      return;
+    }
+
+    if (questEntry.state === "active") {
+      const nextObjective = questEntry.quest.objectives.find((objective) => {
+        const progress = questEntry.progressState?.objectiveProgress[objective.key];
+        return !progress || progress.state !== "completed";
+      });
+
+      setEventLogs((prev) => [
+        ...prev,
+        nextObjective
+          ? `Quest reminder: ${nextObjective.description}`
+          : `Quest reminder: ${questEntry.quest.title} is still in progress.`,
+      ]);
+      return;
+    }
+
+    if (questEntry.state === "completed") {
+      if (questEntry.isRewardClaimed) {
+        setEventLogs((prev) => [
+          ...prev,
+          "Maria: You've already been paid for that goblin hunt.",
+        ]);
+        return;
+      }
+
+      const didClaim = applyQuestRewards(questKey);
+
+      if (didClaim) {
+        setEventLogs((prev) => [
+          ...prev,
+          `Quest reward claimed: ${questEntry.quest.title}.`,
+        ]);
+      }
+    }
+  };
+
+  const handleHideoutUpgrade = (structureKey: HideoutStructureKey) => {
+    const targetStructure = hideoutStructures.find(
+      (entry) => entry.definition.key === structureKey
+    );
+
+    if (!player || !targetStructure || !targetStructure.eligibility.nextTier) {
+      return;
+    }
+
+    if (!targetStructure.eligibility.canUpgrade) {
+      setEventLogs((prev) => [
+        ...prev,
+        ...targetStructure.eligibility.reasons.map(
+          (reason) => `Hideout: ${reason}`
+        ),
+      ]);
+      return;
+    }
+
+    const nextInventory = consumeHideoutUpgradeCosts(
+      player.inventory,
+      targetStructure.eligibility.nextTier.buildCosts
+    );
+
+    setPlayer((previousPlayer) => ({
+      ...previousPlayer,
+      inventory: nextInventory,
+    }));
+
+    upgradeStructure(structureKey);
+
+    setEventLogs((prev) => [
+      ...prev,
+      `Hideout: ${targetStructure.definition.name} upgraded to level ${targetStructure.eligibility.nextTier?.level}.`,
+    ]);
+  };
+
+  const handleDepositToHideoutStorage = (itemKey: string) => {
+    if (!player) return;
+
+    const { didTransfer, nextInventory } = depositItem(itemKey, player.inventory);
+
+    if (!didTransfer) {
+      return;
+    }
+
+    setPlayer((previousPlayer) => ({
+      ...previousPlayer,
+      inventory: nextInventory,
+    }));
+
+    setEventLogs((prev) => [
+      ...prev,
+      `Hideout: ${itemKey === "gold" ? "Gold" : itemKey} stored in the chest.`,
+    ]);
+  };
+
+  const handleWithdrawFromHideoutStorage = (itemKey: string) => {
+    if (!player) return;
+
+    const { didTransfer, nextInventory } = withdrawItem(itemKey, player.inventory);
+
+    if (!didTransfer) {
+      return;
+    }
+
+    setPlayer((previousPlayer) => ({
+      ...previousPlayer,
+      inventory: nextInventory,
+    }));
+
+    setEventLogs((prev) => [
+      ...prev,
+      `Hideout: ${itemKey === "gold" ? "Gold" : itemKey} returned to your inventory.`,
+    ]);
+  };
+
   const handleSellResources = (action?: ContextAction) => {
     if (!player) return;
 
@@ -569,6 +978,9 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
         if (player && !player.learnedRumors.includes("jane-sewer-rumor")) {
           learnRumor("jane-sewer-rumor");
+          logQuestUpdates(
+            applyQuestEvent({ type: "rumor", rumorKey: "jane-sewer-rumor" })
+          );
           gainCharacterXp(10, "Learned a useful rumor from Jane");
         }
 
@@ -638,6 +1050,14 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
     if (action.effect === "learn_rumor" && action.rumorKey) {
       learnRumor(action.rumorKey);
+      logQuestUpdates(
+        applyQuestEvent({ type: "rumor", rumorKey: action.rumorKey })
+      );
+      return;
+    }
+
+    if (action.effect === "quest_interaction" && action.questKey) {
+      handleQuestInteraction(action.questKey);
       return;
     }
 
@@ -659,6 +1079,11 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
     if (action.effect === "start_mining") {
       handleOpenMining(action);
+      return;
+    }
+
+    if (action.effect === "open_hideout") {
+      handleOpenHideout();
       return;
     }
 
@@ -707,6 +1132,14 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
         `System: You obtained ${amount}x ${action.rewardItem}.`,
       ]);
 
+      logQuestUpdates(
+        applyQuestEvent({
+          type: "item",
+          itemKey: action.rewardItem,
+          amount,
+        })
+      );
+
       recordSkillTraining({
         type: "world.action.completed",
         action: {
@@ -730,26 +1163,12 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     counts.set(item, (counts.get(item) ?? 0) + 1);
   }
 
-  const groupedInventory = Array.from(counts.entries()).map(([name, count]) => {
-    const catalogItem = inventoryCatalog[name] ?? {
-      key: name,
-      name,
-      icon: "📦",
-      weight: 1,
-      description: "An unidentified item recovered from the wasteland.",
-      stats: ["Unknown properties"],
-    };
-
-    return {
-      key: catalogItem.key,
-      name: catalogItem.name,
-      icon: catalogItem.icon,
-      count,
-      weight: catalogItem.weight,
-      description: catalogItem.description,
-      stats: catalogItem.stats,
-    };
-  });
+  const groupedInventory = Array.from(counts.entries()).map(
+    ([itemKey, count]) => resolveInventoryDisplayItem(itemKey, count)
+  );
+  const hideoutStorageDisplayEntries = storageEntries.map(({ itemKey, count }) =>
+    resolveInventoryDisplayItem(itemKey, count)
+  );
 
   const currentWeight = groupedInventory.reduce(
     (total, item) => total + item.weight * item.count,
@@ -760,9 +1179,49 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     ? `${xpProgress.xpIntoLevel}/${xpProgress.xpToNextLevel} XP`
     : "0/0 XP";
 
+  const sideNavItems = [
+    {
+      id: "quests",
+      label: "Quest Log",
+      icon: sideNavIcons.quests,
+      onClick: handleOpenQuestLog,
+      isActive: questLogDialogOpen,
+      tooltipDescription:
+        "Review daily missions, lore questlines, and hunt contracts.",
+    },
+    {
+      id: "bestiary",
+      label: "Bestiary",
+      icon: sideNavIcons.bestiary,
+      onClick: handleOpenBestiary,
+      isActive: bestiaryDialogOpen,
+      tooltipDescription:
+        "Review known creatures and unlock deeper knowledge through repeated kills.",
+    },
+    {
+      id: "hideout",
+      label: "Hideout",
+      icon: sideNavIcons.hideout,
+      onClick: handleOpenHideout,
+      isActive: hideoutDialogOpen,
+      tooltipDescription: "Open your camp management window and upgrade core structures.",
+    },
+    {
+      id: "skill-tree",
+      label: "Skill Tree",
+      icon: sideNavIcons.skillTree,
+      onClick: handleOpenSkillTree,
+      isActive: skillTreeDialogOpen,
+      tooltipDescription:
+        "Open the full talent and specialization window.",
+    },
+  ];
+
   return (
     <main className="game-shell">
       <section className="game-grid">
+        <SideNavRail items={sideNavItems} />
+
         <section className="world-panel">
           <TopPanel
             locationName={currentMapData.name}
@@ -862,7 +1321,10 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
             discoverablePois={discoverablePoisData}
             revealedPois={player.revealedPois}
             discoveredPois={player.discoveredPois}
-            onDiscoverPoi={discoverPoi}
+            onDiscoverPoi={(poiKey) => {
+              discoverPoi(poiKey);
+              logQuestUpdates(applyQuestEvent({ type: "poi", poiKey }));
+            }}
             npcNarrativeHint={activeNpcProfile.narrativeHint}
             showNpcNarrativeStatus={true}
             npcNarrativeStatusText={
@@ -887,6 +1349,54 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
                   onSuccess={handleMiningSuccess}
                   onFailure={handleMiningFailure}
                 />
+              ) : skillTreeDialogOpen ? (
+                <SkillTreeDialog
+                  isOpen={skillTreeDialogOpen}
+                  characterLevel={computedLevel}
+                  skills={skills}
+                  specializationProgress={player.specializationProgress}
+                  talentTrees={talentTrees}
+                  talentPointsEarned={talentPointsEarned}
+                  talentPointsSpent={talentPointsSpent}
+                  talentPointsAvailable={talentPointsAvailable}
+                  onClose={handleCloseSkillTree}
+                  onUnlockTalent={(nodeKey: string) =>
+                    spendTalentPoint(nodeKey, computedLevel)
+                  }
+                  onSelectSpecialization={(skillKey, nodeKey) => {
+                    const skill = skills.find((entry) => entry.key === skillKey);
+
+                    if (!skill) {
+                      return;
+                    }
+
+                    selectSkillSpecialization(skill, nodeKey);
+                  }}
+                />
+              ) : questLogDialogOpen ? (
+                <QuestLogDialog
+                  isOpen={questLogDialogOpen}
+                  entries={questLog.entries}
+                  onClose={handleCloseQuestLog}
+                />
+              ) : bestiaryDialogOpen ? (
+                <BestiaryDialog
+                  isOpen={bestiaryDialogOpen}
+                  entries={bestiaryEntries}
+                  onClose={handleCloseBestiary}
+                />
+              ) : hideoutDialogOpen ? (
+                <HideoutDialog
+                  isOpen={hideoutDialogOpen}
+                  hideoutName={hideoutState.name}
+                  structures={hideoutStructures}
+                  inventoryEntries={groupedInventory}
+                  storageEntries={hideoutStorageDisplayEntries}
+                  onClose={handleCloseHideout}
+                  onUpgrade={handleHideoutUpgrade}
+                  onDepositItem={handleDepositToHideoutStorage}
+                  onWithdrawItem={handleWithdrawFromHideoutStorage}
+                />
               ) : null
             }
           />
@@ -910,7 +1420,6 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
             />
           </section>
         </section>
-
         <aside className="right-sidebar">
           <CharacterPanel
             level={computedLevel}
@@ -929,9 +1438,13 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
             maxWeight={computedCarryWeight}
           />
 
-          <SkillsPanel skills={skills} />
+          <SkillsPanel
+            skills={skills}
+            specializationProgress={player.specializationProgress}
+          />
         </aside>
       </section>
     </main>
   );
 }
+

@@ -35,6 +35,8 @@ export type ContextAction = {
     | "sell_resources"
     | "start_fishing"
     | "start_mining"
+    | "open_hideout"
+    | "quest_interaction"
     | "npc_dialog"
     | "learn_rumor"
     | "log_message"
@@ -45,6 +47,7 @@ export type ContextAction = {
   destinationMapId?: MapId;
   npcName?: string;
   npcProfileId?: NpcProfileKey;
+  questKey?: string;
   encounterKey?: EncounterKey;
   rumorKey?: string;
   eventLogMessage?: string;

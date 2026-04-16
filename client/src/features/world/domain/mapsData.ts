@@ -202,7 +202,7 @@ export const mapsData: Record<MapId, MapData> = {
             label: "Goblin Battle",
             description: "Challenge the goblins hiding in the ruins.",
             effect: "trigger_encounter",
-            encounterKey: "north-road-goblin",
+            encounterKey: "north-forest-goblin-ruins-goblin",
           },
           {
             id: "north-forest-retreat",
@@ -439,6 +439,13 @@ export const mapsData: Record<MapId, MapData> = {
         description:
           "Maria keeps a small apothecary beneath patched canvas, trading in potions, herbs, and strange rural remedies.",
         actions: [
+          {
+            id: "southwest-farm-goblin-hunt",
+            label: "Goblin Hunt",
+            description: "Ask Maria about the goblin threat near North Forest and collect payment if the hunt is done.",
+            effect: "quest_interaction",
+            questKey: "maria-goblin-hunt",
+          },
           {
             id: "southwest-farm-talk-maria",
             label: "Talk to Maria",

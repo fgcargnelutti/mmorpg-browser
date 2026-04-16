@@ -10,6 +10,23 @@ import {
   createInitialSkillProgressionState,
   type CharacterSkillProgressionState,
 } from "../../domain/skillProgression";
+import {
+  createInitialBestiaryProgressState,
+  getBestiaryMilestoneMessage,
+  registerCreatureKill,
+  type CreatureBestiaryKey,
+  type PlayerBestiaryProgressState,
+} from "../../../bestiary";
+import {
+  createInitialTalentProgressState,
+  unlockTalentNode,
+  type CharacterTalentProgressState,
+} from "../../../specializations";
+import {
+  createInitialSpecializationProgressState,
+  selectSpecializationNode,
+} from "../../../specializations";
+import { skillTreesData } from "../../../specializations";
 import type { SkillTrainingEvent } from "../../domain/skillTrainingRules";
 import {
   loreDiscoveriesData,
@@ -35,6 +52,9 @@ type Player = {
   revealedPois: string[];
   discoveredPois: string[];
   skillProgression: CharacterSkillProgressionState;
+  bestiaryProgress: PlayerBestiaryProgressState;
+  talentProgress: CharacterTalentProgressState;
+  specializationProgress: ReturnType<typeof createInitialSpecializationProgressState>;
 };
 
 type UseCharacterProgressionParams = {
@@ -75,6 +95,9 @@ function createInitialPlayer(
     revealedPois: [],
     discoveredPois: [],
     skillProgression: createInitialSkillProgressionState(),
+    bestiaryProgress: createInitialBestiaryProgressState(),
+    talentProgress: createInitialTalentProgressState(),
+    specializationProgress: createInitialSpecializationProgressState(),
   };
 }
 
@@ -175,6 +198,107 @@ export function useCharacterProgression({
 
     if (levelUpMessages.length > 0) {
       setEventLogs((previousLogs) => [...previousLogs, ...levelUpMessages]);
+    }
+  };
+
+  const registerBestiaryKill = (
+    creatureKey: CreatureBestiaryKey,
+    creatureName: string
+  ) => {
+    let milestoneMessage: string | null = null;
+
+    setPlayer((previousPlayer) => {
+      const result = registerCreatureKill(
+        previousPlayer.bestiaryProgress,
+        creatureKey
+      );
+
+      milestoneMessage = getBestiaryMilestoneMessage(
+        creatureName,
+        result.previousTier,
+        result.nextTier
+      );
+
+      return {
+        ...previousPlayer,
+        bestiaryProgress: result.nextState,
+      };
+    });
+
+    if (milestoneMessage) {
+      const resolvedMilestoneMessage = milestoneMessage;
+      setEventLogs((previousLogs) => [
+        ...previousLogs,
+        resolvedMilestoneMessage,
+      ]);
+    }
+  };
+
+  const spendTalentPoint = (
+    nodeKey: string,
+    characterLevel: number = computedLevel
+  ) => {
+    let wasUnlocked = false;
+
+    setPlayer((previousPlayer) => {
+      const nextTalentProgress = unlockTalentNode(
+        previousPlayer.talentProgress,
+        nodeKey,
+        characterLevel
+      );
+
+      wasUnlocked = nextTalentProgress !== previousPlayer.talentProgress;
+
+      if (!wasUnlocked) {
+        return previousPlayer;
+      }
+
+      return {
+        ...previousPlayer,
+        talentProgress: nextTalentProgress,
+      };
+    });
+
+    if (wasUnlocked) {
+      setEventLogs((previousLogs) => [
+        ...previousLogs,
+        `Talent Tree: ${nodeKey} unlocked.`,
+      ]);
+    }
+  };
+
+  const selectSkillSpecialization = (
+    skill: (typeof skills)[number],
+    nodeKey: string
+  ) => {
+    let wasSelected = false;
+
+    setPlayer((previousPlayer) => {
+      const nextSpecializationProgress = selectSpecializationNode(
+        previousPlayer.specializationProgress,
+        skill,
+        skillTreesData[skill.key],
+        nodeKey
+      );
+
+      wasSelected =
+        nextSpecializationProgress !== previousPlayer.specializationProgress;
+
+      if (!wasSelected) {
+        return previousPlayer;
+      }
+
+      return {
+        ...previousPlayer,
+        specializationProgress: nextSpecializationProgress,
+      };
+    });
+
+    if (wasSelected) {
+      setEventLogs((previousLogs) => [
+        ...previousLogs,
+        `Skill Tree: ${skill.name} specialization selected.`,
+      ]);
     }
   };
 
@@ -444,5 +568,8 @@ export function useCharacterProgression({
     learnRumor,
     discoverPoi,
     recordSkillTraining,
+    registerBestiaryKill,
+    spendTalentPoint,
+    selectSkillSpecialization,
   };
 }

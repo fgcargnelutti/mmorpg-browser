@@ -1,0 +1,219 @@
+.quest-log-dialog-anchor {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+}
+
+.quest-log-dialog-anchor .game-dialog {
+  pointer-events: auto;
+  top: 50%;
+  left: 50%;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  width: min(1024px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  overflow: hidden;
+}
+
+.quest-log-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 0;
+}
+
+.quest-log-dialog__overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.quest-log-dialog__overview-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 0 10px;
+  border-bottom: 1px solid rgba(84, 103, 132, 0.34);
+}
+
+.quest-log-dialog__overview-item span {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.quest-log-dialog__overview-item strong {
+  color: var(--text-soft);
+  font-size: 14px;
+}
+
+.quest-log-dialog__sections {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  min-height: 0;
+  max-height: min(64vh, 720px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.quest-log-section {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.quest-log-section__header {
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(84, 103, 132, 0.28);
+}
+
+.quest-log-section__header h4 {
+  margin: 0 0 6px;
+  color: var(--text);
+  font-size: 17px;
+}
+
+.quest-log-section__header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.quest-log-section__entries {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.quest-log-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.quest-log-entry__topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.quest-log-entry__topline strong {
+  color: var(--text-soft);
+  font-size: 14px;
+}
+
+.quest-log-entry__topline span {
+  flex: 0 0 auto;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.quest-log-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 4px 8px;
+  border: 1px solid rgba(91, 109, 137, 0.38);
+  border-radius: 999px;
+  background: rgba(14, 21, 33, 0.54);
+  color: var(--text-soft);
+}
+
+.quest-log-status--available {
+  border-color: rgba(188, 150, 89, 0.44);
+  background: linear-gradient(180deg, rgba(58, 45, 24, 0.72) 0%, rgba(27, 22, 15, 0.82) 100%);
+  color: #e2c98f;
+}
+
+.quest-log-status--active {
+  border-color: rgba(105, 150, 132, 0.44);
+  background: linear-gradient(180deg, rgba(28, 49, 44, 0.72) 0%, rgba(17, 29, 27, 0.84) 100%);
+  color: #a7c6b7;
+}
+
+.quest-log-status--completed {
+  border-color: rgba(122, 131, 145, 0.38);
+  background: linear-gradient(180deg, rgba(39, 44, 53, 0.7) 0%, rgba(22, 27, 34, 0.84) 100%);
+  color: #b6becb;
+}
+
+.quest-log-entry__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.quest-log-entry p,
+.quest-log-entry small {
+  margin: 0;
+  color: var(--muted-strong);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.quest-log-entry small {
+  color: var(--muted);
+}
+
+.quest-log-entry__divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(96, 117, 149, 0.42) 0%,
+    rgba(96, 117, 149, 0.12) 100%
+  );
+}
+
+.quest-log-section__empty {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.quest-log-section__empty strong {
+  color: var(--text-soft);
+  font-size: 13px;
+}
+
+.quest-log-section__empty p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.quest-log-dialog__sections::-webkit-scrollbar {
+  width: 8px;
+}
+
+.quest-log-dialog__sections::-webkit-scrollbar-track {
+  background: rgba(8, 13, 21, 0.8);
+}
+
+.quest-log-dialog__sections::-webkit-scrollbar-thumb {
+  background: rgba(85, 108, 141, 0.54);
+  border: 1px solid rgba(10, 16, 25, 0.84);
+  border-radius: 999px;
+}
+
+@media (max-width: 980px) {
+  .quest-log-dialog__overview,
+  .quest-log-dialog__sections {
+    grid-template-columns: 1fr;
+  }
+}

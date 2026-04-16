@@ -11,9 +11,9 @@
   gap: 4px;
   min-height: 58px;
   padding: 10px;
-  border: 1px solid #6b5038;
-  background: linear-gradient(180deg, #3f2d20 0%, #251a13 100%);
-  color: #eadbc4;
+  border: 1px solid rgba(95, 118, 152, 0.44);
+  background: var(--surface-action-soft);
+  color: var(--text-soft);
   cursor: pointer;
   border-radius: 8px;
   text-align: left;
@@ -30,16 +30,16 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(255, 244, 223, 0.05) 0%, transparent 45%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 45%);
   pointer-events: none;
 }
 
 .context-dialog__action:hover {
-  background: linear-gradient(180deg, #533a29 0%, #2f2118 100%);
-  border-color: rgba(203, 164, 114, 0.62);
+  background: var(--surface-action-hover);
+  border-color: rgba(141, 169, 210, 0.62);
   box-shadow:
-    0 10px 18px rgba(0, 0, 0, 0.24),
-    0 0 0 1px rgba(203, 164, 114, 0.08);
+    0 10px 18px rgba(1, 6, 13, 0.24),
+    0 0 0 1px rgba(141, 169, 210, 0.08);
   transform: translateY(-1px);
 }
 
@@ -48,7 +48,7 @@
 }
 
 .context-dialog__action:focus-visible {
-  outline: 2px solid rgba(219, 182, 131, 0.45);
+  outline: 2px solid rgba(126, 162, 216, 0.42);
   outline-offset: 2px;
 }
 
@@ -59,7 +59,7 @@
 
 .context-dialog__action span {
   font-size: 11px;
-  color: #bba589;
+  color: var(--muted);
   text-align: left;
   line-height: 1.3;
 }

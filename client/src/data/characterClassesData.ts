@@ -1,3 +1,5 @@
+import { BASE_CHARACTER_STAMINA } from "./gameBalance";
+
 export type CharacterClassKey =
   | "wasteland-warrior"
   | "arcanist"
@@ -60,7 +62,7 @@ export const characterClassesData: Record<
 
     baseHp: 100,
     baseSp: 30,
-    baseStamina: 10,
+    baseStamina: BASE_CHARACTER_STAMINA,
     carryWeight: 100,
 
     passiveStaminaRegenBonusPercent: 10,
@@ -116,7 +118,7 @@ export const characterClassesData: Record<
 
     baseHp: 60,
     baseSp: 100,
-    baseStamina: 10,
+    baseStamina: BASE_CHARACTER_STAMINA,
     carryWeight: 70,
 
     passiveStaminaRegenBonusPercent: 0,
@@ -169,7 +171,7 @@ export const characterClassesData: Record<
 
     baseHp: 80,
     baseSp: 60,
-    baseStamina: 10,
+    baseStamina: BASE_CHARACTER_STAMINA,
     carryWeight: 80,
 
     passiveStaminaRegenBonusPercent: 0,
