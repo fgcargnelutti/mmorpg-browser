@@ -3,6 +3,8 @@ import type { UnlockDescriptor } from "./unlockTypes";
 
 export type DiscoveryOutcomeType =
   | "reveal_poi"
+  | "discover_poi"
+  | "discover_location"
   | "grant_reward"
   | "grant_item"
   | "start_quest"
@@ -14,6 +16,18 @@ export type DiscoveryOutcomeType =
 export type RevealPoiOutcome = {
   type: "reveal_poi";
   poiKey: string;
+  message?: string;
+};
+
+export type DiscoverPoiOutcome = {
+  type: "discover_poi";
+  poiKey: string;
+  message?: string;
+};
+
+export type DiscoverLocationOutcome = {
+  type: "discover_location";
+  locationKey: string;
   message?: string;
 };
 
@@ -60,6 +74,8 @@ export type LogMessageOutcome = {
 
 export type DiscoveryOutcome =
   | RevealPoiOutcome
+  | DiscoverPoiOutcome
+  | DiscoverLocationOutcome
   | GrantRewardOutcome
   | GrantItemOutcome
   | StartQuestOutcome
@@ -73,5 +89,7 @@ export type DiscoveryResolution = {
   rewards: Reward[];
   unlocks: UnlockDescriptor[];
   revealedPoiKeys: string[];
+  discoveredPoiKeys: string[];
+  discoveredLocationKeys: string[];
   startedQuestKeys: string[];
 };

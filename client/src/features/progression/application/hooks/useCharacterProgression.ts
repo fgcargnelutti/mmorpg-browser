@@ -34,6 +34,12 @@ import {
 } from "../../domain/loreDiscoveriesData";
 import { locationDiscoveriesData } from "../../domain/locationDiscoveriesData";
 import { discoverablePoisData } from "../../../world/domain/discoverablePoisData";
+import { collectRewardMessages } from "../../../systems/application/systems/rewardResolutionSystem";
+import { resolveDiscoveryOutcomes } from "../../../systems/application/systems/discoveryOutcomeSystem";
+import type {
+  DiscoveryOutcome,
+  DiscoveryResolution,
+} from "../../../systems/domain/discoveryOutcomeTypes";
 
 import type { LocationKey, ContextAction } from "../../../world/domain/locations";
 import type { CharacterSummary } from "../../../../screens/CharacterSelectScreen";
@@ -201,6 +207,65 @@ export function useCharacterProgression({
     }
   };
 
+  const applyDiscoveryResolutionRewards = (resolution: DiscoveryResolution) => {
+    const xpReward = resolution.rewards.reduce((total, reward) => {
+      return reward.type === "xp" ? total + reward.amount : total;
+    }, 0);
+
+    const previousLevel = getLevelFromTotalXp(player.totalXp);
+    const nextLevel = getLevelFromTotalXp(player.totalXp + xpReward);
+
+    setPlayer((previousPlayer) => {
+      const nextInventory = [...previousPlayer.inventory];
+      let nextTotalXp = previousPlayer.totalXp;
+      let nextStamina = previousPlayer.stamina;
+
+      for (const reward of resolution.rewards) {
+        if (reward.type === "item") {
+          for (let count = 0; count < reward.amount; count += 1) {
+            nextInventory.push(reward.itemKey);
+          }
+          continue;
+        }
+
+        if (reward.type === "gold") {
+          for (let count = 0; count < reward.amount; count += 1) {
+            nextInventory.push("gold");
+          }
+          continue;
+        }
+
+        if (reward.type === "xp") {
+          nextTotalXp += reward.amount;
+          continue;
+        }
+
+        if (reward.type === "stamina") {
+          nextStamina = Math.min(previousPlayer.maxStamina, nextStamina + reward.amount);
+        }
+      }
+
+      return {
+        ...previousPlayer,
+        inventory: nextInventory,
+        totalXp: nextTotalXp,
+        stamina: nextStamina,
+      };
+    });
+
+    const rewardMessages = collectRewardMessages(resolution.rewards);
+
+    setEventLogs((previousLogs) => {
+      const nextLogs = [...previousLogs, ...resolution.messages, ...rewardMessages];
+
+      if (xpReward > 0 && nextLevel > previousLevel) {
+        nextLogs.push(`System: Level up! You reached level ${nextLevel}.`);
+      }
+
+      return nextLogs;
+    });
+  };
+
   const registerBestiaryKill = (
     creatureKey: CreatureBestiaryKey,
     creatureName: string
@@ -348,8 +413,8 @@ export function useCharacterProgression({
     ]);
   };
 
-  const learnRumor = (rumorKey: string) => {
-    if (player.learnedRumors.includes(rumorKey)) return;
+  const learnRumor = (rumorKey: string): DiscoveryResolution | null => {
+    if (player.learnedRumors.includes(rumorKey)) return null;
 
     const poisUnlocked = Object.values(discoverablePoisData).filter(
       (poi) => poi.requiredRumorKey === rumorKey
@@ -358,19 +423,38 @@ export function useCharacterProgression({
       (poi) => !player.revealedPois.includes(poi.key)
     );
     const revealedPoisKeys = newlyRevealedPois.map((poi) => poi.key);
-    const learningMessages = poisUnlocked.map((poi) => poi.learningMessage);
-    const xpReward = newlyRevealedPois.reduce(
-      (total, poi) => total + (poi.xpReward ?? 0),
-      0
-    );
-    const xpReason =
-      newlyRevealedPois.length === 1
-        ? newlyRevealedPois[0]?.xpReason
-        : newlyRevealedPois.length > 1
-          ? "Learned about multiple hidden routes"
-          : undefined;
-    const previousLevel = getLevelFromTotalXp(player.totalXp);
-    const nextLevel = getLevelFromTotalXp(player.totalXp + xpReward);
+    const outcomes: DiscoveryOutcome[] = [];
+
+    for (const poi of poisUnlocked) {
+      if (poi.learningMessage) {
+        outcomes.push({
+          type: "log_message",
+          message: `System: ${poi.learningMessage}`,
+        });
+      }
+    }
+
+    for (const poi of newlyRevealedPois) {
+      outcomes.push({
+        type: "reveal_poi",
+        poiKey: poi.revealedMapPoiId ?? poi.locationKey ?? poi.key,
+      });
+
+      if (poi.xpReward && poi.xpReward > 0) {
+        outcomes.push({
+          type: "grant_reward",
+          rewards: [
+            {
+              type: "xp",
+              amount: poi.xpReward,
+              reason: poi.xpReason,
+            },
+          ],
+        });
+      }
+    }
+
+    const resolution = resolveDiscoveryOutcomes(outcomes);
 
     setPlayer((previousPlayer) => {
       if (previousPlayer.learnedRumors.includes(rumorKey)) {
@@ -379,41 +463,50 @@ export function useCharacterProgression({
 
       return {
         ...previousPlayer,
-        totalXp: previousPlayer.totalXp + xpReward,
         learnedRumors: [...previousPlayer.learnedRumors, rumorKey],
         revealedPois: [...previousPlayer.revealedPois, ...revealedPoisKeys],
       };
     });
 
-    setEventLogs((previousLogs) => {
-      const nextLogs = [
-        ...previousLogs,
-        ...(learningMessages.length > 0
-          ? learningMessages.map((message) => `System: ${message}`)
-          : ["System: You learned something useful."]),
-      ];
-
-      if (xpReward > 0 && xpReason) {
-        nextLogs.push(`System: You gained ${xpReward} XP. (${xpReason})`);
-      }
-
-      if (nextLevel > previousLevel) {
-        nextLogs.push(`System: Level up! You reached level ${nextLevel}.`);
-      }
-
-      return nextLogs;
-    });
+    applyDiscoveryResolutionRewards(resolution);
 
     recordSkillTraining({
       type: "npc.rumor.learned",
       rumorKey,
     });
+
+    return resolution;
   };
 
-  const discoverPoi = (poiKey: string) => {
-    if (player.discoveredPois.includes(poiKey)) return;
+  const discoverPoi = (poiKey: string): DiscoveryResolution | null => {
+    if (player.discoveredPois.includes(poiKey)) return null;
 
     const poi = discoverablePoisData[poiKey as keyof typeof discoverablePoisData];
+    const outcomes: DiscoveryOutcome[] = [
+      {
+        type: "discover_poi",
+        poiKey: poi.revealedMapPoiId ?? poi.locationKey ?? poi.key,
+      },
+      {
+        type: "log_message",
+        message: `System: ${poi.discoveryMessage}`,
+      },
+    ];
+
+    if (poi.xpReward && poi.xpReward > 0) {
+      outcomes.push({
+        type: "grant_reward",
+        rewards: [
+          {
+            type: "xp",
+            amount: poi.xpReward,
+            reason: poi.xpReason,
+          },
+        ],
+      });
+    }
+
+    const resolution = resolveDiscoveryOutcomes(outcomes);
 
     setPlayer((previousPlayer) => {
       if (previousPlayer.discoveredPois.includes(poiKey)) {
@@ -428,73 +521,66 @@ export function useCharacterProgression({
           !previousPlayer.discoveredLocations.includes(poi.locationKey)
             ? [...previousPlayer.discoveredLocations, poi.locationKey]
             : previousPlayer.discoveredLocations,
-      };
+        };
     });
 
-    setEventLogs((previousLogs) => [
-      ...previousLogs,
-      `System: ${poi.discoveryMessage}`,
-    ]);
+    applyDiscoveryResolutionRewards(resolution);
 
     recordSkillTraining({
       type: "world.discovery.poi",
       poiKey,
     });
+
+    return resolution;
   };
 
-  const handleTravel = (nextLocation: LocationKey) => {
+  const handleTravel = (nextLocation: LocationKey): DiscoveryResolution | null => {
     updateState((currentState) => ({
       ...currentState,
       currentLocation: nextLocation,
     }));
 
     if (player.discoveredLocations.includes(nextLocation)) {
-      return;
+      return null;
     }
 
     const discoveryData = locationDiscoveriesData[nextLocation];
     const nextDiscoveredLocations = [...player.discoveredLocations, nextLocation];
-
-    if (!discoveryData || discoveryData.xpReward <= 0) {
-      setPlayer((previousPlayer) => ({
-        ...previousPlayer,
-        discoveredLocations: nextDiscoveredLocations,
-      }));
-
-      recordSkillTraining({
-        type: "world.discovery.location",
+    const outcomes: DiscoveryOutcome[] = [
+      {
+        type: "discover_location",
         locationKey: nextLocation,
+      },
+    ];
+
+    if (discoveryData?.xpReward && discoveryData.xpReward > 0) {
+      outcomes.push({
+        type: "grant_reward",
+        rewards: [
+          {
+            type: "xp",
+            amount: discoveryData.xpReward,
+            reason: discoveryData.xpReason,
+          },
+        ],
       });
-      return;
     }
 
-    const previousLevel = getLevelFromTotalXp(player.totalXp);
-    const nextTotalXp = player.totalXp + discoveryData.xpReward;
-    const nextLevel = getLevelFromTotalXp(nextTotalXp);
+    const resolution = resolveDiscoveryOutcomes(outcomes);
 
     setPlayer((previousPlayer) => ({
       ...previousPlayer,
-      totalXp: previousPlayer.totalXp + discoveryData.xpReward,
       discoveredLocations: nextDiscoveredLocations,
     }));
 
-    setEventLogs((previousLogs) => {
-      const nextLogs = [
-        ...previousLogs,
-        `System: You gained ${discoveryData.xpReward} XP. (${discoveryData.xpReason})`,
-      ];
-
-      if (nextLevel > previousLevel) {
-        nextLogs.push(`System: Level up! You reached level ${nextLevel}.`);
-      }
-
-      return nextLogs;
-    });
+    applyDiscoveryResolutionRewards(resolution);
 
     recordSkillTraining({
       type: "world.discovery.location",
       locationKey: nextLocation,
     });
+
+    return resolution;
   };
 
   const gainLoreDiscoveryXp = (loreKey: LoreDiscoveryKey) => {

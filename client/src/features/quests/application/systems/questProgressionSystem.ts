@@ -4,6 +4,7 @@ import type { QuestDefinition, QuestProgressState } from "../../domain/questType
 export type QuestProgressEvent =
   | { type: "rumor"; rumorKey: string }
   | { type: "poi"; poiKey: string }
+  | { type: "reveal_poi"; poiKey: string }
   | { type: "item"; itemKey: string; amount?: number }
   | { type: "npc"; npcKey: string }
   | { type: "map"; mapId: string }
@@ -24,6 +25,11 @@ function objectiveMatchesEvent(
       return objective.trigger.type === "rumor" && objective.trigger.rumorKey === event.rumorKey;
     case "poi":
       return objective.trigger.type === "poi" && objective.trigger.poiKey === event.poiKey;
+    case "reveal_poi":
+      return (
+        objective.trigger.type === "reveal_poi" &&
+        objective.trigger.poiKey === event.poiKey
+      );
     case "item":
       return objective.trigger.type === "item" && objective.trigger.itemKey === event.itemKey;
     case "npc":
@@ -137,4 +143,15 @@ export function applyQuestProgressEvent(
   }
 
   return nextState;
+}
+
+export function applyQuestProgressEvents(
+  quest: QuestDefinition,
+  progressState: QuestProgressState,
+  events: QuestProgressEvent[]
+): QuestProgressState {
+  return events.reduce(
+    (currentState, event) => applyQuestProgressEvent(quest, currentState, event),
+    progressState
+  );
 }

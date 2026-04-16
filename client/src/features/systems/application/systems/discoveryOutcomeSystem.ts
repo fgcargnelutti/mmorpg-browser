@@ -13,12 +13,22 @@ export function resolveDiscoveryOutcomes(
   const rewards: Reward[] = [];
   const unlocks: DiscoveryResolution["unlocks"] = [];
   const revealedPoiKeys: string[] = [];
+  const discoveredPoiKeys: string[] = [];
+  const discoveredLocationKeys: string[] = [];
   const startedQuestKeys: string[] = [];
 
   for (const outcome of outcomes) {
     switch (outcome.type) {
       case "reveal_poi":
         revealedPoiKeys.push(outcome.poiKey);
+        if (outcome.message) messages.push(outcome.message);
+        break;
+      case "discover_poi":
+        discoveredPoiKeys.push(outcome.poiKey);
+        if (outcome.message) messages.push(outcome.message);
+        break;
+      case "discover_location":
+        discoveredLocationKeys.push(outcome.locationKey);
         if (outcome.message) messages.push(outcome.message);
         break;
       case "grant_reward":
@@ -74,6 +84,8 @@ export function resolveDiscoveryOutcomes(
     rewards: mergeStackableRewards(rewards),
     unlocks: dedupeUnlocks(unlocks),
     revealedPoiKeys: Array.from(new Set(revealedPoiKeys)),
+    discoveredPoiKeys: Array.from(new Set(discoveredPoiKeys)),
+    discoveredLocationKeys: Array.from(new Set(discoveredLocationKeys)),
     startedQuestKeys: Array.from(new Set(startedQuestKeys)),
   };
 }

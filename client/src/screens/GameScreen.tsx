@@ -51,6 +51,8 @@ import {
 } from "../features/hideout";
 import {
   QuestLogDialog,
+  createQuestEventsFromDiscoveryResolution,
+  mergeQuestProgressEvents,
   questsData,
   useQuestLog,
   useQuestProgression,
@@ -215,6 +217,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     progressStates: questProgressStates,
     activateQuestByKey,
     applyEvent: applyQuestEvent,
+    applyEvents: applyQuestEvents,
     claimQuestRewardsByKey,
   } = useQuestProgression({
     quests: questDefinitions,
@@ -288,9 +291,20 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
     const destinationMap = mapsData[destinationMapId];
 
-    if (destinationMap.entryLocationKey) {
-      handleTravel(destinationMap.entryLocationKey);
-    }
+    const travelResolution = destinationMap.entryLocationKey
+      ? handleTravel(destinationMap.entryLocationKey)
+      : null;
+
+    logQuestUpdates(
+      applyQuestEvents(
+        mergeQuestProgressEvents(
+          [{ type: "map", mapId: destinationMapId }],
+          travelResolution
+            ? createQuestEventsFromDiscoveryResolution(travelResolution)
+            : []
+        )
+      )
+    );
 
     setEventLogs((prev) => [
       ...prev,
@@ -303,8 +317,17 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     setActiveEncounter(null);
     setContextState("expanded");
 
-    handleTravel(location);
-    logQuestUpdates(applyQuestEvent({ type: "poi", poiKey: location }));
+    const travelResolution = handleTravel(location);
+    logQuestUpdates(
+      applyQuestEvents(
+        mergeQuestProgressEvents(
+          [{ type: "poi", poiKey: location }],
+          travelResolution
+            ? createQuestEventsFromDiscoveryResolution(travelResolution)
+            : []
+        )
+      )
+    );
 
     if (location === "sewer" && currentMap === "town") {
       handleMapTravel("sewer");
@@ -323,6 +346,8 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       ...prev,
       `System: You started a conversation with ${profile.name}.`,
     ]);
+
+    logQuestUpdates(applyQuestEvents([{ type: "npc", npcKey: profileKey }]));
   };
 
   const handleCloseNpcDialog = () => {
@@ -526,6 +551,20 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       activeFishingConfig.successLog,
       `You obtained ${activeFishingConfig.rewardAmount}x ${activeFishingConfig.rewardItemKey}.`,
     ]);
+
+    logQuestUpdates(
+      applyQuestEvents([
+        {
+          type: "action",
+          actionId: activeFishingSession.action.id,
+        },
+        {
+          type: "item",
+          itemKey: activeFishingConfig.rewardItemKey,
+          amount: activeFishingConfig.rewardAmount,
+        },
+      ])
+    );
   };
 
   const handleFishingFailure = () => {
@@ -603,6 +642,20 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       activeMiningConfig.successLog,
       `You obtained ${activeMiningConfig.rewardAmount}x ${activeMiningConfig.rewardItemKey}.`,
     ]);
+
+    logQuestUpdates(
+      applyQuestEvents([
+        {
+          type: "action",
+          actionId: activeMiningSession.action.id,
+        },
+        {
+          type: "item",
+          itemKey: activeMiningConfig.rewardItemKey,
+          amount: activeMiningConfig.rewardAmount,
+        },
+      ])
+    );
   };
 
   const handleMiningFailure = () => {
@@ -977,9 +1030,16 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
         ]);
 
         if (player && !player.learnedRumors.includes("jane-sewer-rumor")) {
-          learnRumor("jane-sewer-rumor");
+          const resolution = learnRumor("jane-sewer-rumor");
           logQuestUpdates(
-            applyQuestEvent({ type: "rumor", rumorKey: "jane-sewer-rumor" })
+            applyQuestEvents(
+              mergeQuestProgressEvents(
+                [{ type: "rumor", rumorKey: "jane-sewer-rumor" }],
+                resolution
+                  ? createQuestEventsFromDiscoveryResolution(resolution)
+                  : []
+              )
+            )
           );
           gainCharacterXp(10, "Learned a useful rumor from Jane");
         }
@@ -1049,9 +1109,16 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     }
 
     if (action.effect === "learn_rumor" && action.rumorKey) {
-      learnRumor(action.rumorKey);
+      const resolution = learnRumor(action.rumorKey);
       logQuestUpdates(
-        applyQuestEvent({ type: "rumor", rumorKey: action.rumorKey })
+        applyQuestEvents(
+          mergeQuestProgressEvents(
+            [{ type: "rumor", rumorKey: action.rumorKey }],
+            resolution
+              ? createQuestEventsFromDiscoveryResolution(resolution)
+              : []
+          )
+        )
       );
       return;
     }
@@ -1133,11 +1200,17 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       ]);
 
       logQuestUpdates(
-        applyQuestEvent({
-          type: "item",
-          itemKey: action.rewardItem,
-          amount,
-        })
+        applyQuestEvents([
+          {
+            type: "action",
+            actionId: action.id,
+          },
+          {
+            type: "item",
+            itemKey: action.rewardItem,
+            amount,
+          },
+        ])
       );
 
       recordSkillTraining({
@@ -1322,8 +1395,17 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
             revealedPois={player.revealedPois}
             discoveredPois={player.discoveredPois}
             onDiscoverPoi={(poiKey) => {
-              discoverPoi(poiKey);
-              logQuestUpdates(applyQuestEvent({ type: "poi", poiKey }));
+              const resolution = discoverPoi(poiKey);
+              logQuestUpdates(
+                applyQuestEvents(
+                  mergeQuestProgressEvents(
+                    [{ type: "poi", poiKey }],
+                    resolution
+                      ? createQuestEventsFromDiscoveryResolution(resolution)
+                      : []
+                  )
+                )
+              );
             }}
             npcNarrativeHint={activeNpcProfile.narrativeHint}
             showNpcNarrativeStatus={true}

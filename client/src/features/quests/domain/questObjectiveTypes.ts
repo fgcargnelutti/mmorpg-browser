@@ -20,6 +20,7 @@ export type QuestObjectiveTrigger =
   | { type: "npc"; npcKey: string }
   | { type: "map"; mapId: string }
   | { type: "poi"; poiKey: string }
+  | { type: "reveal_poi"; poiKey: string }
   | { type: "item"; itemKey: string }
   | { type: "encounter"; encounterKey: string }
   | { type: "action"; actionId: string }

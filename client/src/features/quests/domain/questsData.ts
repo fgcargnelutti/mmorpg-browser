@@ -84,7 +84,7 @@ export const questsData: Record<string, QuestDefinition> = {
           required: 1,
         },
         trigger: {
-          type: "poi",
+          type: "reveal_poi",
           poiKey: "sewer",
         },
       },

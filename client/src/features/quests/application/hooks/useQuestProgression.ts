@@ -3,6 +3,7 @@ import type { QuestDefinition, QuestProgressState } from "../../domain/questType
 import {
   activateQuest,
   applyQuestProgressEvent,
+  applyQuestProgressEvents,
   claimQuestRewards,
   createInitialQuestProgressState,
   type QuestProgressEvent,
@@ -77,6 +78,39 @@ export function useQuestProgression({
     return updates;
   };
 
+  const applyEvents = (events: QuestProgressEvent[]) => {
+    if (events.length === 0) {
+      return [];
+    }
+
+    const updates: Array<{
+      questKey: string;
+      previousState: QuestProgressState["state"];
+      nextState: QuestProgressState["state"];
+    }> = [];
+
+    setProgressStates((previousStates) =>
+      previousStates.map((progressState) => {
+        const quest = questByKey.get(progressState.questKey);
+        if (!quest) return progressState;
+
+        const nextState = applyQuestProgressEvents(quest, progressState, events);
+
+        if (nextState !== progressState) {
+          updates.push({
+            questKey: progressState.questKey,
+            previousState: progressState.state,
+            nextState: nextState.state,
+          });
+        }
+
+        return nextState;
+      })
+    );
+
+    return updates;
+  };
+
   const claimQuestRewardsByKey = (questKey: string) => {
     let didClaim = false;
 
@@ -99,6 +133,7 @@ export function useQuestProgression({
     progressStates,
     activateQuestByKey,
     applyEvent,
+    applyEvents,
     claimQuestRewardsByKey,
   };
 }
