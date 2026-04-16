@@ -15,6 +15,7 @@ import type {
 } from "../../domain/discoverablePoisData";
 import type { MapData, MapId, MapPoi } from "../../domain/mapsData";
 import type { DialogueOption } from "../../../../components/NpcDialog";
+import type { NpcShopOffer } from "../../domain/npcProfilesData";
 
 type WorldMapProps = {
   currentLocation: LocationKey;
@@ -35,8 +36,9 @@ type WorldMapProps = {
   npcLoreNotes: string[];
   onCloseNpcDialog: () => void;
   onNpcOptionSelect: (optionId: string) => void;
-  onNpcBuy: () => void;
+  onNpcBuyItem: (offer: NpcShopOffer) => void;
   onNpcSell: () => void;
+  npcBuyOffers?: NpcShopOffer[];
 
   npcNarrativeHint?: string;
   showNpcNarrativeStatus?: boolean;
@@ -78,8 +80,9 @@ export default function WorldMap({
   npcLoreNotes,
   onCloseNpcDialog,
   onNpcOptionSelect,
-  onNpcBuy,
+  onNpcBuyItem,
   onNpcSell,
+  npcBuyOffers,
   npcNarrativeHint,
   showNpcNarrativeStatus,
   npcNarrativeStatusText,
@@ -416,8 +419,9 @@ export default function WorldMap({
             loreNotes={npcLoreNotes}
             onClose={onCloseNpcDialog}
             onOptionSelect={onNpcOptionSelect}
-            onBuy={onNpcBuy}
+            onBuyItem={onNpcBuyItem}
             onSell={onNpcSell}
+            buyOffers={npcBuyOffers}
             narrativeHint={npcNarrativeHint}
             showNarrativeStatus={showNpcNarrativeStatus}
             narrativeStatusText={npcNarrativeStatusText}

@@ -1,0 +1,1 @@
+Use this area for general-purpose art support such as illustrations and banners. If an image belongs to a gameplay domain like maps, items, NPC portraits, or sprites, prefer that domain-specific folder instead.

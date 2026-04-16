@@ -1,7 +1,9 @@
-import mapTown from "../../../assets/maps/map-town.png";
-import mapNorthForest from "../../../assets/maps/north-forest.png";
-import mapSewer from "../../../assets/maps/sewer.png";
-import mapSouthwestFarm from "../../../assets/maps/southwest-farm.png";
+import {
+  northForestMapArt,
+  sewerMapArt,
+  southwestFarmMapArt,
+  townMapArt,
+} from "../../../assets/world/maps";
 import type { ContextAction } from "./locations";
 import type { LocationKey, PoiVariant } from "./locations";
 
@@ -38,7 +40,7 @@ export const mapsData: Record<MapId, MapData> = {
   town: {
     id: "town",
     name: "Dustveil Outpost",
-    background: mapTown,
+    background: townMapArt,
     entryLocationKey: "merchant",
     pois: [],
   },
@@ -46,7 +48,7 @@ export const mapsData: Record<MapId, MapData> = {
   sewer: {
     id: "sewer",
     name: "Sewers",
-    background: mapSewer,
+    background: sewerMapArt,
     entryLocationKey: "sewer",
     defaultPoiVariant: "danger",
     description:
@@ -154,7 +156,7 @@ export const mapsData: Record<MapId, MapData> = {
   "north-forest": {
     id: "north-forest",
     name: "North Forest",
-    background: mapNorthForest,
+    background: northForestMapArt,
     entryLocationKey: "north-road",
     defaultPoiVariant: "building",
     description:
@@ -319,7 +321,7 @@ export const mapsData: Record<MapId, MapData> = {
   "southwest-farm": {
     id: "southwest-farm",
     name: "Southwest Farm",
-    background: mapSouthwestFarm,
+    background: southwestFarmMapArt,
     entryLocationKey: "southwest-road",
     defaultPoiVariant: "building",
     description:

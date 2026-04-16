@@ -5,6 +5,8 @@ export type EncounterKey = "north-road-goblin" | "north-forest-goblin-ruins-gobl
 export type EncounterData = {
   key: EncounterKey;
   creatureKey: CreatureBestiaryKey;
+  encounterType?: "creature" | "boss";
+  lootTableKey?: string;
   enemyName: string;
   enemyTitle: string;
   enemyMaxHp: number;
@@ -20,6 +22,8 @@ export const encountersData: Record<EncounterKey, EncounterData> = {
   "north-road-goblin": {
     key: "north-road-goblin",
     creatureKey: "goblin",
+    encounterType: "creature",
+    lootTableKey: "north-road-goblin",
     enemyName: "Goblin",
     enemyTitle: "Roadside Ambusher",
     enemyMaxHp: 18,
@@ -36,6 +40,8 @@ export const encountersData: Record<EncounterKey, EncounterData> = {
   "north-forest-goblin-ruins-goblin": {
     key: "north-forest-goblin-ruins-goblin",
     creatureKey: "goblin",
+    encounterType: "creature",
+    lootTableKey: "north-forest-goblin-ruins-goblin",
     enemyName: "Goblin",
     enemyTitle: "Ruins Scavenger",
     enemyMaxHp: 20,

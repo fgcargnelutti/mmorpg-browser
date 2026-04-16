@@ -155,6 +155,13 @@
   text-transform: uppercase;
 }
 
+.quest-log-entry__source {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .quest-log-entry p,
 .quest-log-entry small {
   margin: 0;
@@ -166,6 +173,19 @@
 
 .quest-log-entry small {
   color: var(--muted);
+}
+
+.quest-log-entry__detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.quest-log-entry__detail-label {
+  color: var(--text-soft);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .quest-log-entry__divider {

@@ -32,16 +32,15 @@ import {
   type LocationKey,
   type MapId,
   type NpcProfileKey,
+  type NpcShopOffer,
 } from "../features/world";
 import {
   FishingDialog,
   fishingConfigs,
-  type FishingSpotKey,
 } from "../features/fishing";
 import {
   MiningDialog,
   miningConfigs,
-  type MiningSpotKey,
 } from "../features/mining";
 import {
   HideoutDialog,
@@ -68,31 +67,47 @@ import { equipmentRows } from "../data/equipmentData";
 import { conditionsData } from "../data/conditionsData";
 import { buffsData } from "../data/buffsData";
 import { collectRewardMessages } from "../features/systems/application/systems/rewardResolutionSystem";
+import { applyRewardsToPlayerSnapshot } from "../features/systems/application/systems/playerRewardStateSystem";
+import {
+  countInventoryItem,
+  canSpendPlayerStamina,
+  consumeInventoryItemAmount,
+  removeInventoryItemsByPredicate,
+  replacePlayerInventory,
+  spendPlayerStamina,
+} from "../features/systems/application/systems/playerStateMutationSystem";
+import { resolveBattleVictoryRewards } from "../features/combat/application/systems/battleRewardSystem";
+import {
+  createActionPerformedMessage,
+  createConversationStartedMessage,
+  createDirectMessagePlaceholder,
+  createEncounterLostMessage,
+  createEncounterStartedMessage,
+  createEncounterWonMessage,
+  createHideoutReasonMessage,
+  createHideoutStorageMessage,
+  createHideoutUpgradeMessage,
+  createHuntInvitePlaceholder,
+  createInsufficientStaminaMessage,
+  createItemObtainedMessage,
+  createNoSellableResourcesMessage,
+  createPanelOpenedMessage,
+  createPurchaseSuccessMessage,
+  createStaminaRecoveredMessage,
+  createSystemMessage,
+  createTravelMessage,
+  createUnavailableDestinationMessage,
+  createSellResourcesMessage,
+} from "../features/systems/application/systems/eventLogMessageSystem";
 import { useCharacterProgression } from "../features/progression";
+import { useNotifications } from "../features/notifications";
 import type { CharacterSummary } from "./CharacterSelectScreen";
 import type { DialogueOption } from "../components/NpcDialog";
 import type { ChatMessage } from "../components/ChatPanel";
-
-type ActiveEncounter = {
-  key: EncounterKey;
-  enemyHp: number;
-  combatLog: string[];
-  isResolved: boolean;
-  resolution: "victory" | "defeat" | null;
-};
+import { useGameOverlayState } from "./hooks/useGameOverlayState";
 
 type GameScreenProps = {
   selectedCharacter: CharacterSummary;
-};
-
-type ActiveFishingSession = {
-  action: ContextAction;
-  configKey: FishingSpotKey;
-};
-
-type ActiveMiningSession = {
-  action: ContextAction;
-  configKey: MiningSpotKey;
 };
 
 function formatChatTimestamp(date = new Date()) {
@@ -132,6 +147,7 @@ function resolveInventoryDisplayItem(itemKey: string, count: number) {
 }
 
 export default function GameScreen({ selectedCharacter }: GameScreenProps) {
+  const { notifyError, notifySuccess, notifyInfo } = useNotifications();
   const [eventLogs, setEventLogs] = useState<string[]>([
     "System: The wasteland is silent today.",
     "System: You feel the cold wind across the ruins.",
@@ -145,34 +161,43 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     createChatMessage("Ronan: Anyone heading to Blackwood?"),
   ]);
 
-  const [contextState, setContextState] = useState<
-    "hidden" | "expanded" | "minimized"
-  >("hidden");
-
-  const [npcDialogOpen, setNpcDialogOpen] = useState(false);
-  const [activeNpcProfileKey, setActiveNpcProfileKey] =
-    useState<NpcProfileKey>("jane");
-  const [npcDialogueLines, setNpcDialogueLines] = useState<string[]>(
-    npcProfilesData.jane.initialDialogueLines
-  );
-
   const [triggeredEncounters, setTriggeredEncounters] = useState<EncounterKey[]>(
     []
   );
 
-  const [activeEncounter, setActiveEncounter] = useState<ActiveEncounter | null>(
-    null
-  );
-  const [activeFishingSession, setActiveFishingSession] =
-    useState<ActiveFishingSession | null>(null);
-  const [activeMiningSession, setActiveMiningSession] =
-    useState<ActiveMiningSession | null>(null);
-  const [bestiaryDialogOpen, setBestiaryDialogOpen] = useState(false);
-  const [skillTreeDialogOpen, setSkillTreeDialogOpen] = useState(false);
-  const [hideoutDialogOpen, setHideoutDialogOpen] = useState(false);
-  const [questLogDialogOpen, setQuestLogDialogOpen] = useState(false);
-
   const [currentMap, setCurrentMap] = useState<MapId>("town");
+  const {
+    contextState,
+    setContextState,
+    npcDialogOpen,
+    activeNpcProfileKey,
+    npcDialogueLines,
+    setNpcDialogueLines,
+    activeEncounter,
+    setActiveEncounter,
+    activeFishingSession,
+    activeMiningSession,
+    bestiaryDialogOpen,
+    skillTreeDialogOpen,
+    hideoutDialogOpen,
+    questLogDialogOpen,
+    closeWorldActivityOverlays,
+    openNpcDialog: openNpcOverlay,
+    closeNpcDialog: closeNpcOverlay,
+    openEncounter: openEncounterOverlay,
+    openFishingSession: openFishingOverlay,
+    closeFishingSession: closeFishingOverlay,
+    openMiningSession: openMiningOverlay,
+    closeMiningSession: closeMiningOverlay,
+    openHideoutDialog: openHideoutOverlay,
+    closeHideoutDialog: closeHideoutOverlay,
+    openBestiaryDialog: openBestiaryOverlay,
+    closeBestiaryDialog: closeBestiaryOverlay,
+    openSkillTreeDialog: openSkillTreeOverlay,
+    closeSkillTreeDialog: closeSkillTreeOverlay,
+    openQuestLogDialog: openQuestLogOverlay,
+    closeQuestLogDialog: closeQuestLogOverlay,
+  } = useGameOverlayState();
 
   const {
     player,
@@ -285,8 +310,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     if (!destinationMapId) return;
 
     setCurrentMap(destinationMapId);
-    setNpcDialogOpen(false);
-    setActiveEncounter(null);
+    closeWorldActivityOverlays();
     setContextState("expanded");
 
     const destinationMap = mapsData[destinationMapId];
@@ -308,13 +332,12 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
     setEventLogs((prev) => [
       ...prev,
-      `System: You travel to ${destinationMap.name}.`,
+      createTravelMessage(destinationMap.name),
     ]);
   };
 
   const handleTravelAndOpenContext = (location: LocationKey) => {
-    setNpcDialogOpen(false);
-    setActiveEncounter(null);
+    closeWorldActivityOverlays();
     setContextState("expanded");
 
     const travelResolution = handleTravel(location);
@@ -337,22 +360,21 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
   const handleOpenNpcDialog = (profileKey: NpcProfileKey = "jane") => {
     const profile = npcProfilesData[profileKey];
 
-    setContextState("hidden");
-    setActiveNpcProfileKey(profileKey);
-    setNpcDialogueLines(profile.initialDialogueLines);
-    setNpcDialogOpen(true);
+    openNpcOverlay({
+      profileKey,
+      dialogueLines: profile.initialDialogueLines,
+    });
 
     setEventLogs((prev) => [
       ...prev,
-      `System: You started a conversation with ${profile.name}.`,
+      createConversationStartedMessage(profile.name),
     ]);
 
     logQuestUpdates(applyQuestEvents([{ type: "npc", npcKey: profileKey }]));
   };
 
   const handleCloseNpcDialog = () => {
-    setNpcDialogOpen(false);
-    setContextState("expanded");
+    closeNpcOverlay();
   };
 
   const openEncounter = (encounterKey: EncounterKey) => {
@@ -362,20 +384,15 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       prev.includes(encounterKey) ? prev : [...prev, encounterKey]
     );
 
-    setNpcDialogOpen(false);
-    setContextState("hidden");
-
-    setActiveEncounter({
-      key: encounterKey,
+    openEncounterOverlay({
+      encounterKey,
       enemyHp: encounter.enemyMaxHp,
-      combatLog: [encounter.introText],
-      isResolved: false,
-      resolution: null,
+      introText: encounter.introText,
     });
 
     setEventLogs((prev) => [
       ...prev,
-      `System: Encounter started: ${encounter.enemyName}.`,
+      createEncounterStartedMessage(encounter.enemyName),
     ]);
   };
 
@@ -396,6 +413,8 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     );
 
     if (nextEnemyHp <= 0) {
+      const victoryRewards = resolveBattleVictoryRewards(encounter);
+
       setActiveEncounter({
         ...activeEncounter,
         enemyHp: 0,
@@ -409,6 +428,16 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       });
 
       gainCharacterXp(encounter.rewardXp, `Defeated ${encounter.enemyName}`);
+      if (victoryRewards.rewards.length > 0) {
+        setPlayer((previousPlayer) =>
+          applyRewardsToPlayerSnapshot(
+            {
+              ...previousPlayer,
+            },
+            victoryRewards.rewards
+          )
+        );
+      }
       registerBestiaryKill(encounter.creatureKey, encounter.enemyName);
       logQuestUpdates(
         applyQuestEvent({
@@ -424,7 +453,8 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
       setEventLogs((prev) => [
         ...prev,
-        `System: You defeated ${encounter.enemyName}.`,
+        createEncounterWonMessage(encounter.enemyName),
+        ...victoryRewards.eventLogMessages,
       ]);
 
       return;
@@ -453,7 +483,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
       setEventLogs((prev) => [
         ...prev,
-        `System: You were defeated by ${encounter.enemyName}.`,
+        createEncounterLostMessage(encounter.enemyName),
       ]);
 
       return;
@@ -475,7 +505,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
     const encounter = encountersData[activeEncounter.key];
 
-    setEventLogs((prev) => [...prev, `System: ${encounter.retreatText}`]);
+    setEventLogs((prev) => [...prev, createSystemMessage(encounter.retreatText)]);
     setActiveEncounter(null);
     setContextState("expanded");
   };
@@ -490,50 +520,43 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
     const attemptCost = action.staminaCost ?? 0;
 
-    if (player.stamina < attemptCost) {
+    if (!canSpendPlayerStamina(player, attemptCost)) {
       setEventLogs((prev) => [
         ...prev,
-        `Not enough stamina to ${action.label.toLowerCase()}.`,
+        createInsufficientStaminaMessage(action.label),
       ]);
       return;
     }
 
-    setPlayer((previousPlayer) => ({
-      ...previousPlayer,
-      stamina: Math.max(0, previousPlayer.stamina - attemptCost),
-    }));
+    setPlayer((previousPlayer) => spendPlayerStamina(previousPlayer, attemptCost));
 
-    setNpcDialogOpen(false);
-    setActiveEncounter(null);
-    setContextState("hidden");
-    setActiveFishingSession({
+    openFishingOverlay({
       action,
       configKey: action.fishingSpotKey,
     });
 
-    setEventLogs((prev) => [...prev, `You start fishing at ${currentMapData.name}.`]);
+    setEventLogs((prev) => [
+      ...prev,
+      createSystemMessage(`You start fishing at ${currentMapData.name}.`),
+    ]);
   };
 
   const handleCloseFishing = () => {
-    setActiveFishingSession(null);
-    setContextState("expanded");
+    closeFishingOverlay();
   };
 
   const handleFishingSuccess = () => {
     if (!player || !activeFishingSession || !activeFishingConfig) return;
 
-    setPlayer((previousPlayer) => {
-      const nextInventory = [...previousPlayer.inventory];
-
-      for (let i = 0; i < activeFishingConfig.rewardAmount; i += 1) {
-        nextInventory.push(activeFishingConfig.rewardItemKey);
-      }
-
-      return {
-        ...previousPlayer,
-        inventory: nextInventory,
-      };
-    });
+    setPlayer((previousPlayer) =>
+      applyRewardsToPlayerSnapshot(previousPlayer, [
+        {
+          type: "item",
+          itemKey: activeFishingConfig.rewardItemKey,
+          amount: activeFishingConfig.rewardAmount,
+        },
+      ])
+    );
 
     recordSkillTraining({
       type: "world.action.completed",
@@ -549,7 +572,10 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     setEventLogs((prev) => [
       ...prev,
       activeFishingConfig.successLog,
-      `You obtained ${activeFishingConfig.rewardAmount}x ${activeFishingConfig.rewardItemKey}.`,
+      createItemObtainedMessage(
+        activeFishingConfig.rewardItemKey,
+        activeFishingConfig.rewardAmount
+      ),
     ]);
 
     logQuestUpdates(
@@ -578,53 +604,43 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
     const attemptCost = action.staminaCost ?? 0;
 
-    if (player.stamina < attemptCost) {
+    if (!canSpendPlayerStamina(player, attemptCost)) {
       setEventLogs((prev) => [
         ...prev,
-        `Not enough stamina to ${action.label.toLowerCase()}.`,
+        createInsufficientStaminaMessage(action.label),
       ]);
       return;
     }
 
-    setPlayer((previousPlayer) => ({
-      ...previousPlayer,
-      stamina: Math.max(0, previousPlayer.stamina - attemptCost),
-    }));
+    setPlayer((previousPlayer) => spendPlayerStamina(previousPlayer, attemptCost));
 
-    setNpcDialogOpen(false);
-    setActiveEncounter(null);
-    setContextState("hidden");
-    setActiveMiningSession({
+    openMiningOverlay({
       action,
       configKey: action.miningSpotKey,
     });
 
     setEventLogs((prev) => [
       ...prev,
-      `You begin mining at ${currentMapData.name}.`,
+      createSystemMessage(`You begin mining at ${currentMapData.name}.`),
     ]);
   };
 
   const handleCloseMining = () => {
-    setActiveMiningSession(null);
-    setContextState("expanded");
+    closeMiningOverlay();
   };
 
   const handleMiningSuccess = () => {
     if (!player || !activeMiningSession || !activeMiningConfig) return;
 
-    setPlayer((previousPlayer) => {
-      const nextInventory = [...previousPlayer.inventory];
-
-      for (let i = 0; i < activeMiningConfig.rewardAmount; i += 1) {
-        nextInventory.push(activeMiningConfig.rewardItemKey);
-      }
-
-      return {
-        ...previousPlayer,
-        inventory: nextInventory,
-      };
-    });
+    setPlayer((previousPlayer) =>
+      applyRewardsToPlayerSnapshot(previousPlayer, [
+        {
+          type: "item",
+          itemKey: activeMiningConfig.rewardItemKey,
+          amount: activeMiningConfig.rewardAmount,
+        },
+      ])
+    );
 
     recordSkillTraining({
       type: "world.action.completed",
@@ -640,7 +656,10 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     setEventLogs((prev) => [
       ...prev,
       activeMiningConfig.successLog,
-      `You obtained ${activeMiningConfig.rewardAmount}x ${activeMiningConfig.rewardItemKey}.`,
+      createItemObtainedMessage(
+        activeMiningConfig.rewardItemKey,
+        activeMiningConfig.rewardAmount
+      ),
     ]);
 
     logQuestUpdates(
@@ -665,81 +684,60 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
   };
 
   const handleOpenHideout = () => {
-    setBestiaryDialogOpen(false);
-    setSkillTreeDialogOpen(false);
-    setQuestLogDialogOpen(false);
-    setNpcDialogOpen(false);
-    setActiveEncounter(null);
-    setActiveFishingSession(null);
-    setActiveMiningSession(null);
-    setContextState("hidden");
-    setHideoutDialogOpen(true);
-    setEventLogs((prev) => [...prev, "You step into your hideout and review the camp."]);
+    openHideoutOverlay();
+    setEventLogs((prev) => [
+      ...prev,
+      createSystemMessage("You step into your hideout and review the camp."),
+    ]);
   };
 
   const handleCloseHideout = () => {
-    setHideoutDialogOpen(false);
-    setContextState("expanded");
+    closeHideoutOverlay();
   };
 
   const handleOpenBestiary = () => {
-    setHideoutDialogOpen(false);
-    setSkillTreeDialogOpen(false);
-    setQuestLogDialogOpen(false);
-    setNpcDialogOpen(false);
-    setActiveEncounter(null);
-    setActiveFishingSession(null);
-    setActiveMiningSession(null);
-    setContextState("hidden");
-    setBestiaryDialogOpen(true);
-    setEventLogs((prev) => [...prev, "Bestiary: You review the creatures documented so far."]);
+    openBestiaryOverlay();
+    setEventLogs((prev) => [
+      ...prev,
+      createPanelOpenedMessage(
+        "Bestiary",
+        "You review the creatures documented so far."
+      ),
+    ]);
   };
 
   const handleCloseBestiary = () => {
-    setBestiaryDialogOpen(false);
-    setContextState("expanded");
+    closeBestiaryOverlay();
   };
 
   const handleOpenSkillTree = () => {
-    setHideoutDialogOpen(false);
-    setBestiaryDialogOpen(false);
-    setQuestLogDialogOpen(false);
-    setNpcDialogOpen(false);
-    setActiveEncounter(null);
-    setActiveFishingSession(null);
-    setActiveMiningSession(null);
-    setContextState("hidden");
-    setSkillTreeDialogOpen(true);
+    openSkillTreeOverlay();
     setEventLogs((prev) => [
       ...prev,
-      "Skill Tree: You open the full progression window.",
+      createPanelOpenedMessage(
+        "Skill Tree",
+        "You open the full progression window."
+      ),
     ]);
   };
 
   const handleCloseSkillTree = () => {
-    setSkillTreeDialogOpen(false);
-    setContextState("expanded");
+    closeSkillTreeOverlay();
   };
 
   const handleOpenQuestLog = () => {
-    setHideoutDialogOpen(false);
-    setBestiaryDialogOpen(false);
-    setSkillTreeDialogOpen(false);
-    setNpcDialogOpen(false);
-    setActiveEncounter(null);
-    setActiveFishingSession(null);
-    setActiveMiningSession(null);
-    setContextState("hidden");
-    setQuestLogDialogOpen(true);
+    openQuestLogOverlay();
     setEventLogs((prev) => [
       ...prev,
-      "Quest Log: You review the active mission categories and future contracts.",
+      createPanelOpenedMessage(
+        "Quest Log",
+        "You review the active mission categories and future contracts."
+      ),
     ]);
   };
 
   const handleCloseQuestLog = () => {
-    setQuestLogDialogOpen(false);
-    setContextState("expanded");
+    closeQuestLogOverlay();
   };
 
   const logQuestUpdates = (
@@ -786,40 +784,14 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     const rewards = questEntry.quest.rewards;
     const rewardMessages = collectRewardMessages(rewards);
 
-    setPlayer((previousPlayer) => {
-      const nextInventory = [...previousPlayer.inventory];
-      let nextTotalXp = previousPlayer.totalXp;
-      let nextStamina = previousPlayer.stamina;
-
-      for (const reward of rewards) {
-        if (reward.type === "item") {
-          for (let count = 0; count < reward.amount; count += 1) {
-            nextInventory.push(reward.itemKey);
-          }
-        }
-
-        if (reward.type === "gold") {
-          for (let count = 0; count < reward.amount; count += 1) {
-            nextInventory.push("gold");
-          }
-        }
-
-        if (reward.type === "xp") {
-          nextTotalXp += reward.amount;
-        }
-
-        if (reward.type === "stamina") {
-          nextStamina = Math.min(previousPlayer.maxStamina, nextStamina + reward.amount);
-        }
-      }
-
-      return {
-        ...previousPlayer,
-        inventory: nextInventory,
-        totalXp: nextTotalXp,
-        stamina: nextStamina,
-      };
-    });
+    setPlayer((previousPlayer) =>
+      applyRewardsToPlayerSnapshot(
+        {
+          ...previousPlayer,
+        },
+        rewards
+      )
+    );
 
     const didClaim = claimQuestRewardsByKey(questKey);
 
@@ -900,8 +872,8 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     if (!targetStructure.eligibility.canUpgrade) {
       setEventLogs((prev) => [
         ...prev,
-        ...targetStructure.eligibility.reasons.map(
-          (reason) => `Hideout: ${reason}`
+        ...targetStructure.eligibility.reasons.map((reason) =>
+          createHideoutReasonMessage(reason)
         ),
       ]);
       return;
@@ -912,16 +884,18 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       targetStructure.eligibility.nextTier.buildCosts
     );
 
-    setPlayer((previousPlayer) => ({
-      ...previousPlayer,
-      inventory: nextInventory,
-    }));
+    setPlayer((previousPlayer) =>
+      replacePlayerInventory(previousPlayer, nextInventory)
+    );
 
     upgradeStructure(structureKey);
 
     setEventLogs((prev) => [
       ...prev,
-      `Hideout: ${targetStructure.definition.name} upgraded to level ${targetStructure.eligibility.nextTier?.level}.`,
+      createHideoutUpgradeMessage(
+        targetStructure.definition.name,
+        targetStructure.eligibility.nextTier?.level
+      ),
     ]);
   };
 
@@ -934,14 +908,22 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       return;
     }
 
-    setPlayer((previousPlayer) => ({
-      ...previousPlayer,
-      inventory: nextInventory,
-    }));
+    setPlayer((previousPlayer) =>
+      replacePlayerInventory(previousPlayer, nextInventory)
+    );
+
+    const itemLabel = inventoryCatalog[itemKey]?.name ?? itemKey;
+
+    notifyInfo(itemKey === "gold" ? "Gold stored" : `${itemLabel} stored`, {
+      title: "Hideout chest",
+    });
 
     setEventLogs((prev) => [
       ...prev,
-      `Hideout: ${itemKey === "gold" ? "Gold" : itemKey} stored in the chest.`,
+      createHideoutStorageMessage(
+        itemKey === "gold" ? "Gold" : itemLabel,
+        "stored"
+      ),
     ]);
   };
 
@@ -954,14 +936,25 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       return;
     }
 
-    setPlayer((previousPlayer) => ({
-      ...previousPlayer,
-      inventory: nextInventory,
-    }));
+    setPlayer((previousPlayer) =>
+      replacePlayerInventory(previousPlayer, nextInventory)
+    );
+
+    const itemLabel = inventoryCatalog[itemKey]?.name ?? itemKey;
+
+    notifyInfo(
+      itemKey === "gold" ? "Gold returned to inventory" : `${itemLabel} returned`,
+      {
+        title: "Hideout chest",
+      }
+    );
 
     setEventLogs((prev) => [
       ...prev,
-      `Hideout: ${itemKey === "gold" ? "Gold" : itemKey} returned to your inventory.`,
+      createHideoutStorageMessage(
+        itemKey === "gold" ? "Gold" : itemLabel,
+        "returned"
+      ),
     ]);
   };
 
@@ -971,37 +964,80 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     const sellableItems =
       action?.sellableItemKeys ?? ["stone", "wood", "herb", "fish", "rope", "paper"];
 
-    const soldItems = player.inventory.filter((item) =>
-      sellableItems.includes(item)
+    const saleResult = removeInventoryItemsByPredicate(
+      player,
+      (itemKey) => sellableItems.includes(itemKey)
     );
-
-    const keptItems = player.inventory.filter(
-      (item) => !sellableItems.includes(item)
-    );
+    const soldItems = saleResult.removedItems;
 
     if (soldItems.length === 0) {
       setEventLogs((prev) => [
         ...prev,
-        "System: You have no sellable resources.",
+        createNoSellableResourcesMessage(),
       ]);
       return;
     }
 
     const goldEarned = soldItems.length * (action?.goldPerItem ?? 2);
-    const nextInventory = [...keptItems];
 
-    for (let i = 0; i < goldEarned; i += 1) {
-      nextInventory.push("gold");
-    }
+    setPlayer(
+      applyRewardsToPlayerSnapshot(saleResult.nextSnapshot, [
+        {
+          type: "gold",
+          amount: goldEarned,
+        },
+      ])
+    );
 
-    setPlayer({
-      ...player,
-      inventory: nextInventory,
+    notifySuccess(`${goldEarned} Gold received`, {
+      title: "Resources sold",
     });
 
     setEventLogs((prev) => [
       ...prev,
-      `System: You sold ${soldItems.length} resources and received ${goldEarned} gold.`,
+      createSellResourcesMessage(soldItems.length, goldEarned),
+    ]);
+  };
+
+  const handleNpcBuyItem = (offer: NpcShopOffer) => {
+    if (!player) return;
+
+    const availableGold = countInventoryItem(player.inventory, "gold");
+
+    if (availableGold < offer.priceGold) {
+      notifyError("Insufficient gold", {
+        title: "Purchase failed",
+      });
+      return;
+    }
+
+    setPlayer((previousPlayer) => {
+      const goldConsumption = consumeInventoryItemAmount(
+        previousPlayer,
+        "gold",
+        offer.priceGold
+      );
+
+      if (!goldConsumption.didConsume) {
+        return previousPlayer;
+      }
+
+      return applyRewardsToPlayerSnapshot(goldConsumption.nextSnapshot, [
+        {
+          type: "item",
+          itemKey: offer.itemKey,
+          amount: 1,
+        },
+      ]);
+    });
+
+    notifySuccess(`1x ${offer.label}`, {
+      title: "Purchased",
+    });
+
+    setEventLogs((prev) => [
+      ...prev,
+      createPurchaseSuccessMessage(offer.label, 1, offer.priceGold),
     ]);
   };
 
@@ -1090,7 +1126,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
       setEventLogs((prev) => [
         ...prev,
-        `System: ${action.targetMapName ?? "This destination"} is not available yet.`,
+        createUnavailableDestinationMessage(action.targetMapName),
       ]);
       return;
     }
@@ -1103,7 +1139,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     if (action.effect === "travel_placeholder") {
       setEventLogs((prev) => [
         ...prev,
-        `System: ${action.targetMapName ?? "This destination"} is not available yet.`,
+        createUnavailableDestinationMessage(action.targetMapName),
       ]);
       return;
     }
@@ -1157,46 +1193,52 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     if (action.effect === "rest") {
       const restored = action.amount ?? 2;
 
-      setPlayer({
-        ...player,
-        stamina: Math.min(player.maxStamina, player.stamina + restored),
-      });
+      setPlayer((previousPlayer) =>
+        applyRewardsToPlayerSnapshot(previousPlayer, [
+          {
+            type: "stamina",
+            amount: restored,
+          },
+        ])
+      );
 
       setEventLogs((prev) => [
         ...prev,
-        `System: You recovered ${restored} stamina.`,
+        createStaminaRecoveredMessage(restored),
       ]);
       return;
     }
 
     if (action.rewardItem) {
+      const rewardItem = action.rewardItem;
       const cost = action.staminaCost ?? 0;
 
-      if (player.stamina < cost) {
+      if (!canSpendPlayerStamina(player, cost)) {
         setEventLogs((prev) => [
           ...prev,
-          `System: Not enough stamina to ${action.label.toLowerCase()}.`,
+          createInsufficientStaminaMessage(action.label),
         ]);
         return;
       }
 
       const amount = action.amount ?? 1;
-      const nextInventory = [...player.inventory];
-
-      for (let i = 0; i < amount; i += 1) {
-        nextInventory.push(action.rewardItem);
-      }
-
-      setPlayer({
-        ...player,
-        stamina: Math.max(0, player.stamina - cost),
-        inventory: nextInventory,
-      });
+      setPlayer((previousPlayer) =>
+        applyRewardsToPlayerSnapshot(
+          spendPlayerStamina(previousPlayer, cost),
+          [
+            {
+              type: "item",
+              itemKey: rewardItem,
+              amount,
+            },
+          ]
+        )
+      );
 
       setEventLogs((prev) => [
         ...prev,
-        `System: Action performed: ${action.label}.`,
-        `System: You obtained ${amount}x ${action.rewardItem}.`,
+        createActionPerformedMessage(action.label),
+        createItemObtainedMessage(rewardItem, amount),
       ]);
 
       logQuestUpdates(
@@ -1207,7 +1249,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
           },
           {
             type: "item",
-            itemKey: action.rewardItem,
+            itemKey: rewardItem,
             amount,
           },
         ])
@@ -1218,7 +1260,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
         action: {
           id: action.id,
           label: action.label,
-          rewardItem: action.rewardItem,
+          rewardItem,
           amount,
           effect: action.effect,
         },
@@ -1309,13 +1351,13 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
                 onSendMessage={(_, playerName) => {
                   setEventLogs((previousLogs) => [
                     ...previousLogs,
-                    `System: Direct message to ${playerName} is still a placeholder.`,
+                    createDirectMessagePlaceholder(playerName),
                   ]);
                 }}
                 onInviteToHunt={(_, playerName) => {
                   setEventLogs((previousLogs) => [
                     ...previousLogs,
-                    `System: Hunt invite sent to ${playerName} (placeholder).`,
+                    createHuntInvitePlaceholder(playerName),
                   ]);
                 }}
               />
@@ -1360,12 +1402,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
             npcLoreNotes={npcLoreNotes}
             onCloseNpcDialog={handleCloseNpcDialog}
             onNpcOptionSelect={handleNpcOptionSelect}
-            onNpcBuy={() =>
-              setEventLogs((prev) => [
-                ...prev,
-                activeNpcProfile.buyPlaceholderMessage,
-              ])
-            }
+            onNpcBuyItem={handleNpcBuyItem}
             onNpcSell={() => {
               if (activeNpcProfileKey === "maria") {
                 handleSellResources({
@@ -1381,6 +1418,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
               handleSellResources();
             }}
+            npcBuyOffers={activeNpcProfile.buyOffers}
             combatDialogOpen={Boolean(activeEncounter && activeEncounterData)}
             combatEnemyName={activeEncounterData?.enemyName ?? ""}
             combatEnemyTitle={activeEncounterData?.enemyTitle ?? ""}

@@ -4,7 +4,10 @@ import type {
   QuestProgressState,
   QuestState,
 } from "../../domain/questTypes";
+import EmptyStateNotice from "../../../../components/EmptyStateNotice";
 import GameDialog from "../../../../components/GameDialog";
+import SectionHeading from "../../../../components/SectionHeading";
+import { inventoryCatalog } from "../../../../data/inventoryCatalog";
 import "./QuestLogDialog.css";
 
 type QuestLogEntryView = {
@@ -66,6 +69,81 @@ function getCurrentObjectiveText(entry: QuestLogEntryView) {
   });
 
   return nextObjective?.description ?? entry.quest.description;
+}
+
+function getQuestSourceLabel(entry: QuestLogEntryView) {
+  switch (entry.quest.source.type) {
+    case "npc":
+      return `Source: NPC ${entry.quest.source.npcKey}`;
+    case "poi":
+      return `Source: PoI ${entry.quest.source.poiKey}`;
+    case "item":
+      return `Source: Item ${entry.quest.source.itemKey}`;
+    case "discovery":
+      return `Source: Discovery ${entry.quest.source.discoveryKey}`;
+    case "system":
+      return `Source: ${entry.quest.source.key}`;
+    default:
+      return "Source: Unknown";
+  }
+}
+
+function getRewardPreview(entry: QuestLogEntryView) {
+  const rewards = entry.quest.rewards ?? [];
+
+  if (rewards.length === 0) {
+    return "No reward registered yet";
+  }
+
+  return rewards
+    .map((reward) => {
+      if (reward.type === "xp") {
+        return `${reward.amount} XP`;
+      }
+
+      if (reward.type === "gold") {
+        return `${reward.amount} Gold`;
+      }
+
+      if (reward.type === "item") {
+        return `${reward.amount}x ${
+          inventoryCatalog[reward.itemKey]?.name ?? reward.itemKey
+        }`;
+      }
+
+      if (reward.type === "stamina") {
+        return `${reward.amount} Stamina`;
+      }
+
+      if (reward.type === "message") {
+        return "Narrative reward";
+      }
+
+      return reward.unlockKey;
+    })
+    .join(" • ");
+}
+
+function getTurnInStatus(entry: QuestLogEntryView) {
+  if (entry.state === "available") {
+    return "Turn-in: Accept this contract to begin progress";
+  }
+
+  if (entry.state === "active") {
+    return "Turn-in: Objective still in progress";
+  }
+
+  if (entry.state === "completed" && entry.isRewardClaimed) {
+    return "Turn-in: Reward already claimed";
+  }
+
+  if (entry.state === "completed") {
+    return entry.canClaimRewards
+      ? "Turn-in: Return to the source to claim rewards"
+      : "Turn-in: Completed";
+  }
+
+  return "Turn-in: Not available";
 }
 
 function getStatusClassName(state: QuestState) {
@@ -158,12 +236,11 @@ export default function QuestLogDialog({
           <div className="quest-log-dialog__sections">
             {sections.map((section) => (
               <section key={section.id} className="quest-log-section">
-                <div className="quest-log-section__header">
-                  <div>
-                    <h4>{section.label}</h4>
-                    <p>{section.summary}</p>
-                  </div>
-                </div>
+                <SectionHeading
+                  className="quest-log-section__header"
+                  title={section.label}
+                  description={section.summary}
+                />
 
                 <div className="quest-log-section__entries">
                   {section.entries.length > 0 ? (
@@ -176,20 +253,39 @@ export default function QuestLogDialog({
                           </span>
                         </div>
 
+                        <div className="quest-log-entry__source">
+                          <span>{getQuestSourceLabel(entry)}</span>
+                        </div>
+
                         <div className="quest-log-entry__meta">
                           <span>{getProgressSummary(entry)}</span>
+                          <span>{getTurnInStatus(entry)}</span>
                         </div>
 
                         <p>{entry.quest.description}</p>
                         <div className="quest-log-entry__divider" />
-                        <small>{getCurrentObjectiveText(entry)}</small>
+
+                        <div className="quest-log-entry__detail-row">
+                          <span className="quest-log-entry__detail-label">
+                            Current objective
+                          </span>
+                          <small>{getCurrentObjectiveText(entry)}</small>
+                        </div>
+
+                        <div className="quest-log-entry__detail-row">
+                          <span className="quest-log-entry__detail-label">
+                            Reward preview
+                          </span>
+                          <small>{getRewardPreview(entry)}</small>
+                        </div>
                       </article>
                     ))
                   ) : (
-                    <div className="quest-log-section__empty">
-                      <strong>Nothing here yet</strong>
-                      <p>{section.emptyState}</p>
-                    </div>
+                    <EmptyStateNotice
+                      className="quest-log-section__empty"
+                      title="Nothing here yet"
+                      description={section.emptyState}
+                    />
                   )}
                 </div>
               </section>

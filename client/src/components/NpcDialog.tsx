@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import GameDialog from "./GameDialog";
 import "./NpcDialog.css";
-import npcJanePortrait from "../assets/NpcJane.png";
+import { janePortraitArt } from "../assets/npcs/portraits";
+import type { NpcShopOffer } from "../features/world/domain/npcProfilesData";
 
 export type DialogueTopicState =
   | "unlocked"
@@ -27,8 +28,9 @@ type NpcDialogProps = {
   loreNotes: string[];
   onClose: () => void;
   onOptionSelect: (optionId: string) => void;
-  onBuy?: () => void;
+  onBuyItem?: (offer: NpcShopOffer) => void;
   onSell?: () => void;
+  buyOffers?: NpcShopOffer[];
   narrativeHint?: string;
   showNarrativeStatus?: boolean;
   narrativeStatusText?: string;
@@ -57,14 +59,15 @@ export default function NpcDialog({
   loreNotes,
   onClose,
   onOptionSelect,
-  onBuy,
+  onBuyItem,
   onSell,
+  buyOffers = [],
   narrativeHint = "This NPC still has an important role in the story.",
   portraitSrc,
 }: NpcDialogProps) {
   const dialogueScrollRef = useRef<HTMLDivElement | null>(null);
   const [tradeMode, setTradeMode] = useState<TradeMode>(null);
-  const resolvedPortrait = portraitSrc ?? npcJanePortrait;
+  const resolvedPortrait = portraitSrc ?? janePortraitArt;
 
   useEffect(() => {
     if (!dialogueScrollRef.current) return;
@@ -215,21 +218,28 @@ export default function NpcDialog({
 
               {activeTradeMode === "buy" ? (
                 <div className="npc-trade-panel__content">
-                  <div className="trade-item-card">
-                    <strong>Short Sword</strong>
-                    <span>Basic weapon • Attack +4</span>
-                    <button type="button" onClick={onBuy}>
-                      Buy
-                    </button>
-                  </div>
-
-                  <div className="trade-item-card">
-                    <strong>Scrap Shield</strong>
-                    <span>Basic shield • Defense +3</span>
-                    <button type="button" onClick={onBuy}>
-                      Buy
-                    </button>
-                  </div>
+                  {buyOffers.length > 0 ? (
+                    buyOffers.map((offer) => (
+                      <div key={offer.itemKey} className="trade-item-card">
+                        <strong>{offer.label}</strong>
+                        <span>{offer.description}</span>
+                        <button
+                          type="button"
+                          onClick={() => onBuyItem?.(offer)}
+                        >
+                          Buy • {offer.priceGold} Gold
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="trade-drop-zone">
+                      <strong>No stock available</strong>
+                      <p>
+                        This merchant does not have a real buy inventory in the
+                        current prototype.
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="npc-trade-panel__content">

@@ -7,6 +7,7 @@ import CharacterSelectScreen, {
 import CharacterCreationScreen from "./screens/CharacterCreationScreen";
 import GameScreen from "./screens/GameScreen";
 import { charactersData } from "./data/charactersData";
+import { NotificationProvider } from "./features/notifications";
 
 type AppScreen = "login" | "character-select" | "character-create" | "game";
 
@@ -41,22 +42,20 @@ export default function App() {
     setScreen("character-select");
   };
 
-  if (screen === "login") {
-    return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
-  }
+  let content;
 
-  if (screen === "character-create") {
-    return (
+  if (screen === "login") {
+    content = <LoginScreen onLoginSuccess={handleLoginSuccess} />;
+  } else if (screen === "character-create") {
+    content = (
       <CharacterCreationScreen
         username={loggedUser ?? ""}
         onBack={handleBackToCharacterSelect}
         onCreateCharacter={handleCreateCharacter}
       />
     );
-  }
-
-  if (screen === "character-select") {
-    return (
+  } else if (screen === "character-select" || !selectedCharacter) {
+    content = (
       <CharacterSelectScreen
         username={loggedUser ?? ""}
         characters={characters}
@@ -64,18 +63,9 @@ export default function App() {
         onCreateNewCharacter={handleOpenCreateCharacter}
       />
     );
+  } else {
+    content = <GameScreen selectedCharacter={selectedCharacter} />;
   }
 
-  if (!selectedCharacter) {
-    return (
-      <CharacterSelectScreen
-        username={loggedUser ?? ""}
-        characters={characters}
-        onEnterWorld={handleEnterWorld}
-        onCreateNewCharacter={handleOpenCreateCharacter}
-      />
-    );
-  }
-
-  return <GameScreen selectedCharacter={selectedCharacter} />;
+  return <NotificationProvider>{content}</NotificationProvider>;
 }

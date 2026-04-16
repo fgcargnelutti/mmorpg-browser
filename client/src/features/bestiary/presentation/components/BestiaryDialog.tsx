@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import EmptyStateNotice from "../../../../components/EmptyStateNotice";
 import GameDialog from "../../../../components/GameDialog";
+import SectionHeading from "../../../../components/SectionHeading";
 import type { CreatureBestiaryKey, VisibleBestiaryEntry } from "../../domain/bestiaryTypes";
 import "./BestiaryDialog.css";
 
@@ -98,10 +100,11 @@ export default function BestiaryDialog({
                 ))}
               </div>
             ) : (
-              <div className="bestiary-empty-state">
-                <strong>No creatures recorded yet</strong>
-                <p>Defeat a creature to add its first entry to the Bestiary.</p>
-              </div>
+              <EmptyStateNotice
+                className="bestiary-empty-state"
+                title="No creatures recorded yet"
+                description="Defeat a creature to add its first entry to the Bestiary."
+              />
             )}
           </aside>
 
@@ -142,9 +145,10 @@ export default function BestiaryDialog({
                   </div>
 
                   <div className="bestiary-detail-section">
-                    <div className="bestiary-detail-section__header">
-                      <strong>Vitals</strong>
-                    </div>
+                    <SectionHeading
+                      className="bestiary-detail-section__header"
+                      title="Vitals"
+                    />
                     <div className="bestiary-detail-line">
                       <span>HP</span>
                       <strong>{selectedEntry.maxHp ?? "Unknown"}</strong>
@@ -156,9 +160,10 @@ export default function BestiaryDialog({
                   </div>
 
                   <div className="bestiary-detail-section">
-                    <div className="bestiary-detail-section__header">
-                      <strong>Loot</strong>
-                    </div>
+                    <SectionHeading
+                      className="bestiary-detail-section__header"
+                      title="Loot"
+                    />
                     <div className="bestiary-detail-line">
                       <span>Common Drops</span>
                       <strong>{formatDrops(selectedEntry.commonDrops)}</strong>
@@ -170,9 +175,10 @@ export default function BestiaryDialog({
                   </div>
 
                   <div className="bestiary-detail-section">
-                    <div className="bestiary-detail-section__header">
-                      <strong>Combat Notes</strong>
-                    </div>
+                    <SectionHeading
+                      className="bestiary-detail-section__header"
+                      title="Combat Notes"
+                    />
                     <div className="bestiary-detail-line">
                       <span>Weaknesses</span>
                       <strong>{formatList(selectedEntry.weaknesses)}</strong>
@@ -210,10 +216,11 @@ export default function BestiaryDialog({
                 </div>
               </>
             ) : (
-              <div className="bestiary-empty-state">
-                <strong>No active entry</strong>
-                <p>Select a known creature to inspect its unlocked knowledge.</p>
-              </div>
+              <EmptyStateNotice
+                className="bestiary-empty-state"
+                title="No active entry"
+                description="Select a known creature to inspect its unlocked knowledge."
+              />
             )}
           </section>
         </div>

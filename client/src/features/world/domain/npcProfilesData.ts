@@ -7,6 +7,13 @@ export type NpcDialogueOptionData = {
 
 export type NpcProfileKey = "jane" | "maria";
 
+export type NpcShopOffer = {
+  itemKey: string;
+  priceGold: number;
+  label: string;
+  description: string;
+};
+
 export type NpcProfileData = {
   key: NpcProfileKey;
   name: string;
@@ -18,6 +25,7 @@ export type NpcProfileData = {
   narrativeStatusText: string;
   buyPlaceholderMessage: string;
   sellPlaceholderMessage: string;
+  buyOffers?: NpcShopOffer[];
 };
 
 export const npcProfilesData: Record<NpcProfileKey, NpcProfileData> = {
@@ -51,8 +59,22 @@ export const npcProfilesData: Record<NpcProfileKey, NpcProfileData> = {
     ],
     narrativeHint: "This NPC still has an important role in the story.",
     narrativeStatusText: "Jane still seems to be holding back information.",
-    buyPlaceholderMessage: "System: Buy flow placeholder.",
+    buyPlaceholderMessage: "System: Jane is ready to sell basic survival gear.",
     sellPlaceholderMessage: "System: Jane is ready to buy gathered resources.",
+    buyOffers: [
+      {
+        itemKey: "short-sword",
+        priceGold: 6,
+        label: "Short Sword",
+        description: "Basic weapon • Attack +4",
+      },
+      {
+        itemKey: "shield",
+        priceGold: 5,
+        label: "Scrap Shield",
+        description: "Basic shield • Defense +3",
+      },
+    ],
   },
   maria: {
     key: "maria",
@@ -90,5 +112,6 @@ export const npcProfilesData: Record<NpcProfileKey, NpcProfileData> = {
     buyPlaceholderMessage: "System: Maria's potion stock is still a placeholder.",
     sellPlaceholderMessage:
       "System: Maria examines your natural goods with professional interest.",
+    buyOffers: [],
   },
 };

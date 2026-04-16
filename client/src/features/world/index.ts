@@ -25,4 +25,5 @@ export type {
   NpcDialogueOptionData,
   NpcProfileData,
   NpcProfileKey,
+  NpcShopOffer,
 } from "./domain/npcProfilesData";
