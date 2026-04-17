@@ -9,18 +9,31 @@
   top: 50%;
   bottom: auto;
   transform: translate(-50%, -50%);
-  width: min(1040px, calc(100% - 44px));
+  display: flex;
+  flex-direction: column;
+  width: min(1480px, calc(100% - 20px));
+  height: min(92vh, calc(100% - 20px));
   padding: 16px;
 }
 
+.world-overview-dialog-anchor .game-dialog__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+}
+
 .world-overview-dialog {
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 0;
 }
 
 .world-overview-dialog__frame {
   position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: hidden;
   border-radius: 16px;
   border: 1px solid rgba(119, 145, 186, 0.34);
@@ -30,6 +43,13 @@
   box-shadow:
     inset 0 0 0 1px rgba(196, 214, 239, 0.05),
     0 26px 44px rgba(2, 7, 15, 0.34);
+}
+
+.world-overview-dialog__artboard {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .world-overview-dialog__frame::after {
@@ -44,52 +64,618 @@
 .world-overview-dialog__image {
   display: block;
   width: 100%;
-  max-height: min(68vh, 760px);
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
   object-position: center;
   user-select: none;
+  pointer-events: none;
 }
 
-.world-overview-dialog__caption {
+.world-overview-dialog__route-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.world-overview-dialog__route {
+  position: absolute;
+  height: 4px;
+  margin-top: -2px;
+  border-radius: 999px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(224, 191, 122, 0.9) 0 12px,
+    transparent 12px 22px
+  );
+  transform-origin: left center;
+  filter: drop-shadow(0 0 6px rgba(227, 186, 95, 0.22));
+}
+
+.world-overview-dialog__route--active {
+  animation: worldRouteDash 1.3s linear infinite;
+}
+
+.world-overview-dialog__route-endpoint {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  background: rgba(243, 210, 137, 0.95);
+  box-shadow:
+    0 0 0 3px rgba(34, 48, 70, 0.58),
+    0 0 10px rgba(237, 196, 111, 0.42);
+}
+
+.world-overview-dialog__poi-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+}
+
+.world-overview-poi {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 96px;
+  max-width: 170px;
+  padding: 7px 9px;
+  border-radius: 14px;
+  border: 1px solid rgba(147, 174, 215, 0.26);
+  background:
+    linear-gradient(180deg, rgba(15, 23, 35, 0.9) 0%, rgba(6, 11, 18, 0.94) 100%);
+  box-shadow:
+    0 12px 20px rgba(1, 7, 16, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  color: #e5eef8;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.world-overview-poi::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 46%);
+  pointer-events: none;
+}
+
+.world-overview-poi:hover {
+  transform: translate(-50%, calc(-50% - 1px));
+  border-color: rgba(180, 205, 240, 0.44);
+  box-shadow:
+    0 18px 28px rgba(1, 7, 16, 0.38),
+    0 0 18px rgba(121, 166, 232, 0.12);
+}
+
+.world-overview-poi:focus-visible {
+  outline: 2px solid rgba(166, 196, 235, 0.78);
+  outline-offset: 2px;
+}
+
+.world-overview-poi--selected {
+  border-color: rgba(194, 214, 240, 0.62);
+  background:
+    linear-gradient(180deg, rgba(27, 40, 60, 0.94) 0%, rgba(10, 17, 28, 0.97) 100%);
+  box-shadow:
+    0 18px 30px rgba(1, 7, 16, 0.42),
+    0 0 20px rgba(109, 156, 224, 0.16);
+}
+
+.world-overview-poi--current {
+  border-color: rgba(233, 200, 120, 0.72);
+  box-shadow:
+    0 18px 30px rgba(1, 7, 16, 0.4),
+    0 0 22px rgba(227, 182, 92, 0.18);
+}
+
+.world-overview-poi--route-origin,
+.world-overview-poi--route-destination {
+  border-color: rgba(220, 191, 121, 0.64);
+}
+
+.world-overview-poi__dot {
+  position: relative;
+  z-index: 1;
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  border-radius: 999px;
+  background: currentColor;
+  color: #8cb4e8;
+  box-shadow: 0 0 12px currentColor;
+}
+
+.world-overview-poi--current .world-overview-poi__dot {
+  color: #e3b865;
+}
+
+.world-overview-poi__label-group {
+  position: relative;
+  z-index: 1;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 0 2px;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
 }
 
-.world-overview-dialog__caption strong {
+.world-overview-poi__label {
   font-size: 12px;
-  letter-spacing: 0.16em;
+  line-height: 1.15;
+  font-weight: 700;
+  color: #f3f7fd;
+}
+
+.world-overview-player-pin {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 6px));
+  z-index: 11;
+  pointer-events: none;
+}
+
+.world-overview-player-pin__pulse {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  transform: translate(-50%, -58%);
+  background: radial-gradient(circle, rgba(235, 194, 113, 0.28) 0%, transparent 70%);
+  animation: worldPinPulse 2.2s ease-in-out infinite;
+}
+
+.world-overview-player-pin__marker {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px 999px 999px 0;
+  transform: rotate(-45deg);
+  background: linear-gradient(180deg, #f3cf8b 0%, #c98c38 100%);
+  border: 1px solid rgba(255, 236, 201, 0.48);
+  box-shadow:
+    0 12px 18px rgba(1, 7, 15, 0.34),
+    0 0 12px rgba(236, 196, 110, 0.28);
+}
+
+.world-overview-player-pin__marker::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(43, 28, 11, 0.78);
+  transform: translate(-50%, -50%);
+}
+
+.world-overview-player-pin--traveling .world-overview-player-pin__marker {
+  background: linear-gradient(180deg, #f5dfa8 0%, #dea04f 100%);
+  box-shadow:
+    0 12px 18px rgba(1, 7, 15, 0.34),
+    0 0 16px rgba(245, 217, 153, 0.34);
+}
+
+.world-overview-travel-progress {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 12;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(123, 148, 189, 0.34);
+  background:
+    linear-gradient(180deg, rgba(18, 27, 41, 0.9) 0%, rgba(8, 13, 21, 0.94) 100%);
+  box-shadow: 0 18px 28px rgba(1, 7, 15, 0.28);
+  color: #e4edf8;
+  pointer-events: none;
+}
+
+.world-overview-travel-progress strong {
+  font-size: 12px;
+  color: #f4f8fd;
+}
+
+.world-overview-travel-progress span {
+  font-size: 11px;
+  color: #9db3cf;
+}
+
+.world-overview-travel-confirm {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: radial-gradient(circle at center, rgba(10, 16, 24, 0.14) 0%, rgba(3, 6, 10, 0.42) 100%);
+  backdrop-filter: blur(6px);
+}
+
+.world-overview-travel-confirm__card {
+  width: min(420px, calc(100% - 16px));
+  padding: 18px 18px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(119, 145, 186, 0.42);
+  background:
+    linear-gradient(180deg, rgba(24, 35, 53, 0.98) 0%, rgba(11, 18, 29, 0.99) 100%);
+  box-shadow:
+    0 30px 54px rgba(1, 7, 15, 0.44),
+    inset 0 0 0 1px rgba(196, 214, 239, 0.06);
+  text-align: center;
+}
+
+.world-overview-travel-confirm__card h4 {
+  margin: 0 0 14px;
+  font-size: 22px;
+  line-height: 1.1;
+  color: #f4f8fd;
+}
+
+.world-overview-travel-confirm__destination {
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #aabed9;
+}
+
+.world-overview-travel-confirm__destination strong {
+  color: #f4f8fd;
+}
+
+.world-overview-travel-confirm__costs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.world-overview-travel-confirm__cost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(116, 140, 176, 0.22);
+  background: rgba(8, 14, 22, 0.5);
+  color: #dce8f5;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.world-overview-travel-confirm__cost-icon {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #e2bf79;
+}
+
+.world-overview-travel-confirm__cost-svg {
+  width: 20px;
+  height: 20px;
+}
+
+.world-overview-travel-confirm__section {
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.world-overview-travel-confirm__section-header {
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #dbe7f5;
+  color: #97aecb;
 }
 
-.world-overview-dialog__caption p {
-  max-width: 560px;
+.world-overview-travel-confirm__activity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.world-overview-travel-confirm__activity {
+  display: flex;
+  min-height: 86px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(108, 132, 168, 0.26);
+  background:
+    linear-gradient(180deg, rgba(14, 22, 34, 0.9) 0%, rgba(8, 13, 22, 0.94) 100%);
+  color: #dce8f5;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease;
+}
+
+.world-overview-travel-confirm__activity:hover {
+  transform: translateY(-1px);
+  border-color: rgba(156, 184, 226, 0.42);
+  box-shadow: 0 14px 24px rgba(1, 7, 15, 0.24);
+}
+
+.world-overview-travel-confirm__activity--selected {
+  border-color: rgba(195, 160, 95, 0.46);
+  background:
+    linear-gradient(180deg, rgba(42, 33, 22, 0.94) 0%, rgba(19, 15, 10, 0.98) 100%);
+  box-shadow:
+    0 16px 28px rgba(1, 7, 15, 0.3),
+    0 0 18px rgba(228, 190, 107, 0.12);
+}
+
+.world-overview-travel-confirm__activity-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f3f7fd;
+}
+
+.world-overview-travel-confirm__activity-description {
+  font-size: 11px;
+  line-height: 1.35;
+  color: #9fb2cb;
+}
+
+.world-overview-travel-report {
+  width: min(520px, calc(100% - 16px));
+}
+
+.world-overview-travel-report__status-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.world-overview-travel-report__status-badge {
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(136, 160, 197, 0.24);
+  background:
+    linear-gradient(180deg, rgba(17, 26, 40, 0.92) 0%, rgba(8, 13, 22, 0.98) 100%);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.world-overview-travel-report__status-badge--quiet,
+.world-overview-travel-report__status-badge--clean {
+  color: #c5e7cf;
+  border-color: rgba(126, 184, 138, 0.28);
+}
+
+.world-overview-travel-report__status-badge--encounter,
+.world-overview-travel-report__status-badge--loss {
+  color: #f0d5b0;
+  border-color: rgba(201, 155, 94, 0.28);
+}
+
+.world-overview-travel-report__summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.world-overview-travel-report__summary-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.world-overview-travel-report__summary-list {
+  display: grid;
+  gap: 10px;
+}
+
+.world-overview-travel-report__summary {
+  display: flex;
+  min-height: 76px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(116, 140, 176, 0.22);
+  background: rgba(8, 14, 22, 0.5);
+  text-align: left;
+}
+
+.world-overview-travel-report__summary--gain {
+  border-color: rgba(111, 176, 124, 0.2);
+  background:
+    linear-gradient(180deg, rgba(16, 31, 24, 0.9) 0%, rgba(9, 18, 14, 0.96) 100%);
+}
+
+.world-overview-travel-report__summary--loss {
+  border-color: rgba(186, 136, 96, 0.22);
+  background:
+    linear-gradient(180deg, rgba(38, 26, 18, 0.9) 0%, rgba(20, 13, 10, 0.96) 100%);
+}
+
+.world-overview-travel-report__summary--neutral {
+  border-color: rgba(116, 140, 176, 0.22);
+}
+
+.world-overview-travel-report__summary-label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #97aecb;
+}
+
+.world-overview-travel-report__summary strong {
+  font-size: 20px;
+  color: #f4f8fd;
+}
+
+.world-overview-travel-report__text {
   margin: 0;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
-  color: #95a9c3;
-  text-align: right;
+  color: #d7e3f1;
+}
+
+.world-overview-travel-report__rewards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.world-overview-travel-report__reward {
+  padding: 9px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(180, 205, 240, 0.2);
+  background:
+    linear-gradient(180deg, rgba(17, 26, 40, 0.92) 0%, rgba(8, 13, 22, 0.98) 100%);
+  color: #f0f5fb;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.world-overview-travel-report__reward--gain {
+  border-color: rgba(117, 179, 132, 0.26);
+  color: #d9f0df;
+}
+
+.world-overview-travel-confirm__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.world-overview-travel-confirm__button {
+  min-width: 118px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(108, 132, 168, 0.34);
+  background:
+    linear-gradient(180deg, rgba(20, 29, 45, 0.96) 0%, rgba(10, 15, 24, 0.98) 100%);
+  color: #dfeaf8;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.world-overview-travel-confirm__button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(168, 194, 235, 0.5);
+  box-shadow: 0 14px 22px rgba(1, 7, 15, 0.28);
+}
+
+.world-overview-travel-confirm__button--primary {
+  border-color: rgba(193, 160, 97, 0.42);
+  background:
+    linear-gradient(180deg, rgba(77, 57, 28, 0.98) 0%, rgba(39, 28, 14, 0.99) 100%);
+  color: #f5ebd5;
 }
 
 @media (max-width: 900px) {
   .world-overview-dialog-anchor .game-dialog {
-    width: min(720px, calc(100% - 28px));
-    padding: 14px;
+    width: calc(100% - 16px);
+    height: calc(100% - 16px);
+    padding: 12px;
   }
 
-  .world-overview-dialog__image {
-    max-height: 56vh;
+  .world-overview-poi {
+    min-width: 82px;
+    max-width: 140px;
+    padding: 6px 8px;
+    gap: 7px;
   }
 
-  .world-overview-dialog__caption {
+  .world-overview-poi__label {
+    font-size: 11px;
+  }
+
+  .world-overview-travel-progress {
     flex-direction: column;
+    gap: 2px;
+    padding: 9px 12px;
+    text-align: center;
   }
 
-  .world-overview-dialog__caption p {
-    max-width: none;
-    text-align: left;
+  .world-overview-travel-confirm__card {
+    width: min(420px, calc(100% - 10px));
+    padding: 16px 14px 14px;
+  }
+
+  .world-overview-travel-confirm__card h4 {
+    font-size: 20px;
+  }
+
+  .world-overview-travel-confirm__activity-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .world-overview-travel-report {
+    width: min(420px, calc(100% - 10px));
+  }
+
+  .world-overview-travel-report__summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .world-overview-travel-confirm__button {
+    min-width: 96px;
+  }
+}
+
+@keyframes worldRouteDash {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: -24px 0;
+  }
+}
+
+@keyframes worldPinPulse {
+  0%,
+  100% {
+    opacity: 0.26;
+    transform: translate(-50%, -58%) scale(0.92);
+  }
+
+  50% {
+    opacity: 0.58;
+    transform: translate(-50%, -58%) scale(1.08);
   }
 }

@@ -61,8 +61,10 @@ type Player = {
   name: string;
   totalXp: number;
   currentHp: number;
+  currentSp: number;
   stamina: number;
   maxStamina: number;
+  activeConditions: string[];
   inventory: string[];
   logs: string[];
   discoveredLocations: LocationKey[];
@@ -104,8 +106,10 @@ function createInitialPlayer(
     name: selectedCharacter.name,
     totalXp: 0,
     currentHp: initialMaxHp,
+    currentSp: selectedClass.baseSp,
     stamina: selectedClass.baseStamina,
     maxStamina: selectedClass.baseStamina,
+    activeConditions: [],
     inventory: [],
     logs: [],
     discoveredLocations: ["merchant"],
@@ -493,6 +497,7 @@ export function useCharacterProgression({
     player: {
       ...player,
       currentHp: Math.min(player.currentHp, computedMaxHp),
+      currentSp: Math.min(player.currentSp, computedSp),
     },
     setPlayer,
     selectedClass,

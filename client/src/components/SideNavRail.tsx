@@ -110,11 +110,41 @@ function SideNavRailIconQuests() {
   );
 }
 
+function SideNavRailIconWorldMap() {
+  return (
+    <svg viewBox="0 0 24 24" className="side-nav-rail__svg" aria-hidden="true">
+      <circle
+        cx="12"
+        cy="12"
+        r="7.8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M12 4.2c2.1 2.2 3.2 4.9 3.2 7.8s-1.1 5.6-3.2 7.8c-2.1-2.2-3.2-4.9-3.2-7.8s1.1-5.6 3.2-7.8Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.35"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M5 9.1h14M5 14.9h14"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.35"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export const sideNavIcons = {
   bestiary: <SideNavRailIconBestiary />,
   hideout: <SideNavRailIconHome />,
   quests: <SideNavRailIconQuests />,
   skillTree: <SideNavRailIconSkillTree />,
+  worldMap: <SideNavRailIconWorldMap />,
 };
 
 export default function SideNavRail({ items }: SideNavRailProps) {

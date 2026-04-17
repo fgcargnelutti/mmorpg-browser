@@ -24,7 +24,6 @@ type WorldMapProps = {
   mapData: MapData;
   onTravel: (location: LocationKey) => void;
   onMapTravel: (destinationMapId?: MapId) => void;
-  onOpenWorldMap: () => void;
   onMinimizeContext: () => void;
   onExpandContext: () => void;
   onAction: (action: ContextAction) => void;
@@ -70,7 +69,6 @@ export default function WorldMap({
   mapData,
   onTravel,
   onMapTravel,
-  onOpenWorldMap,
   onMinimizeContext,
   onExpandContext,
   onAction,
@@ -278,45 +276,6 @@ export default function WorldMap({
         />
 
         <div className="world-map-overlay">
-          <button
-            className="world-map-overview-button"
-            type="button"
-            onClick={onOpenWorldMap}
-            aria-label="Open world map"
-            title="Open world map"
-          >
-            <span className="world-map-overview-button__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" className="world-map-overview-button__svg">
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="8.2"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                />
-                <path
-                  d="M12 3.8c2.2 2.3 3.4 5.1 3.4 8.2S14.2 17.9 12 20.2c-2.2-2.3-3.4-5.1-3.4-8.2S9.8 6.1 12 3.8Z"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.4"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M4.7 9.2h14.6M4.7 14.8h14.6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.3"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </span>
-            <span className="world-map-overview-button__text">
-              <strong>World Map</strong>
-              <span>Open atlas</span>
-            </span>
-          </button>
-
           {hasForegroundDialog ? (
             <div className="world-map-backdrop" aria-hidden="true" />
           ) : null}
@@ -372,7 +331,6 @@ export default function WorldMap({
                     <span className="poi-dot" aria-hidden="true" />
                     <span className="poi-label-group">
                       <span className="poi-name">{location.name}</span>
-                      <span className="poi-subtitle">{location.subtitle}</span>
                     </span>
                   </button>
                 );
@@ -400,12 +358,6 @@ export default function WorldMap({
                   <span className="poi-dot" aria-hidden="true" />
                   <span className="poi-label-group">
                     <span className="poi-name">{poi.label}</span>
-                    <span className="poi-subtitle">
-                      {poi.subtitle ??
-                        (poi.type === "travel"
-                          ? "Map transition"
-                          : "Point of interest")}
-                    </span>
                   </span>
                 </button>
                 );

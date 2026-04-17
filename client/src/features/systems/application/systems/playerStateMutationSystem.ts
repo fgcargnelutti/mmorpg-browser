@@ -16,6 +16,17 @@ export function countInventoryItem(
   }, 0);
 }
 
+export function countInventoryItemsByKeys(
+  inventory: string[],
+  itemKeys: string[]
+) {
+  const supportedKeys = new Set(itemKeys);
+
+  return inventory.reduce((count, currentItemKey) => {
+    return supportedKeys.has(currentItemKey) ? count + 1 : count;
+  }, 0);
+}
+
 export function canSpendPlayerStamina(
   snapshot: Pick<StaminaPlayerSnapshot, "stamina">,
   amount: number
@@ -108,5 +119,77 @@ export function consumeInventoryItemAmount<T extends InventoryPlayerSnapshot>(
   return {
     didConsume: true,
     nextSnapshot: replacePlayerInventory(snapshot, nextInventory),
+  };
+}
+
+export function consumeInventoryItemsByPriority<T extends InventoryPlayerSnapshot>(
+  snapshot: T,
+  itemKeys: string[],
+  amount: number
+): {
+  didConsume: boolean;
+  nextSnapshot: T;
+  consumedItems: string[];
+} {
+  const resolvedAmount = Math.max(0, amount);
+
+  if (resolvedAmount <= 0) {
+    return {
+      didConsume: true,
+      nextSnapshot: snapshot,
+      consumedItems: [],
+    };
+  }
+
+  let nextSnapshot = snapshot;
+  let remainingAmount = resolvedAmount;
+  const consumedItems: string[] = [];
+
+  for (const itemKey of itemKeys) {
+    if (remainingAmount <= 0) {
+      break;
+    }
+
+    const availableAmount = countInventoryItem(nextSnapshot.inventory, itemKey);
+    const amountToConsume = Math.min(availableAmount, remainingAmount);
+
+    if (amountToConsume <= 0) {
+      continue;
+    }
+
+    const consumption = consumeInventoryItemAmount(
+      nextSnapshot,
+      itemKey,
+      amountToConsume
+    );
+
+    if (!consumption.didConsume) {
+      return {
+        didConsume: false,
+        nextSnapshot: snapshot,
+        consumedItems: [],
+      };
+    }
+
+    nextSnapshot = consumption.nextSnapshot;
+    remainingAmount -= amountToConsume;
+
+    for (let count = 0; count < amountToConsume; count += 1) {
+      consumedItems.push(itemKey);
+    }
+  }
+
+  if (remainingAmount > 0) {
+    return {
+      didConsume: false,
+      nextSnapshot: snapshot,
+      consumedItems: [],
+    };
+  }
+
+  return {
+    didConsume: true,
+    nextSnapshot,
+    consumedItems,
   };
 }

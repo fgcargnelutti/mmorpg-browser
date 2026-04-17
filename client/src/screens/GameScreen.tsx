@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import "../App.css";
 import "../components/CharacterPanel.css";
@@ -29,6 +29,14 @@ import {
   discoverablePoisData,
   mapsData,
   npcProfilesData,
+  resolveWorldFastTravelReport,
+  worldMapPoisData,
+  type ActiveWorldFastTravel,
+  type WorldFastTravelActivity,
+  type WorldFastTravelReport,
+  type WorldMapPoi,
+  type WorldMapPoiId,
+  type WorldMapTravelCost,
   type ContextAction,
   type LocationKey,
   type MapId,
@@ -70,8 +78,15 @@ import { buffsData } from "../data/buffsData";
 import { collectRewardMessages } from "../features/systems/application/systems/rewardResolutionSystem";
 import { applyRewardsToPlayerSnapshot } from "../features/systems/application/systems/playerRewardStateSystem";
 import {
+  applyConditionActionWear,
+  resolveConditionAdjustedAttackDamage,
+  resolveConditionAdjustedStaminaCost,
+} from "../features/systems/application/systems/playerConditionSystem";
+import {
   countInventoryItem,
+  countInventoryItemsByKeys,
   canSpendPlayerStamina,
+  consumeInventoryItemsByPriority,
   consumeInventoryItemAmount,
   removeInventoryItemsByPredicate,
   replacePlayerInventory,
@@ -125,6 +140,9 @@ function createChatMessage(content: string, date = new Date()): ChatMessage {
   };
 }
 
+const fastTravelFoodItemKeys = ["cookie", "fruit", "fish", "rabbit-meat"];
+const alwaysVisibleConditionKeys = new Set(["cold", "hunger"]);
+
 function resolveInventoryDisplayItem(itemKey: string, count: number) {
   const catalogItem = inventoryCatalog[itemKey] ?? {
     key: itemKey,
@@ -165,6 +183,26 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
   const [triggeredEncounters, setTriggeredEncounters] = useState<EncounterKey[]>(
     []
   );
+  const [activeWorldFastTravel, setActiveWorldFastTravel] =
+    useState<ActiveWorldFastTravel | null>(null);
+  const [completedWorldFastTravelReport, setCompletedWorldFastTravelReport] =
+    useState<WorldFastTravelReport | null>(null);
+  const [pendingWorldFastTravelArrivalMapId, setPendingWorldFastTravelArrivalMapId] =
+    useState<MapId | null>(null);
+  // Temporary continent-position override used by the world-map prototype/testing flow.
+  // This lets the pin and highlighted continent PoI move even when a destination does not
+  // yet have a fully mapped local playable map. It must not be treated as the same source
+  // of truth as `currentMap` for future gameplay systems.
+  const [currentWorldMapPoiOverrideId, setCurrentWorldMapPoiOverrideId] =
+    useState<WorldMapPoiId | null>("belagard");
+  const fastTravelRecoveryRef = useRef<{
+    travelKey: string | null;
+    recoveredMinutesApplied: number;
+  }>({
+    travelKey: null,
+    recoveredMinutesApplied: 0,
+  });
+  const fastTravelCompletionRef = useRef<string | null>(null);
 
   const [currentMap, setCurrentMap] = useState<MapId>("town");
   const {
@@ -253,6 +291,15 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
   });
 
   const currentMapData = mapsData[currentMap];
+  const linkedCurrentMapPoi =
+    worldMapPoisData.find((poi) => poi.linkedMapIds?.includes(currentMap)) ?? null;
+  // Prefer the prototype/testing continent override when present; otherwise fall back
+  // to the continent PoI inferred from the current local playable map.
+  const currentWorldMapPoiId = currentWorldMapPoiOverrideId ?? linkedCurrentMapPoi?.id ?? null;
+  const currentWorldMapPoi =
+    worldMapPoisData.find((poi) => poi.id === currentWorldMapPoiId) ??
+    linkedCurrentMapPoi ??
+    null;
   const activeNpcProfile = npcProfilesData[activeNpcProfileKey];
   const sewerRumorLearned =
     player?.learnedRumors.includes("jane-sewer-rumor") ?? false;
@@ -309,11 +356,57 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
         .map((entry) => entry.questKey),
     },
   });
+  const resolvedCharacterConditions = conditionsData.map((condition) => ({
+    ...condition,
+    active:
+      alwaysVisibleConditionKeys.has(condition.key) ||
+      (player?.activeConditions.includes(condition.key) ?? false),
+  }));
+  const hasInjury = player?.activeConditions.includes("injury") ?? false;
+  const hasPoison = player?.activeConditions.includes("poison") ?? false;
+
+  const logQuestUpdates = useCallback(
+    (updates: Array<{
+      questKey: string;
+      previousState: string;
+      nextState: string;
+    }>) => {
+      if (updates.length === 0) {
+        return;
+      }
+
+      const questByKey = new Map(questDefinitions.map((quest) => [quest.key, quest]));
+      const messages = updates.flatMap((update) => {
+        const quest = questByKey.get(update.questKey);
+        if (!quest || update.previousState === update.nextState) {
+          return [];
+        }
+
+        if (update.nextState === "completed") {
+          return [`Quest completed: ${quest.title}. Return to the source for your reward.`];
+        }
+
+        if (update.previousState === "available" && update.nextState === "active") {
+          return [`Quest accepted: ${quest.title}.`];
+        }
+
+        return [`Quest updated: ${quest.title} is now ${update.nextState}.`];
+      });
+
+      if (messages.length > 0) {
+        setEventLogs((prev) => [...prev, ...messages]);
+      }
+    },
+    [questDefinitions]
+  );
 
   const handleMapTravel = (destinationMapId?: MapId) => {
     if (!destinationMapId) return;
 
     setCurrentMap(destinationMapId);
+    const destinationWorldPoi =
+      worldMapPoisData.find((poi) => poi.linkedMapIds?.includes(destinationMapId)) ?? null;
+    setCurrentWorldMapPoiOverrideId(destinationWorldPoi?.id ?? null);
     closeWorldActivityOverlays();
     setContextState("expanded");
 
@@ -381,6 +474,175 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     closeNpcOverlay();
   };
 
+  useEffect(() => {
+    if (!activeWorldFastTravel) {
+      fastTravelRecoveryRef.current = {
+        travelKey: null,
+        recoveredMinutesApplied: 0,
+      };
+      fastTravelCompletionRef.current = null;
+      return;
+    }
+
+    const travelKey = [
+      activeWorldFastTravel.startedAt,
+      activeWorldFastTravel.originPoiId,
+      activeWorldFastTravel.destinationPoiId,
+    ].join(":");
+
+    if (fastTravelRecoveryRef.current.travelKey !== travelKey) {
+      fastTravelRecoveryRef.current = {
+        travelKey,
+        recoveredMinutesApplied: activeWorldFastTravel.recoveredStaminaMinutes,
+      };
+      fastTravelCompletionRef.current = null;
+    }
+
+    const tick = () => {
+      const now = Date.now();
+      const totalDuration =
+        activeWorldFastTravel.completesAt - activeWorldFastTravel.startedAt;
+      const elapsed = now - activeWorldFastTravel.startedAt;
+      const progressPercent =
+        totalDuration <= 0 ? 100 : Math.min(100, (elapsed / totalDuration) * 100);
+      const recoveredStaminaMinutes = Math.min(
+        activeWorldFastTravel.durationMinutes,
+        Math.floor(Math.max(0, elapsed) / 60000)
+      );
+
+      const alreadyAppliedRecovery =
+        fastTravelRecoveryRef.current.travelKey === travelKey
+          ? fastTravelRecoveryRef.current.recoveredMinutesApplied
+          : 0;
+      const staminaDelta = Math.max(
+        0,
+        recoveredStaminaMinutes - alreadyAppliedRecovery
+      );
+
+      if (staminaDelta > 0) {
+        setPlayer((previousPlayer) =>
+          applyRewardsToPlayerSnapshot(previousPlayer, [
+            {
+              type: "stamina",
+              amount: staminaDelta,
+            },
+          ])
+        );
+
+        fastTravelRecoveryRef.current = {
+          travelKey,
+          recoveredMinutesApplied: recoveredStaminaMinutes,
+        };
+      }
+
+      if (progressPercent >= 100) {
+        if (fastTravelCompletionRef.current === travelKey) {
+          setActiveWorldFastTravel(null);
+          return;
+        }
+
+        fastTravelCompletionRef.current = travelKey;
+
+        const originPoi =
+          worldMapPoisData.find((poi) => poi.id === activeWorldFastTravel.originPoiId) ??
+          null;
+        const destinationPoi =
+          worldMapPoisData.find(
+            (poi) => poi.id === activeWorldFastTravel.destinationPoiId
+          ) ?? null;
+        const destinationMapId = destinationPoi?.linkedMapIds?.[0];
+        const report = resolveWorldFastTravelReport(
+          activeWorldFastTravel,
+          originPoi,
+          destinationPoi,
+          recoveredStaminaMinutes
+        );
+
+        setPlayer((previousPlayer) => {
+          const withRewards =
+            report.rewards.length > 0
+              ? applyRewardsToPlayerSnapshot(previousPlayer, report.rewards)
+              : previousPlayer;
+
+          return {
+            ...withRewards,
+            currentHp: Math.max(1, withRewards.currentHp - report.hpLoss),
+            currentSp: Math.max(0, withRewards.currentSp - report.spLoss),
+            activeConditions: Array.from(
+              new Set([
+                ...withRewards.activeConditions,
+                ...report.inflictedConditions,
+              ])
+            ),
+          };
+        });
+
+        const rewardQuestEvents = report.rewards.flatMap((reward) =>
+          reward.type === "item"
+            ? [
+                {
+                  type: "item" as const,
+                  itemKey: reward.itemKey,
+                  amount: reward.amount,
+                },
+              ]
+            : []
+        );
+
+        if (rewardQuestEvents.length > 0) {
+          logQuestUpdates(applyQuestEvents(rewardQuestEvents));
+        }
+
+        if (destinationMapId) {
+          setPendingWorldFastTravelArrivalMapId(destinationMapId);
+        }
+
+        if (destinationPoi) {
+          setCurrentWorldMapPoiOverrideId(destinationPoi.id);
+        }
+
+        setEventLogs((prev) => [
+          ...prev,
+          createSystemMessage(
+            `You arrive at ${destinationPoi?.label ?? "your destination"} after recovering ${recoveredStaminaMinutes} stamina during the journey. Planned activity: ${activeWorldFastTravel.activity.label}.`
+          ),
+        ]);
+
+        setCompletedWorldFastTravelReport(report);
+        setActiveWorldFastTravel(null);
+        return;
+      }
+
+      setActiveWorldFastTravel((currentTravel: ActiveWorldFastTravel | null) => {
+        if (!currentTravel || currentTravel.startedAt !== activeWorldFastTravel.startedAt) {
+          return currentTravel;
+        }
+
+        return {
+          ...currentTravel,
+          progressPercent,
+          recoveredStaminaMinutes,
+        };
+      });
+    };
+
+    tick();
+
+    const intervalId = window.setInterval(tick, 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [
+    activeWorldFastTravel,
+    applyQuestEvents,
+    closeWorldActivityOverlays,
+    handleTravel,
+    logQuestUpdates,
+    setContextState,
+    setPlayer,
+  ]);
+
   const openEncounter = (encounterKey: EncounterKey) => {
     const encounter = encountersData[encounterKey];
 
@@ -405,16 +667,17 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     if (activeEncounter.isResolved || activeEncounter.resolution !== null) return;
 
     const encounter = encountersData[activeEncounter.key];
+    const playerAttackDamage = resolveConditionAdjustedAttackDamage(
+      player,
+      encounter.playerAttackDamage
+    );
     recordSkillTraining({
       type: "combat.attack",
       combatStyle: "melee",
       encounterKey: activeEncounter.key,
     });
 
-    const nextEnemyHp = Math.max(
-      0,
-      activeEncounter.enemyHp - encounter.playerAttackDamage
-    );
+    const nextEnemyHp = Math.max(0, activeEncounter.enemyHp - playerAttackDamage);
 
     if (nextEnemyHp <= 0) {
       const victoryRewards = resolveBattleVictoryRewards(encounter);
@@ -426,7 +689,10 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
         resolution: "victory",
         combatLog: [
           ...activeEncounter.combatLog,
-          `You strike the ${encounter.enemyName} for ${encounter.playerAttackDamage} damage.`,
+          `You strike the ${encounter.enemyName} for ${playerAttackDamage} damage.`,
+          ...(hasPoison
+            ? ["Poison burns through your system as the fight ends."]
+            : []),
           encounter.victoryText,
         ],
       });
@@ -458,8 +724,15 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       setEventLogs((prev) => [
         ...prev,
         createEncounterWonMessage(encounter.enemyName),
+        ...(hasPoison
+          ? [createSystemMessage("Poison drains 1 HP and 1 SP during the clash.")]
+          : []),
         ...victoryRewards.eventLogMessages,
       ]);
+
+      if (hasPoison) {
+        setPlayer((previousPlayer) => applyConditionActionWear(previousPlayer));
+      }
 
       return;
     }
@@ -479,7 +752,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
         resolution: "defeat",
         combatLog: [
           ...activeEncounter.combatLog,
-          `You strike the ${encounter.enemyName} for ${encounter.playerAttackDamage} damage.`,
+          `You strike the ${encounter.enemyName} for ${playerAttackDamage} damage.`,
           `${encounter.enemyName} retaliates for ${encounter.enemyAttackDamage} damage.`,
           `You collapse under the ${encounter.enemyName}'s attack.`,
         ],
@@ -498,10 +771,21 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       enemyHp: nextEnemyHp,
       combatLog: [
         ...activeEncounter.combatLog,
-        `You strike the ${encounter.enemyName} for ${encounter.playerAttackDamage} damage.`,
+        `You strike the ${encounter.enemyName} for ${playerAttackDamage} damage.`,
         `${encounter.enemyName} retaliates for ${encounter.enemyAttackDamage} damage.`,
+        ...(hasPoison
+          ? ["Poison weakens you for 1 HP and 1 SP during the exchange."]
+          : []),
       ],
     });
+
+    if (hasPoison) {
+      setPlayer((previousPlayer) => applyConditionActionWear(previousPlayer));
+      setEventLogs((prev) => [
+        ...prev,
+        createSystemMessage("Poison drains 1 HP and 1 SP during the fight."),
+      ]);
+    }
   };
 
   const handleRetreatEncounter = () => {
@@ -522,7 +806,10 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
   const handleOpenFishing = (action: ContextAction) => {
     if (!player || !action.fishingSpotKey) return;
 
-    const attemptCost = action.staminaCost ?? 0;
+    const attemptCost = resolveConditionAdjustedStaminaCost(
+      player,
+      action.staminaCost ?? 0
+    );
 
     if (!canSpendPlayerStamina(player, attemptCost)) {
       setEventLogs((prev) => [
@@ -532,7 +819,9 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       return;
     }
 
-    setPlayer((previousPlayer) => spendPlayerStamina(previousPlayer, attemptCost));
+    setPlayer((previousPlayer) =>
+      applyConditionActionWear(spendPlayerStamina(previousPlayer, attemptCost))
+    );
 
     openFishingOverlay({
       action,
@@ -542,6 +831,12 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     setEventLogs((prev) => [
       ...prev,
       createSystemMessage(`You start fishing at ${currentMapData.name}.`),
+      ...(hasInjury
+        ? [createSystemMessage("Injury makes the effort cost 1 extra stamina.")]
+        : []),
+      ...(hasPoison
+        ? [createSystemMessage("Poison drains 1 HP and 1 SP as you exert yourself.")]
+        : []),
     ]);
   };
 
@@ -606,7 +901,10 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
   const handleOpenMining = (action: ContextAction) => {
     if (!player || !action.miningSpotKey) return;
 
-    const attemptCost = action.staminaCost ?? 0;
+    const attemptCost = resolveConditionAdjustedStaminaCost(
+      player,
+      action.staminaCost ?? 0
+    );
 
     if (!canSpendPlayerStamina(player, attemptCost)) {
       setEventLogs((prev) => [
@@ -616,7 +914,9 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       return;
     }
 
-    setPlayer((previousPlayer) => spendPlayerStamina(previousPlayer, attemptCost));
+    setPlayer((previousPlayer) =>
+      applyConditionActionWear(spendPlayerStamina(previousPlayer, attemptCost))
+    );
 
     openMiningOverlay({
       action,
@@ -626,6 +926,12 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     setEventLogs((prev) => [
       ...prev,
       createSystemMessage(`You begin mining at ${currentMapData.name}.`),
+      ...(hasInjury
+        ? [createSystemMessage("Injury makes the effort cost 1 extra stamina.")]
+        : []),
+      ...(hasPoison
+        ? [createSystemMessage("Poison drains 1 HP and 1 SP as you exert yourself.")]
+        : []),
     ]);
   };
 
@@ -710,6 +1016,122 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     closeWorldMapOverlay();
   };
 
+  const handleDismissWorldFastTravelReport = () => {
+    const arrivalMapId = pendingWorldFastTravelArrivalMapId;
+
+    setCompletedWorldFastTravelReport(null);
+    setPendingWorldFastTravelArrivalMapId(null);
+    closeWorldMapOverlay();
+
+    if (!arrivalMapId) {
+      return;
+    }
+
+    setCurrentMap(arrivalMapId);
+    setCurrentWorldMapPoiOverrideId(null);
+    closeWorldActivityOverlays();
+    setContextState("expanded");
+
+    const destinationMap = mapsData[arrivalMapId];
+    const travelResolution = destinationMap.entryLocationKey
+      ? handleTravel(destinationMap.entryLocationKey)
+      : null;
+
+    logQuestUpdates(
+      applyQuestEvents(
+        mergeQuestProgressEvents(
+          [{ type: "map", mapId: arrivalMapId }],
+          travelResolution
+            ? createQuestEventsFromDiscoveryResolution(travelResolution)
+            : []
+        )
+      )
+    );
+  };
+
+  const handleSelectWorldMapPoi = (poi: WorldMapPoi) => {
+    setEventLogs((prev) => {
+      const message = createSystemMessage(
+        `${poi.label} selected on the continent map. Fast travel and region actions will connect here later.`
+      );
+
+      if (prev[prev.length - 1] === message) {
+        return prev;
+      }
+
+      return [...prev, message];
+    });
+  };
+
+  const handleConfirmWorldMapFastTravel = (
+    poi: WorldMapPoi,
+    cost: WorldMapTravelCost,
+    activity: WorldFastTravelActivity
+  ) => {
+    const originPoiId = currentWorldMapPoi?.id;
+
+    if (!player || !originPoiId || originPoiId === poi.id) {
+      return;
+    }
+
+    const availableFood = countInventoryItemsByKeys(
+      player.inventory,
+      fastTravelFoodItemKeys
+    );
+
+    if (availableFood < cost.foodCost) {
+      notifyError("Not enough food for fast travel", {
+        title: "Fast travel blocked",
+      });
+      setEventLogs((prev) => [
+        ...prev,
+        createSystemMessage(
+          `You need ${cost.foodCost} food to travel to ${poi.label}, but only have ${availableFood}.`
+        ),
+      ]);
+      return;
+    }
+
+    const foodConsumption = consumeInventoryItemsByPriority(
+      player,
+      fastTravelFoodItemKeys,
+      cost.foodCost
+    );
+
+    if (!foodConsumption.didConsume) {
+      notifyError("Fast travel food consumption failed", {
+        title: "Fast travel blocked",
+      });
+      return;
+    }
+
+    setPlayer(foodConsumption.nextSnapshot);
+    setCompletedWorldFastTravelReport(null);
+    setPendingWorldFastTravelArrivalMapId(null);
+
+    const now = Date.now();
+    const durationMs = cost.durationMinutes * 60 * 1000;
+
+    setActiveWorldFastTravel({
+      originPoiId,
+      destinationPoiId: poi.id,
+      foodCost: cost.foodCost,
+      durationMinutes: cost.durationMinutes,
+      startedAt: now,
+      completesAt: now + durationMs,
+      progressPercent: 0,
+      recoveredStaminaMinutes: 0,
+      activity,
+    });
+
+    setEventLogs((prev) => [
+      ...prev,
+      createSystemMessage(
+        `Fast travel to ${poi.label} begins. Travel cost: ${cost.foodCost} food, ${cost.durationMinutes} minute(s). Planned activity: ${activity.label}.`
+      ),
+    ]);
+  };
+
   const handleCloseHideout = () => {
     closeHideoutOverlay();
   };
@@ -757,40 +1179,6 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
   const handleCloseQuestLog = () => {
     closeQuestLogOverlay();
-  };
-
-  const logQuestUpdates = (
-    updates: Array<{
-      questKey: string;
-      previousState: string;
-      nextState: string;
-    }>
-  ) => {
-    if (updates.length === 0) {
-      return;
-    }
-
-    const questByKey = new Map(questDefinitions.map((quest) => [quest.key, quest]));
-    const messages = updates.flatMap((update) => {
-      const quest = questByKey.get(update.questKey);
-      if (!quest || update.previousState === update.nextState) {
-        return [];
-      }
-
-      if (update.nextState === "completed") {
-        return [`Quest completed: ${quest.title}. Return to the source for your reward.`];
-      }
-
-      if (update.previousState === "available" && update.nextState === "active") {
-        return [`Quest accepted: ${quest.title}.`];
-      }
-
-      return [`Quest updated: ${quest.title} is now ${update.nextState}.`];
-    });
-
-    if (messages.length > 0) {
-      setEventLogs((prev) => [...prev, ...messages]);
-    }
   };
 
   const applyQuestRewards = (questKey: string) => {
@@ -1230,7 +1618,10 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
     if (action.rewardItem) {
       const rewardItem = action.rewardItem;
-      const cost = action.staminaCost ?? 0;
+      const cost = resolveConditionAdjustedStaminaCost(
+        player,
+        action.staminaCost ?? 0
+      );
 
       if (!canSpendPlayerStamina(player, cost)) {
         setEventLogs((prev) => [
@@ -1243,7 +1634,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       const amount = action.amount ?? 1;
       setPlayer((previousPlayer) =>
         applyRewardsToPlayerSnapshot(
-          spendPlayerStamina(previousPlayer, cost),
+          applyConditionActionWear(spendPlayerStamina(previousPlayer, cost)),
           [
             {
               type: "item",
@@ -1258,6 +1649,12 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
         ...prev,
         createActionPerformedMessage(action.label),
         createItemObtainedMessage(rewardItem, amount),
+        ...(hasInjury
+          ? [createSystemMessage("Injury makes the effort cost 1 extra stamina.")]
+          : []),
+        ...(hasPoison
+          ? [createSystemMessage("Poison drains 1 HP and 1 SP as you exert yourself.")]
+          : []),
       ]);
 
       logQuestUpdates(
@@ -1314,6 +1711,15 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     : "0/0 XP";
 
   const sideNavItems = [
+    {
+      id: "world-map",
+      label: "World Map",
+      icon: sideNavIcons.worldMap,
+      onClick: handleOpenWorldMap,
+      isActive: worldMapDialogOpen,
+      tooltipDescription:
+        "Open the atlas view of Dustveil and the surrounding frontier.",
+    },
     {
       id: "quests",
       label: "Quest Log",
@@ -1390,7 +1796,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
               },
               {
                 label: "SP",
-                value: computedSp,
+                value: player.currentSp,
                 max: computedSp,
                 className: "bar-sp",
               },
@@ -1410,7 +1816,6 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
             mapData={currentMapData}
             onTravel={handleTravelAndOpenContext}
             onMapTravel={handleMapTravel}
-            onOpenWorldMap={handleOpenWorldMap}
             onMinimizeContext={() => setContextState("minimized")}
             onExpandContext={() => setContextState("expanded")}
             onAction={handleAction}
@@ -1540,7 +1945,14 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
               ) : worldMapDialogOpen ? (
                 <WorldMapDialog
                   isOpen={worldMapDialogOpen}
+                  currentMap={currentMap}
+                  currentWorldMapPoiId={currentWorldMapPoiId}
                   onClose={handleCloseWorldMap}
+                  onPoiSelect={handleSelectWorldMapPoi}
+                  onFastTravelConfirm={handleConfirmWorldMapFastTravel}
+                  activeFastTravel={activeWorldFastTravel}
+                  completedFastTravelReport={completedWorldFastTravelReport}
+                  onDismissFastTravelReport={handleDismissWorldFastTravelReport}
                 />
               ) : null
             }
@@ -1571,7 +1983,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
             xpText={xpText}
             name={player.name}
             characterClass={selectedClass.name}
-            conditions={conditionsData}
+            conditions={resolvedCharacterConditions}
             buffs={buffsData}
           />
 
