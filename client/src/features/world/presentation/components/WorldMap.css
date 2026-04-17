@@ -62,6 +62,99 @@
   inset: 0;
 }
 
+.world-map-overview-button {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 152px;
+  padding: 10px 12px;
+  border: 1px solid rgba(120, 147, 189, 0.42);
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(27, 40, 60, 0.92) 0%, rgba(12, 19, 31, 0.96) 100%);
+  box-shadow:
+    0 16px 32px rgba(2, 7, 16, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  color: #deebf8;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+}
+
+.world-map-overview-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 46%);
+  pointer-events: none;
+}
+
+.world-map-overview-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(162, 191, 233, 0.58);
+  background:
+    linear-gradient(180deg, rgba(36, 52, 77, 0.96) 0%, rgba(16, 25, 40, 0.98) 100%);
+  box-shadow:
+    0 20px 36px rgba(2, 7, 16, 0.42),
+    0 0 20px rgba(108, 149, 211, 0.12);
+}
+
+.world-map-overview-button:focus-visible {
+  outline: 2px solid rgba(156, 190, 236, 0.7);
+  outline-offset: 2px;
+}
+
+.world-map-overview-button__icon {
+  position: relative;
+  z-index: 1;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(133, 161, 203, 0.28);
+  background: radial-gradient(circle at 30% 30%, rgba(91, 126, 178, 0.22) 0%, rgba(17, 27, 43, 0.12) 68%);
+  color: #a9c4eb;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.world-map-overview-button__svg {
+  width: 18px;
+  height: 18px;
+}
+
+.world-map-overview-button__text {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.world-map-overview-button__text strong {
+  font-size: 12px;
+  line-height: 1.1;
+  color: #eef4fc;
+}
+
+.world-map-overview-button__text span {
+  font-size: 10px;
+  line-height: 1.1;
+  color: #9db4d0;
+}
+
 .world-map-backdrop {
   position: absolute;
   inset: 0;
@@ -800,6 +893,13 @@
    ========================= */
 
 @media (max-width: 1200px) {
+  .world-map-overview-button {
+    top: 12px;
+    right: 12px;
+    min-width: 132px;
+    padding: 9px 10px;
+  }
+
   .poi {
     min-width: 92px;
     padding: 7px 9px;

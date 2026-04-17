@@ -71,6 +71,7 @@ export function useGameOverlayState() {
   const [skillTreeDialogOpen, setSkillTreeDialogOpen] = useState(false);
   const [hideoutDialogOpen, setHideoutDialogOpen] = useState(false);
   const [questLogDialogOpen, setQuestLogDialogOpen] = useState(false);
+  const [worldMapDialogOpen, setWorldMapDialogOpen] = useState(false);
 
   const closeSideDialogs = () => {
     setBestiaryDialogOpen(false);
@@ -84,6 +85,7 @@ export function useGameOverlayState() {
     setActiveEncounter(null);
     setActiveFishingSession(null);
     setActiveMiningSession(null);
+    setWorldMapDialogOpen(false);
   };
 
   const openNpcDialog = ({ profileKey, dialogueLines }: OpenNpcDialogParams) => {
@@ -201,6 +203,18 @@ export function useGameOverlayState() {
     setContextState("expanded");
   };
 
+  const openWorldMapDialog = () => {
+    closeSideDialogs();
+    closeWorldActivityOverlays();
+    setContextState("hidden");
+    setWorldMapDialogOpen(true);
+  };
+
+  const closeWorldMapDialog = () => {
+    setWorldMapDialogOpen(false);
+    setContextState("expanded");
+  };
+
   return {
     contextState,
     setContextState,
@@ -216,6 +230,7 @@ export function useGameOverlayState() {
     skillTreeDialogOpen,
     hideoutDialogOpen,
     questLogDialogOpen,
+    worldMapDialogOpen,
     closeSideDialogs,
     closeWorldActivityOverlays,
     openNpcDialog,
@@ -233,5 +248,7 @@ export function useGameOverlayState() {
     closeSkillTreeDialog,
     openQuestLogDialog,
     closeQuestLogDialog,
+    openWorldMapDialog,
+    closeWorldMapDialog,
   };
 }

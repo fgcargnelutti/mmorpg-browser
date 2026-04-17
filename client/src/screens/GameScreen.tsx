@@ -24,6 +24,7 @@ import SideNavRail, { sideNavIcons } from "../components/SideNavRail";
 
 import {
   WorldMap,
+  WorldMapDialog,
   locations,
   discoverablePoisData,
   mapsData,
@@ -181,6 +182,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     skillTreeDialogOpen,
     hideoutDialogOpen,
     questLogDialogOpen,
+    worldMapDialogOpen,
     closeWorldActivityOverlays,
     openNpcDialog: openNpcOverlay,
     closeNpcDialog: closeNpcOverlay,
@@ -197,6 +199,8 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     closeSkillTreeDialog: closeSkillTreeOverlay,
     openQuestLogDialog: openQuestLogOverlay,
     closeQuestLogDialog: closeQuestLogOverlay,
+    openWorldMapDialog: openWorldMapOverlay,
+    closeWorldMapDialog: closeWorldMapOverlay,
   } = useGameOverlayState();
 
   const {
@@ -689,6 +693,21 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       ...prev,
       createSystemMessage("You step into your hideout and review the camp."),
     ]);
+  };
+
+  const handleOpenWorldMap = () => {
+    openWorldMapOverlay();
+    setEventLogs((prev) => [
+      ...prev,
+      createPanelOpenedMessage(
+        "World Map",
+        "You unfold a wider view of Dustveil and the surrounding frontier."
+      ),
+    ]);
+  };
+
+  const handleCloseWorldMap = () => {
+    closeWorldMapOverlay();
   };
 
   const handleCloseHideout = () => {
@@ -1391,6 +1410,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
             mapData={currentMapData}
             onTravel={handleTravelAndOpenContext}
             onMapTravel={handleMapTravel}
+            onOpenWorldMap={handleOpenWorldMap}
             onMinimizeContext={() => setContextState("minimized")}
             onExpandContext={() => setContextState("expanded")}
             onAction={handleAction}
@@ -1516,6 +1536,11 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
                   onUpgrade={handleHideoutUpgrade}
                   onDepositItem={handleDepositToHideoutStorage}
                   onWithdrawItem={handleWithdrawFromHideoutStorage}
+                />
+              ) : worldMapDialogOpen ? (
+                <WorldMapDialog
+                  isOpen={worldMapDialogOpen}
+                  onClose={handleCloseWorldMap}
                 />
               ) : null
             }
