@@ -10,7 +10,10 @@ import type {
 
 function pickWeightedEntry(table: LootTableDefinition) {
   const availableEntries = table.itemEntries.filter(
-    (entry) => !entry.guaranteed && (entry.weight ?? 0) > 0
+    (entry) =>
+      !entry.guaranteed &&
+      entry.dropChance === undefined &&
+      (entry.weight ?? 0) > 0
   );
 
   if (availableEntries.length === 0) {
@@ -33,14 +36,55 @@ function pickWeightedEntry(table: LootTableDefinition) {
   return availableEntries.at(-1) ?? null;
 }
 
+function resolveEntryAmount(tableEntry: LootTableDefinition["itemEntries"][number]) {
+  const fixedAmount = Math.max(
+    1,
+    tableEntry.amount ??
+      tableEntry.minAmount ??
+      tableEntry.maxAmount ??
+      1
+  );
+
+  const minAmount = Math.max(1, tableEntry.minAmount ?? fixedAmount);
+  const maxAmount = Math.max(minAmount, tableEntry.maxAmount ?? fixedAmount);
+
+  if (minAmount === maxAmount) {
+    return minAmount;
+  }
+
+  return (
+    Math.floor(Math.random() * (maxAmount - minAmount + 1)) + minAmount
+  );
+}
+
 function resolveGuaranteedDrops(table: LootTableDefinition): ResolvedLootDrop[] {
   return table.itemEntries
     .filter((entry) => entry.guaranteed)
     .map((entry) => ({
       itemKey: entry.itemKey,
-      amount: entry.amount,
+      amount: resolveEntryAmount(entry),
       rarity: entry.rarity,
     }));
+}
+
+function resolveChanceBasedDrops(table: LootTableDefinition): ResolvedLootDrop[] {
+  return table.itemEntries
+    .filter((entry) => !entry.guaranteed && entry.dropChance !== undefined)
+    .flatMap((entry) => {
+      const resolvedChance = Math.min(1, Math.max(0, entry.dropChance ?? 0));
+
+      if (Math.random() > resolvedChance) {
+        return [];
+      }
+
+      return [
+        {
+          itemKey: entry.itemKey,
+          amount: resolveEntryAmount(entry),
+          rarity: entry.rarity,
+        },
+      ];
+    });
 }
 
 function resolveRolledDrops(table: LootTableDefinition): ResolvedLootDrop[] {
@@ -55,7 +99,7 @@ function resolveRolledDrops(table: LootTableDefinition): ResolvedLootDrop[] {
 
     drops.push({
       itemKey: entry.itemKey,
-      amount: entry.amount,
+      amount: resolveEntryAmount(entry),
       rarity: entry.rarity,
     });
   }
@@ -64,7 +108,11 @@ function resolveRolledDrops(table: LootTableDefinition): ResolvedLootDrop[] {
 }
 
 export function resolveLootTable(table: LootTableDefinition): LootResolution {
-  const drops = [...resolveGuaranteedDrops(table), ...resolveRolledDrops(table)];
+  const drops = [
+    ...resolveGuaranteedDrops(table),
+    ...resolveChanceBasedDrops(table),
+    ...resolveRolledDrops(table),
+  ];
   const rewards: Reward[] = [
     ...(table.guaranteedRewards?.map((entry) => entry.reward) ?? []),
     ...drops.map(

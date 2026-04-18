@@ -1,0 +1,40 @@
+import type { ItemDefinition } from "./itemTypes";
+
+export const equipmentItemsData: ItemDefinition[] = [
+  {
+    key: "short-sword",
+    name: "Short Sword",
+    icon: "ðŸ—¡ï¸",
+    weight: 3.5,
+    description: "A worn but reliable short sword.",
+    stats: ["Attack +4"],
+    category: "equipment",
+    stackable: false,
+    baseValue: 18,
+    tags: ["weapon", "equipment"],
+  },
+  {
+    key: "shield",
+    name: "Scrap Shield",
+    icon: "ðŸ›¡ï¸",
+    weight: 4.0,
+    description: "A basic shield made from reused metal and wood.",
+    stats: ["Defense +3"],
+    category: "equipment",
+    stackable: false,
+    baseValue: 16,
+    tags: ["offhand", "equipment"],
+  },
+  {
+    key: "goblin-helmet",
+    name: "Goblin Helmet",
+    icon: "Helm",
+    weight: 2.4,
+    description: "A crude helm stolen and reforged by goblins over many raids.",
+    stats: ["Head equipment", "Defense +2"],
+    category: "equipment",
+    stackable: false,
+    baseValue: 24,
+    tags: ["head", "equipment", "goblin"],
+  },
+];

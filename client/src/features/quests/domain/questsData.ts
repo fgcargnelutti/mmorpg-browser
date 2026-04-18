@@ -49,9 +49,9 @@ export const questsData: Record<string, QuestDefinition> = {
   },
   "jane-sewer-whispers": {
     key: "jane-sewer-whispers",
-    title: "Whispers Beneath Dustveil",
+    title: "Whispers Beneath Belegard",
     description:
-      "Jane warns that the sewer below Dustveil hides movement and secrets worth uncovering.",
+      "Jane warns that the sewer below Belegard hides movement and secrets worth uncovering.",
     category: "side",
     logSection: "lore",
     state: "available",
@@ -78,7 +78,7 @@ export const questsData: Record<string, QuestDefinition> = {
         key: "reveal-sewer",
         kind: "reveal_poi",
         title: "Reveal the sewer entrance",
-        description: "Uncover the hidden sewer entrance below Dustveil.",
+        description: "Uncover the hidden sewer entrance below Belegard.",
         progress: {
           current: 0,
           required: 1,
@@ -93,7 +93,7 @@ export const questsData: Record<string, QuestDefinition> = {
       {
         type: "xp",
         amount: 20,
-        reason: "Completed Whispers Beneath Dustveil",
+        reason: "Completed Whispers Beneath Belegard",
       },
     ],
   },
@@ -114,7 +114,7 @@ export const questsData: Record<string, QuestDefinition> = {
         key: "visit-old-library",
         kind: "visit_poi",
         title: "Reach the Old Library",
-        description: "Travel to the Old Library in Dustveil Outpost.",
+        description: "Travel to the Old Library in Belegard.",
         progress: {
           current: 0,
           required: 1,

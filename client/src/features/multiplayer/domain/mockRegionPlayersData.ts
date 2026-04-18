@@ -6,14 +6,14 @@ export const mockRegionPlayersData: RegionPresencePlayer[] = [
   {
     id: "presence-1",
     name: "Mara",
-    currentMapId: "town",
+    currentMapId: "belagard",
     isOnline: true,
     detail: "Watching the outpost roads",
   },
   {
     id: "presence-2",
     name: "Darius",
-    currentMapId: "town",
+    currentMapId: "belagard",
     isOnline: true,
     detail: "Trading near the square",
   },

@@ -25,6 +25,43 @@ export type MapAtmosphereProfile = {
   effects: MapAtmosphereEffect[];
 };
 
+const continentArrivalAtmosphere: MapAtmosphereProfile = {
+  theme: "town",
+  effects: [
+    {
+      id: "continent-arrival-dust-1",
+      type: "dust",
+      top: "22%",
+      left: "24%",
+      width: "26%",
+      height: "18%",
+      opacity: 0.1,
+      durationMs: 20000,
+    },
+    {
+      id: "continent-arrival-dust-2",
+      type: "dust",
+      top: "64%",
+      left: "72%",
+      width: "28%",
+      height: "20%",
+      opacity: 0.08,
+      delayMs: 1800,
+      durationMs: 23000,
+    },
+    {
+      id: "continent-arrival-glow-1",
+      type: "glow",
+      top: "16%",
+      left: "54%",
+      width: "18%",
+      height: "12%",
+      opacity: 0.08,
+      durationMs: 4800,
+    },
+  ],
+};
+
 export const mapAtmosphereData: Record<MapId, MapAtmosphereProfile> = {
   town: {
     theme: "town",
@@ -192,4 +229,21 @@ export const mapAtmosphereData: Record<MapId, MapAtmosphereProfile> = {
       },
     ],
   },
+  "old-basalt-mine": continentArrivalAtmosphere,
+  belagard: continentArrivalAtmosphere,
+  "foul-bog": continentArrivalAtmosphere,
+  averon: continentArrivalAtmosphere,
+  "peregrine-shipwreck": continentArrivalAtmosphere,
+  edoras: continentArrivalAtmosphere,
+  "thousand-islands": continentArrivalAtmosphere,
+  "first-watch": continentArrivalAtmosphere,
+  hellos: continentArrivalAtmosphere,
+  "borge-bridge": continentArrivalAtmosphere,
+  "iron-cathedral": continentArrivalAtmosphere,
+  "desert-of-pagos": continentArrivalAtmosphere,
+  "sunken-rest": continentArrivalAtmosphere,
+  resistance: continentArrivalAtmosphere,
+  praeries: continentArrivalAtmosphere,
+  vaultways: continentArrivalAtmosphere,
+  "fettis-stronghold": continentArrivalAtmosphere,
 };

@@ -1,8 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import EmptyStateNotice from "../../../../components/EmptyStateNotice";
 import GameDialog from "../../../../components/GameDialog";
 import SectionHeading from "../../../../components/SectionHeading";
-import type { CreatureBestiaryKey, VisibleBestiaryEntry } from "../../domain/bestiaryTypes";
+import type {
+  CreatureBestiaryKey,
+  CreatureDropGroup,
+  CreatureDropRateTier,
+  VisibleBestiaryEntry,
+} from "../../domain/bestiaryTypes";
 import "./BestiaryDialog.css";
 
 type BestiaryDialogProps = {
@@ -19,17 +24,32 @@ function formatList(values?: string[]) {
   return values.join(", ");
 }
 
-function formatDrops(
-  values?: {
-    itemKey: string;
-    label: string;
-  }[]
+function formatDropChance(drop: CreatureDropGroup) {
+  if (drop.dropChancePercent === undefined) {
+    return null;
+  }
+
+  return `${drop.dropChancePercent}%`;
+}
+
+function getDropsByRarity(
+  drops: CreatureDropGroup[] | undefined,
+  rarity: CreatureDropRateTier
 ) {
+  return drops?.filter((drop) => drop.rarity === rarity) ?? [];
+}
+
+function formatDrops(values?: CreatureDropGroup[]) {
   if (!values || values.length === 0) {
     return "Unknown";
   }
 
-  return values.map((entry) => entry.label).join(", ");
+  return values
+    .map((entry) => {
+      const chanceLabel = formatDropChance(entry);
+      return chanceLabel ? `${entry.label} (${chanceLabel})` : entry.label;
+    })
+    .join(", ");
 }
 
 function formatTitleCase(value: string) {
@@ -47,16 +67,30 @@ export default function BestiaryDialog({
   const [selectedCreatureKey, setSelectedCreatureKey] =
     useState<CreatureBestiaryKey | null>(entries[0]?.creatureKey ?? null);
 
-  useEffect(() => {
-    if (!entries.some((entry) => entry.creatureKey === selectedCreatureKey)) {
-      setSelectedCreatureKey(entries[0]?.creatureKey ?? null);
-    }
-  }, [entries, selectedCreatureKey]);
+  const resolvedSelectedCreatureKey = entries.some(
+    (entry) => entry.creatureKey === selectedCreatureKey
+  )
+    ? selectedCreatureKey
+    : (entries[0]?.creatureKey ?? null);
 
   const selectedEntry = useMemo(
-    () => entries.find((entry) => entry.creatureKey === selectedCreatureKey) ?? null,
-    [entries, selectedCreatureKey]
+    () =>
+      entries.find((entry) => entry.creatureKey === resolvedSelectedCreatureKey) ??
+      null,
+    [entries, resolvedSelectedCreatureKey]
   );
+  const commonDrops = selectedEntry
+    ? getDropsByRarity(selectedEntry.drops, "common")
+    : [];
+  const uncommonDrops = selectedEntry
+    ? getDropsByRarity(selectedEntry.drops, "uncommon")
+    : [];
+  const rareDrops = selectedEntry
+    ? getDropsByRarity(selectedEntry.drops, "rare")
+    : [];
+  const ultraRareDrops = selectedEntry
+    ? getDropsByRarity(selectedEntry.drops, "ultra-rare")
+    : [];
 
   if (!isOpen) {
     return null;
@@ -83,7 +117,7 @@ export default function BestiaryDialog({
                     key={entry.creatureKey}
                     type="button"
                     className={`bestiary-entry-card${
-                      selectedCreatureKey === entry.creatureKey
+                      resolvedSelectedCreatureKey === entry.creatureKey
                         ? " bestiary-entry-card--active"
                         : ""
                     }`}
@@ -166,11 +200,19 @@ export default function BestiaryDialog({
                     />
                     <div className="bestiary-detail-line">
                       <span>Common Drops</span>
-                      <strong>{formatDrops(selectedEntry.commonDrops)}</strong>
+                      <strong>{formatDrops(commonDrops)}</strong>
+                    </div>
+                    <div className="bestiary-detail-line">
+                      <span>Uncommon Drops</span>
+                      <strong>{formatDrops(uncommonDrops)}</strong>
                     </div>
                     <div className="bestiary-detail-line">
                       <span>Rare Drops</span>
-                      <strong>{formatDrops(selectedEntry.rareDrops)}</strong>
+                      <strong>{formatDrops(rareDrops)}</strong>
+                    </div>
+                    <div className="bestiary-detail-line">
+                      <span>Ultra Rare Drops</span>
+                      <strong>{formatDrops(ultraRareDrops)}</strong>
                     </div>
                   </div>
 

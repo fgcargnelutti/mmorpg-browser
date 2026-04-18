@@ -32,6 +32,12 @@ type WorldMapDialogProps = {
   activeFastTravel?: ActiveWorldFastTravel | null;
   completedFastTravelReport?: WorldFastTravelReport | null;
   onDismissFastTravelReport?: () => void;
+  overlayToast?: {
+    tone: "error" | "info" | "success" | "warning";
+    title?: string;
+    message: string;
+  } | null;
+  onDismissOverlayToast?: () => void;
 };
 
 function clamp(value: number, min: number, max: number) {
@@ -101,6 +107,8 @@ export default function WorldMapDialog({
   activeFastTravel,
   completedFastTravelReport,
   onDismissFastTravelReport,
+  overlayToast,
+  onDismissOverlayToast,
 }: WorldMapDialogProps) {
   const frameRef = useRef<HTMLDivElement | null>(null);
   const [artboardSize, setArtboardSize] = useState({
@@ -282,6 +290,35 @@ export default function WorldMapDialog({
       <GameDialog title="Continent" onClose={onClose}>
         <div className="world-overview-dialog">
           <div className="world-overview-dialog__frame" ref={frameRef}>
+            {overlayToast ? (
+              <div className="world-overview-overlay-toast-layer" aria-live="polite">
+                <article
+                  className={`world-overview-overlay-toast world-overview-overlay-toast--${overlayToast.tone}`}
+                  role="status"
+                >
+                  <div className="world-overview-overlay-toast__content">
+                    {overlayToast.title ? (
+                      <strong className="world-overview-overlay-toast__title">
+                        {overlayToast.title}
+                      </strong>
+                    ) : null}
+                    <p className="world-overview-overlay-toast__message">
+                      {overlayToast.message}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="world-overview-overlay-toast__dismiss"
+                    aria-label="Dismiss notification"
+                    onClick={onDismissOverlayToast}
+                  >
+                    ×
+                  </button>
+                </article>
+              </div>
+            ) : null}
+
             <div
               className="world-overview-dialog__artboard"
               style={{
@@ -411,6 +448,14 @@ export default function WorldMapDialog({
                     Destination: <strong>{pendingTravelPoi.label}</strong>
                   </p>
 
+                  <div className="world-overview-travel-confirm__preview">
+                    <img
+                      src={pendingTravelPoi.illustration}
+                      alt={pendingTravelPoi.label}
+                      className="world-overview-travel-confirm__preview-image"
+                    />
+                  </div>
+
                   <div className="world-overview-travel-confirm__costs">
                     <div className="world-overview-travel-confirm__cost">
                       <span
@@ -495,9 +540,6 @@ export default function WorldMapDialog({
                             <span className="world-overview-travel-confirm__activity-label">
                               {activity.label}
                             </span>
-                            <span className="world-overview-travel-confirm__activity-description">
-                              {activity.description}
-                            </span>
                           </button>
                         );
                       })}
@@ -544,6 +586,18 @@ export default function WorldMapDialog({
                     {completedFastTravelReport.originLabel} to{" "}
                     <strong>{completedFastTravelReport.destinationLabel}</strong>
                   </p>
+
+                  <div className="world-overview-travel-confirm__preview">
+                    <img
+                      src={
+                        worldMapPoisData.find(
+                          (poi) => poi.id === completedFastTravelReport.destinationPoiId
+                        )?.illustration
+                      }
+                      alt={completedFastTravelReport.destinationLabel}
+                      className="world-overview-travel-confirm__preview-image"
+                    />
+                  </div>
 
                   <div className="world-overview-travel-report__status-row">
                     <div

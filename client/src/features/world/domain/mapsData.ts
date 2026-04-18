@@ -1,18 +1,59 @@
 import {
+  averonContinentArt,
+  belagardContinentArt,
+  borgeBridgeContinentArt,
+  desertOfPagosContinentArt,
+  edorasContinentArt,
+  fettisStrongholdContinentArt,
+  firstWatchContinentArt,
+  foulBogContinentArt,
+  hellosContinentArt,
+  ironCathedralContinentArt,
+  oldBasaltMineContinentArt,
+  praeriesContinentArt,
+  peregrineShipwreckContinentArt,
+  resistanceContinentArt,
+  sunkenRestContinentArt,
+  thousandIslandsContinentArt,
+  vaultwaysContinentArt,
+} from "../../../assets/world/continent-maps";
+import type { EncounterKey } from "../../../data/encountersData";
+import {
   northForestMapArt,
   sewerMapArt,
   southwestFarmMapArt,
-  townMapArt,
 } from "../../../assets/world/maps";
 import type { ContextAction } from "./locations";
 import type { LocationKey, PoiVariant } from "./locations";
 
-export type MapId = "town" | "sewer" | "north-forest" | "southwest-farm";
+export type MapId =
+  | "town"
+  | "sewer"
+  | "north-forest"
+  | "southwest-farm"
+  | "old-basalt-mine"
+  | "belagard"
+  | "foul-bog"
+  | "averon"
+  | "peregrine-shipwreck"
+  | "edoras"
+  | "thousand-islands"
+  | "first-watch"
+  | "hellos"
+  | "borge-bridge"
+  | "iron-cathedral"
+  | "desert-of-pagos"
+  | "sunken-rest"
+  | "resistance"
+  | "praeries"
+  | "vaultways"
+  | "fettis-stronghold";
 
 export type MapPoi = {
   id: string;
   label: string;
   type: "travel" | "encounter" | "interaction";
+  locationKey?: LocationKey;
   position: {
     top: string;
     left: string;
@@ -25,29 +66,306 @@ export type MapPoi = {
   discoverablePoiKey?: string;
 };
 
+export type MapGlobalActionEffect = "search-for-hunt";
+
+export type MapGlobalAction = {
+  id: string;
+  label: string;
+  description: string;
+  effect: MapGlobalActionEffect;
+};
+
 export type MapData = {
   id: MapId;
   name: string;
+  tier: "primary" | "secondary";
   background: string;
   description?: string;
   actions?: ContextAction[];
+  globalActions?: MapGlobalAction[];
+  huntingEncounterPool?: EncounterKey[];
   entryLocationKey?: LocationKey;
   defaultPoiVariant?: PoiVariant;
   pois: MapPoi[];
 };
 
+function createContinentDestinationMap(
+  id: Exclude<MapId, "town" | "sewer" | "north-forest" | "southwest-farm">,
+  name: string,
+  background: string,
+  description: string
+): MapData {
+  return {
+    id,
+    name,
+    tier: "primary",
+    background,
+    description,
+    pois: [],
+  };
+}
+
+const belegardHubPois: MapPoi[] = [
+  {
+    id: "north-road",
+    label: "North Road",
+    type: "travel",
+    locationKey: "north-road",
+    position: { top: "15%", left: "70%" },
+    poiVariant: "road",
+    subtitle: "Exit route",
+    description: "A road leading north. The next map is not ready yet.",
+    actions: [
+      {
+        id: "travel-north",
+        label: "Travel North",
+        description: "Travel into the North Forest.",
+        effect: "travel_map",
+        destinationMapId: "north-forest",
+        targetMapName: "North Forest",
+      },
+    ],
+  },
+  {
+    id: "old-library",
+    label: "Old Library",
+    type: "interaction",
+    locationKey: "old-library",
+    position: { top: "32%", left: "44%" },
+    poiVariant: "building",
+    subtitle: "Ruined archive",
+    description:
+      "Broken shelves, dust, and loose pages. You might find scraps worth keeping.",
+    actions: [
+      {
+        id: "library-rubble",
+        label: "Search Rubble",
+        description: "Search the rubble for paper or wood.",
+        staminaCost: 2,
+        rewardItem: "paper",
+        amount: 1,
+      },
+      {
+        id: "library-wood",
+        label: "Pull Broken Shelves",
+        description: "Recover wood from damaged bookshelves.",
+        staminaCost: 2,
+        rewardItem: "wood",
+        amount: 1,
+      },
+    ],
+  },
+  {
+    id: "blacksmith",
+    label: "Blacksmith",
+    type: "interaction",
+    locationKey: "blacksmith",
+    position: { top: "37%", left: "58%" },
+    poiVariant: "merchant",
+    subtitle: "Collapsed forge",
+    description:
+      "A ruined forge. You can still trade, buy gear, or salvage debris.",
+    actions: [
+      {
+        id: "buy-weapon",
+        label: "Buy Short Sword",
+        description: "Buy a basic short sword for testing.",
+        staminaCost: 0,
+        rewardItem: "short-sword",
+        amount: 1,
+      },
+      {
+        id: "buy-shield",
+        label: "Buy Scrap Shield",
+        description: "Buy a basic shield for testing.",
+        staminaCost: 0,
+        rewardItem: "shield",
+        amount: 1,
+      },
+      {
+        id: "blacksmith-rubble",
+        label: "Search Rubble",
+        description: "Look for stone or wood among the debris.",
+        staminaCost: 2,
+        rewardItem: "stone",
+        amount: 2,
+      },
+      {
+        id: "blacksmith-sell",
+        label: "Sell Resources",
+        description: "Sell gathered resources for gold.",
+        effect: "sell_resources",
+      },
+    ],
+  },
+  {
+    id: "merchant",
+    label: "Merchant",
+    type: "interaction",
+    locationKey: "merchant",
+    position: { top: "25%", left: "35%" },
+    poiVariant: "merchant",
+    subtitle: "Trading post",
+    description:
+      "A sheltered stall still in use. You can sell goods or talk to Jane.",
+    actions: [
+      {
+        id: "merchant-sell",
+        label: "Sell Resources",
+        description: "Sell gathered resources for gold.",
+        effect: "sell_resources",
+      },
+      {
+        id: "merchant-talk",
+        label: "Talk to NPC Jane",
+        description: "Open a dialog with Jane.",
+        effect: "npc_dialog",
+        npcName: "Jane",
+      },
+    ],
+  },
+  {
+    id: "sewer",
+    label: "Sewer",
+    type: "travel",
+    locationKey: "sewer",
+    discoverablePoiKey: "sewer-hidden-entrance",
+    position: { top: "48%", left: "50%" },
+    poiVariant: "transition",
+    subtitle: "Map transition",
+    description: "A hidden sewer entrance descends into the underground tunnels below the city.",
+    actions: [
+      {
+        id: "travel-sewer",
+        label: "Enter Sewer",
+        description: "Descend into the sewer network beneath Belegard.",
+        effect: "travel_map",
+        destinationMapId: "sewer",
+        targetMapName: "Sewers",
+      },
+    ],
+  },
+  {
+    id: "temple",
+    label: "Temple",
+    type: "interaction",
+    locationKey: "temple",
+    position: { top: "13%", left: "50%" },
+    poiVariant: "temple",
+    subtitle: "Abandoned sanctuary",
+    description:
+      "A quiet ruin where you can recover a little strength or search debris.",
+    actions: [
+      {
+        id: "temple-pray",
+        label: "Pray",
+        description: "Recover 2 stamina.",
+        effect: "rest",
+        amount: 2,
+      },
+      {
+        id: "temple-stone",
+        label: "Search Debris",
+        description: "Look for stone among the temple rubble.",
+        staminaCost: 2,
+        rewardItem: "stone",
+        amount: 2,
+      },
+      {
+        id: "temple-wood",
+        label: "Lift Broken Beams",
+        description: "Recover wood from fallen supports.",
+        staminaCost: 2,
+        rewardItem: "wood",
+        amount: 1,
+      },
+    ],
+  },
+  {
+    id: "stairs",
+    label: "Abandoned Mill",
+    type: "travel",
+    locationKey: "stairs",
+    position: { top: "51%", left: "70%" },
+    poiVariant: "transition",
+    subtitle: "Map transition",
+    description:
+      "An abandoned mill with a lower passage that still leads somewhere we need to build.",
+    actions: [
+      {
+        id: "travel-stairs",
+        label: "Search Lower Passage",
+        description:
+          "This would take you through the abandoned house into another future map.",
+        effect: "travel_placeholder",
+        targetMapName: "Lower District",
+      },
+    ],
+  },
+  {
+    id: "southwest-road",
+    label: "Southwest Road",
+    type: "travel",
+    locationKey: "southwest-road",
+    position: { top: "74%", left: "34%" },
+    poiVariant: "road",
+    subtitle: "Map transition",
+    description: "A road leading toward old farms and fields beyond the outpost.",
+    actions: [
+      {
+        id: "travel-sw",
+        label: "Take Southwest Road",
+        description: "Travel toward the decayed rural outskirts.",
+        effect: "travel_map",
+        destinationMapId: "southwest-farm",
+        targetMapName: "Southwest Farm",
+      },
+    ],
+  },
+  {
+    id: "southeast-road",
+    label: "Southeast Road",
+    type: "travel",
+    locationKey: "southeast-road",
+    position: { top: "68%", left: "76%" },
+    poiVariant: "road",
+    subtitle: "Map transition",
+    description: "A road leaving the town. The destination is not ready yet.",
+    actions: [
+      {
+        id: "travel-se",
+        label: "Take Southeast Road",
+        description: "This would take you to another map.",
+        effect: "travel_placeholder",
+        targetMapName: "Southeast Fields",
+      },
+    ],
+  },
+];
+
+const belagardHubMapBase = {
+  name: "Belegard",
+  tier: "primary" as const,
+  background: belagardContinentArt,
+  entryLocationKey: "merchant" as const,
+  pois: belegardHubPois,
+};
+
 export const mapsData: Record<MapId, MapData> = {
   town: {
     id: "town",
-    name: "Dustveil Outpost",
-    background: townMapArt,
-    entryLocationKey: "merchant",
-    pois: [],
+    ...belagardHubMapBase,
+  },
+
+  belagard: {
+    id: "belagard",
+    ...belagardHubMapBase,
   },
 
   sewer: {
     id: "sewer",
     name: "Sewers",
+    tier: "secondary",
     background: sewerMapArt,
     entryLocationKey: "sewer",
     defaultPoiVariant: "danger",
@@ -66,7 +384,7 @@ export const mapsData: Record<MapId, MapData> = {
         id: "exit",
         label: "Climb Out",
         type: "travel",
-        destinationMapId: "town",
+        destinationMapId: "belagard",
         position: { top: "20%", left: "50%" },
         poiVariant: "transition",
         subtitle: "Exit route",
@@ -75,10 +393,11 @@ export const mapsData: Record<MapId, MapData> = {
         actions: [
           {
             id: "climb-out",
-            label: "Return to Town",
+            label: "Return to Belegard",
             description: "Climb back to the surface.",
-            effect: "travel_placeholder",
-            targetMapName: "Dustveil Outpost",
+            effect: "travel_map",
+            destinationMapId: "belagard",
+            targetMapName: "Belegard",
           },
         ],
       },
@@ -156,6 +475,7 @@ export const mapsData: Record<MapId, MapData> = {
   "north-forest": {
     id: "north-forest",
     name: "North Forest",
+    tier: "secondary",
     background: northForestMapArt,
     entryLocationKey: "north-road",
     defaultPoiVariant: "building",
@@ -278,20 +598,20 @@ export const mapsData: Record<MapId, MapData> = {
         id: "south-path",
         label: "Return to Town",
         type: "travel",
-        destinationMapId: "town",
+        destinationMapId: "belagard",
         position: { top: "90%", left: "50%" },
         poiVariant: "transition",
         subtitle: "Southern trail",
         description:
-          "A worn trail descends back toward Dustveil Outpost and the safer roads below.",
+          "A worn trail descends back toward Belegard and the safer roads below.",
         actions: [
           {
             id: "north-forest-return-town",
-            label: "Return to Town",
-            description: "Follow the southern trail back to Dustveil Outpost.",
+            label: "Return to Belegard",
+            description: "Follow the southern trail back to Belegard.",
             effect: "travel_map",
-            destinationMapId: "town",
-            targetMapName: "Dustveil Outpost",
+            destinationMapId: "belagard",
+            targetMapName: "Belegard",
           },
         ],
       },
@@ -321,30 +641,41 @@ export const mapsData: Record<MapId, MapData> = {
   "southwest-farm": {
     id: "southwest-farm",
     name: "Southwest Farm",
+    tier: "secondary",
     background: southwestFarmMapArt,
     entryLocationKey: "southwest-road",
     defaultPoiVariant: "building",
     description:
       "Faded farmland stretches beyond the outpost walls, where stubborn life still clings to old fences and muddy paths.",
+    globalActions: [
+      {
+        id: "search-for-hunt",
+        label: "Search for Hunt",
+        description:
+          "Roam the outskirts and keep pressing forward as new prey reveals itself.",
+        effect: "search-for-hunt",
+      },
+    ],
+    huntingEncounterPool: ["southwest-farm-goblin-raider"],
     pois: [
       {
         id: "return-road",
-        label: "Return Road",
+        label: "Road to Belegard",
         type: "travel",
-        destinationMapId: "town",
+        destinationMapId: "belagard",
         position: { top: "10%", left: "70%" },
         poiVariant: "transition",
         subtitle: "Road back to town",
         description:
-          "The packed dirt road bends back toward Dustveil Outpost and its safer streets.",
+          "The packed dirt road bends back toward Belegard and its safer streets.",
         actions: [
           {
             id: "southwest-farm-return-road",
-            label: "Return to Town",
-            description: "Head back to Dustveil Outpost.",
+            label: "Return to Belegard",
+            description: "Head back to Belegard.",
             effect: "travel_map",
-            destinationMapId: "town",
-            targetMapName: "Dustveil Outpost",
+            destinationMapId: "belagard",
+            targetMapName: "Belegard",
           },
         ],
       },
@@ -515,4 +846,116 @@ export const mapsData: Record<MapId, MapData> = {
       },
     ],
   },
+
+  "old-basalt-mine": createContinentDestinationMap(
+    "old-basalt-mine",
+    "Old Basalt Mine",
+    oldBasaltMineContinentArt,
+    "An ancient basalt excavation ready to receive its own future local interactions, encounters, and underground routes."
+  ),
+
+  "foul-bog": createContinentDestinationMap(
+    "foul-bog",
+    "Foul Bog",
+    foulBogContinentArt,
+    "A stagnant marsh frontier where future survival routes, hidden paths, and hazards can unfold."
+  ),
+
+  averon: createContinentDestinationMap(
+    "averon",
+    "Averon",
+    averonContinentArt,
+    "A western ruin-site prepared to become a playable regional destination."
+  ),
+
+  "peregrine-shipwreck": createContinentDestinationMap(
+    "peregrine-shipwreck",
+    "The Peregrine Shipwreck",
+    peregrineShipwreckContinentArt,
+    "A wrecked coastal landmark prepared for future exploration, salvage, and quest hooks."
+  ),
+
+  edoras: createContinentDestinationMap(
+    "edoras",
+    "Edoras",
+    edorasContinentArt,
+    "A southern stronghold between forest and water, ready for later local content."
+  ),
+
+  "thousand-islands": createContinentDestinationMap(
+    "thousand-islands",
+    "Thousand Islands",
+    thousandIslandsContinentArt,
+    "A vast northern archipelago prepared for future exploration and maritime progression."
+  ),
+
+  "first-watch": createContinentDestinationMap(
+    "first-watch",
+    "First Watch",
+    firstWatchContinentArt,
+    "An old western lookout that will later serve as a checkpoint across the swamp frontier."
+  ),
+
+  hellos: createContinentDestinationMap(
+    "hellos",
+    "Hellos",
+    hellosContinentArt,
+    "A distant southern landing prepared for future route expansion and regional content."
+  ),
+
+  "borge-bridge": createContinentDestinationMap(
+    "borge-bridge",
+    "Borge Bridge",
+    borgeBridgeContinentArt,
+    "The great bridge between the western and eastern landmasses, now usable as a destination map."
+  ),
+
+  "iron-cathedral": createContinentDestinationMap(
+    "iron-cathedral",
+    "Iron Cathedral",
+    ironCathedralContinentArt,
+    "A stark landmark in the eastern heights reserved for future lore and playable content."
+  ),
+
+  "desert-of-pagos": createContinentDestinationMap(
+    "desert-of-pagos",
+    "Desert of Pagos",
+    desertOfPagosContinentArt,
+    "The southeastern desert frontier, now represented by its own arrival map."
+  ),
+
+  "sunken-rest": createContinentDestinationMap(
+    "sunken-rest",
+    "Sunken Rest",
+    sunkenRestContinentArt,
+    "A drowned ruin-zone in the southeast prepared for future exploration and navigation hooks."
+  ),
+
+  resistance: createContinentDestinationMap(
+    "resistance",
+    "Resistance",
+    resistanceContinentArt,
+    "A hardened desert outpost that can later anchor faction and quest progression."
+  ),
+
+  praeries: createContinentDestinationMap(
+    "praeries",
+    "Praeries",
+    praeriesContinentArt,
+    "The southern plains and farmland belt, now ready as a continent-level destination map."
+  ),
+
+  vaultways: createContinentDestinationMap(
+    "vaultways",
+    "Vaultways",
+    vaultwaysContinentArt,
+    "A mountain-carved passage system prepared to become a future travel and underground network."
+  ),
+
+  "fettis-stronghold": createContinentDestinationMap(
+    "fettis-stronghold",
+    "Fetti's Stronghold",
+    fettisStrongholdContinentArt,
+    "A northeastern mountain fortress ready to stand in as its own arrival destination."
+  ),
 };

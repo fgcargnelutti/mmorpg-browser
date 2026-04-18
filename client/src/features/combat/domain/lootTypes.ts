@@ -6,10 +6,13 @@ export type LootEntryRarity = "common" | "uncommon" | "rare" | "boss";
 
 export type LootItemEntry = {
   itemKey: string;
-  amount: number;
+  amount?: number;
+  minAmount?: number;
+  maxAmount?: number;
   rarity: LootEntryRarity;
   weight?: number;
   guaranteed?: boolean;
+  dropChance?: number;
 };
 
 export type LootRewardEntry = {

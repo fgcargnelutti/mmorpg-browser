@@ -42,7 +42,15 @@ export type CreatureBestiaryKey =
 export type CreatureDropGroup = {
   itemKey: string;
   label: string;
+  rarity: CreatureDropRateTier;
+  dropChancePercent?: number;
 };
+
+export type CreatureDropRateTier =
+  | "common"
+  | "uncommon"
+  | "rare"
+  | "ultra-rare";
 
 export type CreatureAttackDescriptor = {
   key: string;
@@ -59,8 +67,7 @@ export type CreatureBestiaryData = {
   isBossCandidate: boolean;
   maxHp: number;
   maxSp: number;
-  commonDrops: CreatureDropGroup[];
-  rareDrops: CreatureDropGroup[];
+  drops: CreatureDropGroup[];
   weaknesses: string[];
   resistances: string[];
   strengths: string[];
@@ -94,8 +101,7 @@ export type VisibleBestiaryEntry = {
   isBossCandidate: boolean;
   maxHp?: number;
   maxSp?: number;
-  commonDrops?: CreatureDropGroup[];
-  rareDrops?: CreatureDropGroup[];
+  drops?: CreatureDropGroup[];
   weaknesses?: string[];
   resistances?: string[];
   strengths?: string[];

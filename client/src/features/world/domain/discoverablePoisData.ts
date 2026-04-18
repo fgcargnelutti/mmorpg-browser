@@ -30,7 +30,7 @@ export const discoverablePoisData: Record<
 > = {
   "sewer-hidden-entrance": {
     key: "sewer-hidden-entrance",
-    mapId: "town",
+    mapId: "belagard",
     locationKey: "sewer",
     requiredRumorKey: "jane-sewer-rumor",
     hoverDurationMs: 3000,

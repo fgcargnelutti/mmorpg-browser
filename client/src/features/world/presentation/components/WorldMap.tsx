@@ -3,30 +3,30 @@ import "./WorldMap.css";
 import ContextActions from "../../../../components/ContextActions";
 import NpcDialog from "../../../../components/NpcDialog";
 import CombatDialog from "../../../../components/CombatDialog";
+import MapGlobalActionsPanel from "./MapGlobalActionsPanel";
 import { mapAtmosphereData } from "../../domain/mapAtmosphereData";
-import type {
-  LocationData,
-  LocationKey,
-  ContextAction,
-} from "../../domain/locations";
+import type { LocationKey, ContextAction } from "../../domain/locations";
 import type {
   DiscoverablePoiData,
   DiscoverablePoiKey,
 } from "../../domain/discoverablePoisData";
-import type { MapData, MapId, MapPoi } from "../../domain/mapsData";
+import type { MapData, MapGlobalAction, MapPoi } from "../../domain/mapsData";
 import type { DialogueOption } from "../../../../components/NpcDialog";
 import type { NpcShopOffer } from "../../domain/npcProfilesData";
 
 type WorldMapProps = {
   currentLocation: LocationKey;
   contextState: "hidden" | "expanded" | "minimized";
-  locations: Record<LocationKey, LocationData>;
   mapData: MapData;
   onTravel: (location: LocationKey) => void;
-  onMapTravel: (destinationMapId?: MapId) => void;
   onMinimizeContext: () => void;
   onExpandContext: () => void;
   onAction: (action: ContextAction) => void;
+  onGlobalAction: (action: MapGlobalAction) => void;
+  onStopGlobalAction: () => void;
+  activeGlobalActionLabel?: string | null;
+  globalActionStatus?: "idle" | "hunting" | "stopped";
+  globalActionEncountersCompleted?: number;
 
   npcDialogOpen: boolean;
   npcName: string;
@@ -65,13 +65,16 @@ type WorldMapProps = {
 export default function WorldMap({
   currentLocation,
   contextState,
-  locations,
   mapData,
   onTravel,
-  onMapTravel,
   onMinimizeContext,
   onExpandContext,
   onAction,
+  onGlobalAction,
+  onStopGlobalAction,
+  activeGlobalActionLabel,
+  globalActionStatus = "idle",
+  globalActionEncountersCompleted = 0,
   npcDialogOpen,
   npcName,
   npcRole,
@@ -102,12 +105,6 @@ export default function WorldMap({
   onDiscoverPoi,
   overlayContent,
 }: WorldMapProps) {
-  const activeLocation = locations[currentLocation];
-  const locationEntries = Object.entries(locations) as [
-    LocationKey,
-    LocationData,
-  ][];
-
   const [hoveredDiscoverablePoi, setHoveredDiscoverablePoi] = useState<
     string | null
   >(null);
@@ -149,6 +146,12 @@ export default function WorldMap({
     [discoverablePois, discoveredPois, mapData.id, revealedPois]
   );
 
+  const currentLocationPoi = useMemo(
+    () =>
+      visibleMapPois.find((poi) => poi.locationKey === currentLocation) ?? null,
+    [currentLocation, visibleMapPois]
+  );
+
   const selectedMapPoi: MapPoi | null = useMemo(() => {
     const selected = selectedMapPoiId
       ? visibleMapPois.find((poi) => poi.id === selectedMapPoiId) ?? null
@@ -156,24 +159,8 @@ export default function WorldMap({
 
     if (selected) return selected;
 
-    return interactiveMapPois[0] ?? null;
-  }, [interactiveMapPois, selectedMapPoiId, visibleMapPois]);
-
-  const shouldRenderLocationPoi = (locationKey: LocationKey) => {
-    if (mapData.id !== "town") {
-      return false;
-    }
-
-    const requiredDiscovery = (
-      Object.values(discoverablePois) as DiscoverablePoiData[]
-    ).find((poi) => poi.locationKey === locationKey && poi.mapId === "town");
-
-    if (!requiredDiscovery) {
-      return true;
-    }
-
-    return discoveredPois.includes(requiredDiscovery.key);
-  };
+    return currentLocationPoi ?? interactiveMapPois[0] ?? visibleMapPois[0] ?? null;
+  }, [currentLocationPoi, interactiveMapPois, selectedMapPoiId, visibleMapPois]);
 
   const clearHoverTracking = () => {
     hoverStartTimeRef.current = null;
@@ -239,8 +226,10 @@ export default function WorldMap({
   };
 
   const handleMapPoiClick = (poi: MapPoi) => {
-    if (poi.type === "travel") {
-      onMapTravel(poi.destinationMapId);
+    if (poi.locationKey) {
+      setSelectedMapPoiId(poi.id);
+      onTravel(poi.locationKey);
+      onExpandContext();
       return;
     }
 
@@ -248,20 +237,12 @@ export default function WorldMap({
     onExpandContext();
   };
 
-  const contextLocationName =
-    mapData.id === "town"
-      ? activeLocation.name
-      : selectedMapPoi?.label ?? mapData.name;
+  const contextLocationName = selectedMapPoi?.label ?? mapData.name;
 
   const contextLocationDescription =
-    mapData.id === "town"
-      ? activeLocation.description
-      : selectedMapPoi?.description ?? mapData.description ?? "";
+    selectedMapPoi?.description ?? mapData.description ?? "";
 
-  const contextActions =
-    mapData.id === "town"
-      ? activeLocation.actions
-      : selectedMapPoi?.actions ?? mapData.actions ?? [];
+  const contextActions = selectedMapPoi?.actions ?? mapData.actions ?? [];
   const hasForegroundDialog =
     npcDialogOpen || combatDialogOpen || Boolean(overlayContent);
 
@@ -309,59 +290,36 @@ export default function WorldMap({
             ))}
           </div>
 
-          {mapData.id === "town" &&
-            locationEntries
-              .filter(([locationKey]) => shouldRenderLocationPoi(locationKey))
-              .map(([locationKey, location]) => {
-                const isActive = currentLocation === locationKey;
+          {visibleMapPois.map((poi) => {
+            const isSelected =
+              (poi.locationKey && poi.locationKey === currentLocation) ||
+              selectedMapPoi?.id === poi.id;
+            const poiVariant = poi.poiVariant ?? mapData.defaultPoiVariant ?? "danger";
+            const isTravelPoi = poi.type === "travel";
+            const isDiscoveredPoi = Boolean(
+              poi.discoverablePoiKey && discoveredPois.includes(poi.discoverablePoiKey)
+            );
 
-                return (
-                  <button
-                    key={locationKey}
-                    className={`poi poi-${location.poiVariant} ${
-                      isActive ? "is-active" : ""
-                    }`}
-                    type="button"
-                    style={{
-                      top: location.mapPosition.top,
-                      left: location.mapPosition.left,
-                    }}
-                    onClick={() => onTravel(locationKey)}
-                  >
-                    <span className="poi-dot" aria-hidden="true" />
-                    <span className="poi-label-group">
-                      <span className="poi-name">{location.name}</span>
-                    </span>
-                  </button>
-                );
-              })}
-
-          {mapData.id !== "town" &&
-            visibleMapPois.map((poi) => {
-              const isSelected = selectedMapPoi?.id === poi.id;
-              const poiVariant = poi.poiVariant ?? mapData.defaultPoiVariant ?? "danger";
-              const isTravelPoi = poi.type === "travel";
-
-              return (
-                <button
-                  key={poi.id}
-                  className={`poi poi-${poiVariant} ${isSelected ? "is-active" : ""} ${
-                    isTravelPoi ? "poi--travel" : "poi--interactive"
-                  }`}
-                  type="button"
-                  style={{
-                    top: poi.position.top,
-                    left: poi.position.left,
-                  }}
-                  onClick={() => handleMapPoiClick(poi)}
-                >
-                  <span className="poi-dot" aria-hidden="true" />
-                  <span className="poi-label-group">
-                    <span className="poi-name">{poi.label}</span>
-                  </span>
-                </button>
-                );
-              })}
+            return (
+              <button
+                key={poi.id}
+                className={`poi poi-${poiVariant} ${isSelected ? "is-active" : ""} ${
+                  isTravelPoi ? "poi--travel" : "poi--interactive"
+                }${isDiscoveredPoi ? " poi--discovered" : ""}`}
+                type="button"
+                style={{
+                  top: poi.position.top,
+                  left: poi.position.left,
+                }}
+                onClick={() => handleMapPoiClick(poi)}
+              >
+                <span className="poi-dot" aria-hidden="true" />
+                <span className="poi-label-group">
+                  <span className="poi-name">{poi.label}</span>
+                </span>
+              </button>
+            );
+          })}
 
           {activeDiscoverablePois.map((discoverablePoi) => (
             <div
@@ -403,6 +361,15 @@ export default function WorldMap({
             onAction={onAction}
           />
 
+          <MapGlobalActionsPanel
+            actions={mapData.globalActions ?? []}
+            huntingStatus={globalActionStatus}
+            activeActionLabel={activeGlobalActionLabel}
+            completedEncounters={globalActionEncountersCompleted}
+            onAction={onGlobalAction}
+            onStop={onStopGlobalAction}
+          />
+
           <NpcDialog
             isOpen={npcDialogOpen}
             npcName={npcName}
@@ -431,6 +398,12 @@ export default function WorldMap({
             onAttack={onCombatAttack}
             onRetreat={onCombatRetreat}
             onClose={onCloseCombatDialog}
+            loopStatusLabel={
+              globalActionStatus === "hunting" ? "Continuous Hunt Active" : null
+            }
+            onStopLoop={
+              globalActionStatus === "hunting" ? onStopGlobalAction : undefined
+            }
           />
 
           {overlayContent}

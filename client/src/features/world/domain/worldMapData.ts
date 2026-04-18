@@ -25,12 +25,12 @@ export const worldMapData: WorldMapData = {
   name: "World Map",
   background: worldMapArt,
   description:
-    "A macro view of the lands surrounding Dustveil Outpost, prepared as the base art for the future world map / overworld navigation feature.",
+    "A macro view of the lands surrounding Belegard, prepared as the base art for the future world map / overworld navigation feature.",
   regions: [
     {
       id: "dustveil-outpost",
-      label: "Dustveil Outpost",
-      linkedMapIds: ["town"],
+      label: "Belegard",
+      linkedMapIds: ["belagard"],
       isPlayable: true,
       description:
         "The main settlement and current anchor point of the local prototype.",
@@ -57,7 +57,7 @@ export const worldMapData: WorldMapData = {
       linkedMapIds: ["sewer"],
       isPlayable: true,
       description:
-        "The underground route beneath Dustveil Outpost, treated as a connected regional layer for future world navigation.",
+        "The underground route beneath Belegard, treated as a connected regional layer for future world navigation.",
     },
   ],
 };

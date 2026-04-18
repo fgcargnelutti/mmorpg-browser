@@ -12,6 +12,8 @@ type CombatDialogProps = {
   onAttack: () => void;
   onRetreat: () => void;
   onClose: () => void;
+  loopStatusLabel?: string | null;
+  onStopLoop?: () => void;
 };
 
 export default function CombatDialog({
@@ -25,6 +27,8 @@ export default function CombatDialog({
   onAttack,
   onRetreat,
   onClose,
+  loopStatusLabel,
+  onStopLoop,
 }: CombatDialogProps) {
   if (!isOpen) return null;
 
@@ -51,6 +55,17 @@ export default function CombatDialog({
             </div>
           </div>
 
+          <div className="combat-dialog-portrait-panel" aria-hidden="true">
+            <div className="combat-dialog-portrait-frame">
+              <div className="combat-dialog-portrait-badge">Creature</div>
+              <div className="combat-dialog-portrait-glow" />
+              <div className="combat-dialog-portrait-copy">
+                <strong>{enemyName}</strong>
+                <span>{enemyTitle}</span>
+              </div>
+            </div>
+          </div>
+
           <div className="combat-dialog-log">
             {combatLog.map((line, index) => (
               <p key={`${line}-${index}`}>{line}</p>
@@ -58,6 +73,20 @@ export default function CombatDialog({
           </div>
 
           <div className="combat-dialog-actions">
+            {loopStatusLabel ? (
+              <div className="combat-dialog-loop-status">
+                <span>{loopStatusLabel}</span>
+                {onStopLoop ? (
+                  <button
+                    type="button"
+                    className="combat-dialog-button"
+                    onClick={onStopLoop}
+                  >
+                    Stop Hunt
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
             {isResolved ? (
               <button
                 type="button"

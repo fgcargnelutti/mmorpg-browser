@@ -25,7 +25,6 @@ import SideNavRail, { sideNavIcons } from "../components/SideNavRail";
 import {
   WorldMap,
   WorldMapDialog,
-  locations,
   discoverablePoisData,
   mapsData,
   npcProfilesData,
@@ -34,6 +33,7 @@ import {
   type ActiveWorldFastTravel,
   type WorldFastTravelActivity,
   type WorldFastTravelReport,
+  type MapGlobalAction,
   type WorldMapPoi,
   type WorldMapPoiId,
   type WorldMapTravelCost,
@@ -43,6 +43,7 @@ import {
   type NpcProfileKey,
   type NpcShopOffer,
 } from "../features/world";
+import { useContinuousCombatLoop } from "../features/combat/application/hooks/useContinuousCombatLoop";
 import {
   FishingDialog,
   fishingConfigs,
@@ -187,6 +188,11 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     useState<ActiveWorldFastTravel | null>(null);
   const [completedWorldFastTravelReport, setCompletedWorldFastTravelReport] =
     useState<WorldFastTravelReport | null>(null);
+  const [worldMapOverlayToast, setWorldMapOverlayToast] = useState<{
+    tone: "error" | "info" | "success" | "warning";
+    title?: string;
+    message: string;
+  } | null>(null);
   const [pendingWorldFastTravelArrivalMapId, setPendingWorldFastTravelArrivalMapId] =
     useState<MapId | null>(null);
   // Temporary continent-position override used by the world-map prototype/testing flow.
@@ -203,8 +209,12 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     recoveredMinutesApplied: 0,
   });
   const fastTravelCompletionRef = useRef<string | null>(null);
+  const worldMapOverlayToastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
+  const continuousCombatLoopStopRef = useRef<string | null>(null);
 
-  const [currentMap, setCurrentMap] = useState<MapId>("town");
+  const [currentMap, setCurrentMap] = useState<MapId>("belagard");
   const {
     contextState,
     setContextState,
@@ -400,6 +410,32 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     [questDefinitions]
   );
 
+  const dismissWorldMapOverlayToast = useCallback(() => {
+    if (worldMapOverlayToastTimeoutRef.current) {
+      clearTimeout(worldMapOverlayToastTimeoutRef.current);
+      worldMapOverlayToastTimeoutRef.current = null;
+    }
+
+    setWorldMapOverlayToast(null);
+  }, []);
+
+  const showWorldMapOverlayToast = useCallback(
+    (toast: {
+      tone: "error" | "info" | "success" | "warning";
+      title?: string;
+      message: string;
+    }) => {
+      dismissWorldMapOverlayToast();
+      setWorldMapOverlayToast(toast);
+
+      worldMapOverlayToastTimeoutRef.current = setTimeout(() => {
+        setWorldMapOverlayToast(null);
+        worldMapOverlayToastTimeoutRef.current = null;
+      }, 3200);
+    },
+    [dismissWorldMapOverlayToast]
+  );
+
   const handleMapTravel = (destinationMapId?: MapId) => {
     if (!destinationMapId) return;
 
@@ -449,9 +485,6 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       )
     );
 
-    if (location === "sewer" && currentMap === "town") {
-      handleMapTravel("sewer");
-    }
   };
 
   const handleOpenNpcDialog = (profileKey: NpcProfileKey = "jane") => {
@@ -643,7 +676,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     setPlayer,
   ]);
 
-  const openEncounter = (encounterKey: EncounterKey) => {
+  const openEncounter = useCallback((encounterKey: EncounterKey) => {
     const encounter = encountersData[encounterKey];
 
     setTriggeredEncounters((prev) =>
@@ -660,13 +693,46 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       ...prev,
       createEncounterStartedMessage(encounter.enemyName),
     ]);
-  };
+  }, [openEncounterOverlay]);
+
+  const closeEncounterOverlayState = useCallback(() => {
+    setActiveEncounter(null);
+    setContextState("expanded");
+  }, [setActiveEncounter, setContextState]);
+
+  const {
+    loopState: continuousCombatLoopState,
+    activeLoopActionLabel,
+    isHunting,
+    startGlobalAction,
+    stopLoop,
+    resetLoop,
+  } = useContinuousCombatLoop({
+    mapData: currentMapData,
+    activeEncounter,
+    onOpenEncounter: openEncounter,
+    onCloseEncounter: closeEncounterOverlayState,
+  });
 
   const handleAttackEncounter = () => {
     if (!activeEncounter || !player) return;
     if (activeEncounter.isResolved || activeEncounter.resolution !== null) return;
 
     const encounter = encountersData[activeEncounter.key];
+    const attackStaminaCost = resolveConditionAdjustedStaminaCost(player, 1);
+
+    if (!canSpendPlayerStamina(player, attackStaminaCost)) {
+      const insufficientStaminaMessage = createInsufficientStaminaMessage("Attack");
+
+      setActiveEncounter({
+        ...activeEncounter,
+        combatLog: [...activeEncounter.combatLog, insufficientStaminaMessage],
+      });
+      setEventLogs((prev) => [...prev, insufficientStaminaMessage]);
+
+      return;
+    }
+
     const playerAttackDamage = resolveConditionAdjustedAttackDamage(
       player,
       encounter.playerAttackDamage
@@ -678,6 +744,9 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     });
 
     const nextEnemyHp = Math.max(0, activeEncounter.enemyHp - playerAttackDamage);
+    const playerAfterAttackCost = applyConditionActionWear(
+      spendPlayerStamina(player, attackStaminaCost)
+    );
 
     if (nextEnemyHp <= 0) {
       const victoryRewards = resolveBattleVictoryRewards(encounter);
@@ -701,12 +770,14 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       if (victoryRewards.rewards.length > 0) {
         setPlayer((previousPlayer) =>
           applyRewardsToPlayerSnapshot(
-            {
-              ...previousPlayer,
-            },
+            applyConditionActionWear(
+              spendPlayerStamina(previousPlayer, attackStaminaCost)
+            ),
             victoryRewards.rewards
           )
         );
+      } else {
+        setPlayer(playerAfterAttackCost);
       }
       registerBestiaryKill(encounter.creatureKey, encounter.enemyName);
       logQuestUpdates(
@@ -723,16 +794,10 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
       setEventLogs((prev) => [
         ...prev,
+        createSystemMessage(`Attack costs ${attackStaminaCost} stamina.`),
         createEncounterWonMessage(encounter.enemyName),
-        ...(hasPoison
-          ? [createSystemMessage("Poison drains 1 HP and 1 SP during the clash.")]
-          : []),
         ...victoryRewards.eventLogMessages,
       ]);
-
-      if (hasPoison) {
-        setPlayer((previousPlayer) => applyConditionActionWear(previousPlayer));
-      }
 
       return;
     }
@@ -745,6 +810,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     applyDamageToPlayer(encounter.enemyAttackDamage, encounter.enemyName);
 
     if (nextPlayerHp <= 0) {
+      setPlayer(playerAfterAttackCost);
       setActiveEncounter({
         ...activeEncounter,
         enemyHp: nextEnemyHp,
@@ -760,12 +826,14 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
       setEventLogs((prev) => [
         ...prev,
+        createSystemMessage(`Attack costs ${attackStaminaCost} stamina.`),
         createEncounterLostMessage(encounter.enemyName),
       ]);
 
       return;
     }
 
+    setPlayer(playerAfterAttackCost);
     setActiveEncounter({
       ...activeEncounter,
       enemyHp: nextEnemyHp,
@@ -780,28 +848,190 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     });
 
     if (hasPoison) {
-      setPlayer((previousPlayer) => applyConditionActionWear(previousPlayer));
       setEventLogs((prev) => [
         ...prev,
+        createSystemMessage(`Attack costs ${attackStaminaCost} stamina.`),
         createSystemMessage("Poison drains 1 HP and 1 SP during the fight."),
       ]);
+      return;
     }
+
+    setEventLogs((prev) => [
+      ...prev,
+      createSystemMessage(`Attack costs ${attackStaminaCost} stamina.`),
+    ]);
   };
 
   const handleRetreatEncounter = () => {
     if (!activeEncounter) return;
+    if (!player) return;
 
     const encounter = encountersData[activeEncounter.key];
+    const retreatRoll = Math.random();
+    const staminaPenalty = player.stamina > 0 ? 1 : 0;
+    const damagePenalty =
+      retreatRoll >= 0.35 ? Math.min(encounter.enemyAttackDamage, player.currentHp - 1) : 0;
+    const inflictInjury =
+      retreatRoll >= 0.55 && !player.activeConditions.includes("injury");
+    const inflictPoison =
+      retreatRoll >= 0.8 && !player.activeConditions.includes("poison");
 
-    setEventLogs((prev) => [...prev, createSystemMessage(encounter.retreatText)]);
+    setPlayer((previousPlayer) => {
+      const spentStaminaPlayer =
+        staminaPenalty > 0
+          ? spendPlayerStamina(previousPlayer, staminaPenalty)
+          : previousPlayer;
+
+      const nextActiveConditions = Array.from(
+        new Set([
+          ...spentStaminaPlayer.activeConditions,
+          ...(inflictInjury ? ["injury"] : []),
+          ...(inflictPoison ? ["poison"] : []),
+        ])
+      );
+
+      return {
+        ...spentStaminaPlayer,
+        currentHp: Math.max(1, spentStaminaPlayer.currentHp - damagePenalty),
+        activeConditions: nextActiveConditions,
+      };
+    });
+
+    if (isHunting) {
+      stopLoop("retreat");
+    }
+
+    setEventLogs((prev) => [
+      ...prev,
+      createSystemMessage(encounter.retreatText),
+      ...(staminaPenalty > 0
+        ? [createSystemMessage(`Retreat costs ${staminaPenalty} stamina.`)]
+        : []),
+      ...(damagePenalty > 0
+        ? [
+            createSystemMessage(
+              `The ${encounter.enemyName} catches you on the way out for ${damagePenalty} damage.`
+            ),
+          ]
+        : []),
+      ...(inflictInjury
+        ? [
+            createSystemMessage(
+              "You escape, but the scramble leaves you with an injury."
+            ),
+          ]
+        : []),
+      ...(inflictPoison
+        ? [
+            createSystemMessage(
+              "A final hit leaves lingering poison in your system."
+            ),
+          ]
+        : []),
+    ]);
     setActiveEncounter(null);
     setContextState("expanded");
   };
 
   const handleCloseEncounter = () => {
-    setActiveEncounter(null);
-    setContextState("expanded");
+    if (activeEncounter && !activeEncounter.isResolved && isHunting) {
+      stopLoop("manual");
+    }
+
+    closeEncounterOverlayState();
   };
+
+  const handleGlobalMapAction = useCallback(
+    (action: MapGlobalAction) => {
+      const result = startGlobalAction(action);
+
+      if (!result.ok) {
+        if (result.reason === "already-active") {
+          notifyInfo("A continuous hunt is already active.", {
+            title: "Hunt already running",
+          });
+          return;
+        }
+
+        if (result.reason === "combat-active") {
+          notifyInfo("Finish the current combat before starting a hunt.", {
+            title: "Combat already active",
+          });
+          return;
+        }
+
+        if (result.reason === "no-encounters") {
+          notifyInfo("This map does not have a hunting pool configured yet.", {
+            title: "No hunt targets",
+          });
+          return;
+        }
+
+        notifyError("This global map action is not available yet.", {
+          title: "Action unavailable",
+        });
+        return;
+      }
+
+      setEventLogs((prev) => [
+        ...prev,
+        createSystemMessage(
+          `${action.label} begins in ${currentMapData.name}. New encounters will chain automatically until the hunt is stopped or interrupted.`
+        ),
+      ]);
+      setContextState("expanded");
+    },
+    [currentMapData.name, notifyError, notifyInfo, setContextState, startGlobalAction]
+  );
+
+  const handleStopGlobalMapAction = useCallback(() => {
+    if (!isHunting) {
+      return;
+    }
+
+    stopLoop("manual");
+  }, [isHunting, stopLoop]);
+
+  useEffect(() => {
+    if (continuousCombatLoopState.status !== "stopped") {
+      continuousCombatLoopStopRef.current = null;
+      return;
+    }
+
+    const stopKey = `${continuousCombatLoopState.stopReason}:${continuousCombatLoopState.completedEncounters}:${continuousCombatLoopState.activeMapId}`;
+
+    if (continuousCombatLoopStopRef.current === stopKey) {
+      return;
+    }
+
+    continuousCombatLoopStopRef.current = stopKey;
+
+    const reasonMessage =
+      continuousCombatLoopState.stopReason === "defeat"
+        ? "The hunt ends because you were defeated."
+        : continuousCombatLoopState.stopReason === "retreat"
+          ? "The hunt ends after you retreat from the encounter."
+          : continuousCombatLoopState.stopReason === "unavailable"
+            ? "The hunt ends because no further encounters are available on this map."
+            : "You stop searching for new prey.";
+
+    window.setTimeout(() => {
+      setEventLogs((prev) => [
+        ...prev,
+        createSystemMessage(
+          `${reasonMessage} ${continuousCombatLoopState.completedEncounters} encounter(s) were cleared in this run.`
+        ),
+      ]);
+
+      resetLoop();
+    }, 0);
+  }, [
+    continuousCombatLoopState.activeMapId,
+    continuousCombatLoopState.completedEncounters,
+    continuousCombatLoopState.status,
+    continuousCombatLoopState.stopReason,
+    resetLoop,
+  ]);
 
   const handleOpenFishing = (action: ContextAction) => {
     if (!player || !action.fishingSpotKey) return;
@@ -1007,13 +1237,9 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       ...prev,
       createPanelOpenedMessage(
         "World Map",
-        "You unfold a wider view of Dustveil and the surrounding frontier."
+        "You unfold a wider view of Belegard and the surrounding frontier."
       ),
     ]);
-  };
-
-  const handleCloseWorldMap = () => {
-    closeWorldMapOverlay();
   };
 
   const handleDismissWorldFastTravelReport = () => {
@@ -1049,6 +1275,16 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     );
   };
 
+  const handleCloseWorldMap = () => {
+    if (completedWorldFastTravelReport) {
+      handleDismissWorldFastTravelReport();
+      return;
+    }
+
+    dismissWorldMapOverlayToast();
+    closeWorldMapOverlay();
+  };
+
   const handleSelectWorldMapPoi = (poi: WorldMapPoi) => {
     setEventLogs((prev) => {
       const message = createSystemMessage(
@@ -1074,14 +1310,32 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       return;
     }
 
+    if (currentMapData.tier !== "primary") {
+      showWorldMapOverlayToast({
+        tone: "warning",
+        title: "Fast travel blocked",
+        message:
+          "You can't fast travel from here. Go to a city or another relevant point of interest.",
+      });
+      setEventLogs((prev) => [
+        ...prev,
+        createSystemMessage(
+          "You can't fast travel from here. Go to a city or another relevant point of interest."
+        ),
+      ]);
+      return;
+    }
+
     const availableFood = countInventoryItemsByKeys(
       player.inventory,
       fastTravelFoodItemKeys
     );
 
     if (availableFood < cost.foodCost) {
-      notifyError("Not enough food for fast travel", {
+      showWorldMapOverlayToast({
+        tone: "error",
         title: "Fast travel blocked",
+        message: "Not enough food for fast travel",
       });
       setEventLogs((prev) => [
         ...prev,
@@ -1099,8 +1353,10 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     );
 
     if (!foodConsumption.didConsume) {
-      notifyError("Fast travel food consumption failed", {
+      showWorldMapOverlayToast({
+        tone: "error",
         title: "Fast travel blocked",
+        message: "Fast travel food consumption failed",
       });
       return;
     }
@@ -1718,7 +1974,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       onClick: handleOpenWorldMap,
       isActive: worldMapDialogOpen,
       tooltipDescription:
-        "Open the atlas view of Dustveil and the surrounding frontier.",
+        "Open the atlas view of Belegard and the surrounding frontier.",
     },
     {
       id: "quests",
@@ -1812,13 +2068,18 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
           <WorldMap
             currentLocation={currentLocation}
             contextState={contextState}
-            locations={locations}
             mapData={currentMapData}
             onTravel={handleTravelAndOpenContext}
-            onMapTravel={handleMapTravel}
             onMinimizeContext={() => setContextState("minimized")}
             onExpandContext={() => setContextState("expanded")}
             onAction={handleAction}
+            onGlobalAction={handleGlobalMapAction}
+            onStopGlobalAction={handleStopGlobalMapAction}
+            activeGlobalActionLabel={activeLoopActionLabel}
+            globalActionStatus={continuousCombatLoopState.status}
+            globalActionEncountersCompleted={
+              continuousCombatLoopState.completedEncounters
+            }
             npcDialogOpen={npcDialogOpen}
             npcName={activeNpcProfile.name}
             npcRole={activeNpcProfile.role}
@@ -1953,6 +2214,8 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
                   activeFastTravel={activeWorldFastTravel}
                   completedFastTravelReport={completedWorldFastTravelReport}
                   onDismissFastTravelReport={handleDismissWorldFastTravelReport}
+                  overlayToast={worldMapOverlayToast}
+                  onDismissOverlayToast={dismissWorldMapOverlayToast}
                 />
               ) : null
             }
@@ -2004,4 +2267,5 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     </main>
   );
 }
+
 

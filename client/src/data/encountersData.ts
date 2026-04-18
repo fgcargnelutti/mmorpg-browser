@@ -1,6 +1,9 @@
 import type { CreatureBestiaryKey } from "../features/bestiary";
 
-export type EncounterKey = "north-road-goblin" | "north-forest-goblin-ruins-goblin";
+export type EncounterKey =
+  | "north-road-goblin"
+  | "north-forest-goblin-ruins-goblin"
+  | "southwest-farm-goblin-raider";
 
 export type EncounterData = {
   key: EncounterKey;
@@ -54,5 +57,23 @@ export const encountersData: Record<EncounterKey, EncounterData> = {
       "The Goblin falls among the shattered campfires. The ruins grow quiet for a moment.",
     retreatText:
       "You break away from the ruins before the Goblin can corner you.",
+  },
+  "southwest-farm-goblin-raider": {
+    key: "southwest-farm-goblin-raider",
+    creatureKey: "goblin",
+    encounterType: "creature",
+    lootTableKey: "southwest-farm-goblin-raider",
+    enemyName: "Goblin",
+    enemyTitle: "Field Raider",
+    enemyMaxHp: 19,
+    playerAttackDamage: 6,
+    enemyAttackDamage: 3,
+    rewardXp: 12,
+    introText:
+      "A Goblin bursts from the overgrown field boundary, hoping to catch you between the ruined fences.",
+    victoryText:
+      "The Goblin crumples into the weeds. The farmland falls quiet for a breath before the next rustle.",
+    retreatText:
+      "You break off the hunt and slip back from the ruined fields before the Goblin can press the attack.",
   },
 };

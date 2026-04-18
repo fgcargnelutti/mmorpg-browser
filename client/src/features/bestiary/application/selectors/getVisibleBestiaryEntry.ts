@@ -38,11 +38,13 @@ export function getVisibleBestiaryEntry(
     entry.unlockedTier === "common-drops" ||
     entry.unlockedTier === "complete"
   ) {
-    visibleEntry.commonDrops = creatureData.commonDrops;
+    visibleEntry.drops = creatureData.drops.filter(
+      (drop) => drop.rarity === "common" || drop.rarity === "uncommon"
+    );
   }
 
   if (entry.unlockedTier === "complete") {
-    visibleEntry.rareDrops = creatureData.rareDrops;
+    visibleEntry.drops = creatureData.drops;
     visibleEntry.weaknesses = creatureData.weaknesses;
     visibleEntry.resistances = creatureData.resistances;
     visibleEntry.strengths = creatureData.strengths;

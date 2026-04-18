@@ -1,4 +1,23 @@
 import type { MapId } from "./mapsData";
+import {
+  averonContinentArt,
+  belagardContinentArt,
+  borgeBridgeContinentArt,
+  desertOfPagosContinentArt,
+  edorasContinentArt,
+  fettisStrongholdContinentArt,
+  firstWatchContinentArt,
+  foulBogContinentArt,
+  hellosContinentArt,
+  ironCathedralContinentArt,
+  oldBasaltMineContinentArt,
+  praeriesContinentArt,
+  peregrineShipwreckContinentArt,
+  resistanceContinentArt,
+  sunkenRestContinentArt,
+  thousandIslandsContinentArt,
+  vaultwaysContinentArt,
+} from "../../../assets/world/continent-maps";
 
 export type WorldMapPoiId =
   | "old-basalt-mine"
@@ -27,6 +46,7 @@ export type WorldMapPoi = {
     yPercent: number;
   };
   description: string;
+  illustration: string;
   linkedMapIds?: MapId[];
   supportsFastTravel?: boolean;
 };
@@ -43,17 +63,19 @@ export const worldMapPoisData: WorldMapPoi[] = [
     position: { xPercent: 23.2, yPercent: 75.1 },
     description:
       "An ancient excavation tunneled into the eastern mountains, prepared as a future travel and underground interaction point.",
-    linkedMapIds: ["sewer"],
-    supportsFastTravel: false,
+    illustration: oldBasaltMineContinentArt,
+    linkedMapIds: ["old-basalt-mine"],
+    supportsFastTravel: true,
   },
   {
     id: "belagard",
-    label: "Belagard",
+    label: "Belegard",
     position: { xPercent: 13.8, yPercent: 63 },
     description:
-      "A central inland settlement route, currently acting as the closest continent-level anchor for Dustveil's local prototype region.",
-    linkedMapIds: ["town"],
-    supportsFastTravel: false,
+      "A central inland settlement route, currently acting as the closest continent-level anchor for Belegard's local prototype region.",
+    illustration: belagardContinentArt,
+    linkedMapIds: ["belagard", "town", "sewer", "north-forest", "southwest-farm"],
+    supportsFastTravel: true,
   },
   {
     id: "foul-bog",
@@ -61,8 +83,9 @@ export const worldMapPoisData: WorldMapPoi[] = [
     position: { xPercent: 27.8, yPercent: 47.1 },
     description:
       "A marsh-heavy frontier known for stagnant water, hidden trails, and future discovery-based travel hooks.",
-    linkedMapIds: ["north-forest"],
-    supportsFastTravel: false,
+    illustration: foulBogContinentArt,
+    linkedMapIds: ["foul-bog"],
+    supportsFastTravel: true,
   },
   {
     id: "averon",
@@ -70,7 +93,9 @@ export const worldMapPoisData: WorldMapPoi[] = [
     position: { xPercent: 16.4, yPercent: 44.7 },
     description:
       "A western ruin-site and regional anchor on the continent map, prepared for future interaction and travel connections.",
-    supportsFastTravel: false,
+    illustration: averonContinentArt,
+    linkedMapIds: ["averon"],
+    supportsFastTravel: true,
   },
   {
     id: "peregrine-shipwreck",
@@ -78,7 +103,9 @@ export const worldMapPoisData: WorldMapPoi[] = [
     position: { xPercent: 21.8, yPercent: 22.4 },
     description:
       "A wreck on the southwestern coast, suitable for future exploration rewards, quests, or transport routes.",
-    supportsFastTravel: false,
+    illustration: peregrineShipwreckContinentArt,
+    linkedMapIds: ["peregrine-shipwreck"],
+    supportsFastTravel: true,
   },
   {
     id: "edoras",
@@ -86,7 +113,9 @@ export const worldMapPoisData: WorldMapPoi[] = [
     position: { xPercent: 40.4, yPercent: 35.6 },
     description:
       "A southern stronghold nested between forest and water, reserved for future regional routing and discoveries.",
-    supportsFastTravel: false,
+    illustration: edorasContinentArt,
+    linkedMapIds: ["edoras"],
+    supportsFastTravel: true,
   },
   {
     id: "thousand-islands",
@@ -94,7 +123,9 @@ export const worldMapPoisData: WorldMapPoi[] = [
     position: { xPercent: 56.7, yPercent: 21.5 },
     description:
       "A wide northern archipelago that can later support sea travel, exploration chains, and distant world progression.",
-    supportsFastTravel: false,
+    illustration: thousandIslandsContinentArt,
+    linkedMapIds: ["thousand-islands"],
+    supportsFastTravel: true,
   },
   {
     id: "first-watch",
@@ -102,7 +133,9 @@ export const worldMapPoisData: WorldMapPoi[] = [
     position: { xPercent: 44.2, yPercent: 50.1 },
     description:
       "An old western lookout and future macro-route checkpoint across the swamp frontier.",
-    supportsFastTravel: false,
+    illustration: firstWatchContinentArt,
+    linkedMapIds: ["first-watch"],
+    supportsFastTravel: true,
   },
   {
     id: "hellos",
@@ -110,7 +143,9 @@ export const worldMapPoisData: WorldMapPoi[] = [
     position: { xPercent: 38.7, yPercent: 66.3 },
     description:
       "A distant southern landing on the continent map, prepared for later route expansion.",
-    supportsFastTravel: false,
+    illustration: hellosContinentArt,
+    linkedMapIds: ["hellos"],
+    supportsFastTravel: true,
   },
   {
     id: "borge-bridge",
@@ -118,7 +153,9 @@ export const worldMapPoisData: WorldMapPoi[] = [
     position: { xPercent: 50.1, yPercent: 40.0 },
     description:
       "The great bridge between the western and eastern landmasses, ideal for future travel validation and route gating.",
-    supportsFastTravel: false,
+    illustration: borgeBridgeContinentArt,
+    linkedMapIds: ["borge-bridge"],
+    supportsFastTravel: true,
   },
   {
     id: "iron-cathedral",
@@ -126,7 +163,9 @@ export const worldMapPoisData: WorldMapPoi[] = [
     position: { xPercent: 68.6, yPercent: 39.5 },
     description:
       "A landmark embedded in the eastern heights, prepared as a future lore and travel destination.",
-    supportsFastTravel: false,
+    illustration: ironCathedralContinentArt,
+    linkedMapIds: ["iron-cathedral"],
+    supportsFastTravel: true,
   },
   {
     id: "desert-of-pagos",
@@ -134,7 +173,9 @@ export const worldMapPoisData: WorldMapPoi[] = [
     position: { xPercent: 73.9, yPercent: 55.1 },
     description:
       "The great southeastern desert, already useful as a continent-level destination and future travel zone.",
-    supportsFastTravel: false,
+    illustration: desertOfPagosContinentArt,
+    linkedMapIds: ["desert-of-pagos"],
+    supportsFastTravel: true,
   },
   {
     id: "sunken-rest",
@@ -142,7 +183,9 @@ export const worldMapPoisData: WorldMapPoi[] = [
     position: { xPercent: 74.5, yPercent: 73.8 },
     description:
       "A drowned inlet or ruin-zone in the southeast, reserved for future exploration and navigation hooks.",
-    supportsFastTravel: false,
+    illustration: sunkenRestContinentArt,
+    linkedMapIds: ["sunken-rest"],
+    supportsFastTravel: true,
   },
   {
     id: "resistance",
@@ -150,7 +193,9 @@ export const worldMapPoisData: WorldMapPoi[] = [
     position: { xPercent: 80.3, yPercent: 64.2 },
     description:
       "A hardened southern outpost in the desert frontier, suitable for future faction, quest, or travel use.",
-    supportsFastTravel: false,
+    illustration: resistanceContinentArt,
+    linkedMapIds: ["resistance"],
+    supportsFastTravel: true,
   },
   {
     id: "praeries",
@@ -158,8 +203,9 @@ export const worldMapPoisData: WorldMapPoi[] = [
     position: { xPercent: 84.5, yPercent: 49.7 },
     description:
       "The open southern plains and farmland belt, currently the closest continent-level match for the Southwest Farm region.",
-    linkedMapIds: ["southwest-farm"],
-    supportsFastTravel: false,
+    illustration: praeriesContinentArt,
+    linkedMapIds: ["praeries"],
+    supportsFastTravel: true,
   },
   {
     id: "vaultways",
@@ -167,7 +213,9 @@ export const worldMapPoisData: WorldMapPoi[] = [
     position: { xPercent: 92.6, yPercent: 35.1 },
     description:
       "A mountain-carved passage system and likely future underground transition network.",
-    supportsFastTravel: false,
+    illustration: vaultwaysContinentArt,
+    linkedMapIds: ["vaultways"],
+    supportsFastTravel: true,
   },
   {
     id: "fettis-stronghold",
@@ -175,6 +223,8 @@ export const worldMapPoisData: WorldMapPoi[] = [
     position: { xPercent: 88.7, yPercent: 19.9 },
     description:
       "A northern-eastern mountain fortress that can later serve as a high-level regional destination.",
-    supportsFastTravel: false,
+    illustration: fettisStrongholdContinentArt,
+    linkedMapIds: ["fettis-stronghold"],
+    supportsFastTravel: true,
   },
 ];

@@ -358,15 +358,15 @@
 }
 
 .poi-building {
-  border-color: rgba(196, 160, 104, 0.34);
-  color: #d2b173;
+  border-color: rgba(176, 189, 214, 0.42);
+  color: #d5deef;
 }
 
 .poi-building:hover,
 .poi-building.is-active {
-  border-color: rgba(214, 159, 114, 0.56);
+  border-color: rgba(208, 220, 240, 0.58);
   background:
-    linear-gradient(180deg, rgba(36, 26, 21, 0.95) 0%, rgba(17, 12, 10, 0.93) 100%);
+    linear-gradient(180deg, rgba(29, 34, 42, 0.95) 0%, rgba(12, 15, 20, 0.93) 100%);
 }
 
 .poi-merchant {
@@ -394,27 +394,39 @@
 }
 
 .poi-danger {
-  border-color: rgba(118, 179, 143, 0.38);
-  color: #86c39d;
+  border-color: rgba(192, 103, 106, 0.4);
+  color: #df777b;
 }
 
 .poi-danger:hover,
 .poi-danger.is-active {
-  border-color: rgba(137, 188, 148, 0.6);
+  border-color: rgba(218, 123, 129, 0.62);
   background:
-    linear-gradient(180deg, rgba(25, 34, 27, 0.96) 0%, rgba(11, 15, 12, 0.93) 100%);
+    linear-gradient(180deg, rgba(43, 21, 24, 0.96) 0%, rgba(20, 9, 11, 0.93) 100%);
 }
 
 .poi-transition {
-  border-color: rgba(143, 145, 194, 0.34);
-  color: #aeb4ef;
+  border-color: rgba(126, 162, 216, 0.36);
+  color: #8fb0dc;
 }
 
 .poi-transition:hover,
 .poi-transition.is-active {
-  border-color: rgba(182, 160, 210, 0.58);
+  border-color: rgba(153, 180, 206, 0.56);
   background:
-    linear-gradient(180deg, rgba(29, 24, 36, 0.96) 0%, rgba(13, 10, 17, 0.93) 100%);
+    linear-gradient(180deg, rgba(24, 28, 34, 0.95) 0%, rgba(11, 13, 17, 0.93) 100%);
+}
+
+.poi--discovered {
+  border-color: rgba(159, 110, 222, 0.44);
+  color: #b88bf2;
+}
+
+.poi--discovered:hover,
+.poi--discovered.is-active {
+  border-color: rgba(184, 136, 240, 0.64);
+  background:
+    linear-gradient(180deg, rgba(34, 23, 50, 0.96) 0%, rgba(15, 10, 24, 0.94) 100%);
 }
 
 /* =========================
