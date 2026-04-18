@@ -1,15 +1,16 @@
-import type { CreatureBestiaryKey } from "../features/bestiary";
+import { encounterTemplatesData } from "../features/combat/domain/encounterTemplatesData";
+import type { EncounterKey } from "../features/combat/domain/encounterTemplateTypes";
+import { resolveEncounterTemplate } from "../features/combat/application/selectors/resolveEncounterData";
+import type { CreatureSpeciesId } from "../features/creatures";
+import type { LootTableId } from "../features/combat/domain/lootTypes";
 
-export type EncounterKey =
-  | "north-road-goblin"
-  | "north-forest-goblin-ruins-goblin"
-  | "southwest-farm-goblin-raider";
+export type { EncounterKey } from "../features/combat/domain/encounterTemplateTypes";
 
 export type EncounterData = {
   key: EncounterKey;
-  creatureKey: CreatureBestiaryKey;
+  speciesId: CreatureSpeciesId;
   encounterType?: "creature" | "boss";
-  lootTableKey?: string;
+  lootTableKey?: LootTableId;
   enemyName: string;
   enemyTitle: string;
   enemyMaxHp: number;
@@ -21,59 +22,14 @@ export type EncounterData = {
   retreatText: string;
 };
 
-export const encountersData: Record<EncounterKey, EncounterData> = {
-  "north-road-goblin": {
-    key: "north-road-goblin",
-    creatureKey: "goblin",
-    encounterType: "creature",
-    lootTableKey: "north-road-goblin",
-    enemyName: "Goblin",
-    enemyTitle: "Roadside Ambusher",
-    enemyMaxHp: 18,
-    playerAttackDamage: 6,
-    enemyAttackDamage: 3,
-    rewardXp: 12,
-    introText:
-      "A Goblin jumps out from the northern road, blocking your path with a jagged blade.",
-    victoryText:
-      "The Goblin collapses into the dust. The northern path falls silent again.",
-    retreatText:
-      "You step back and abandon the road for now, leaving the Goblin behind.",
-  },
-  "north-forest-goblin-ruins-goblin": {
-    key: "north-forest-goblin-ruins-goblin",
-    creatureKey: "goblin",
-    encounterType: "creature",
-    lootTableKey: "north-forest-goblin-ruins-goblin",
-    enemyName: "Goblin",
-    enemyTitle: "Ruins Scavenger",
-    enemyMaxHp: 20,
-    playerAttackDamage: 6,
-    enemyAttackDamage: 3,
-    rewardXp: 12,
-    introText:
-      "A Goblin darts between the broken barricades of the ruins and lunges with a chipped spear.",
-    victoryText:
-      "The Goblin falls among the shattered campfires. The ruins grow quiet for a moment.",
-    retreatText:
-      "You break away from the ruins before the Goblin can corner you.",
-  },
-  "southwest-farm-goblin-raider": {
-    key: "southwest-farm-goblin-raider",
-    creatureKey: "goblin",
-    encounterType: "creature",
-    lootTableKey: "southwest-farm-goblin-raider",
-    enemyName: "Goblin",
-    enemyTitle: "Field Raider",
-    enemyMaxHp: 19,
-    playerAttackDamage: 6,
-    enemyAttackDamage: 3,
-    rewardXp: 12,
-    introText:
-      "A Goblin bursts from the overgrown field boundary, hoping to catch you between the ruined fences.",
-    victoryText:
-      "The Goblin crumples into the weeds. The farmland falls quiet for a breath before the next rustle.",
-    retreatText:
-      "You break off the hunt and slip back from the ruined fields before the Goblin can press the attack.",
-  },
-};
+export const encountersData: Record<EncounterKey, EncounterData> = Object.fromEntries(
+  Object.entries(encounterTemplatesData).map(([encounterKey, template]) => {
+    const resolvedEncounter = resolveEncounterTemplate(template);
+
+    if (!resolvedEncounter) {
+      throw new Error(`Missing canonical species data for encounter ${encounterKey}.`);
+    }
+
+    return [encounterKey, resolvedEncounter];
+  })
+) as Record<EncounterKey, EncounterData>;

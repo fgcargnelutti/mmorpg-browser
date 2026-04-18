@@ -1,12 +1,13 @@
 import type { EncounterKey } from "../../../../data/encountersData";
+import { encountersData } from "../../../../data/encountersData";
 import type { Reward } from "../../../systems/domain/rewardTypes";
 import { mergeStackableRewards } from "../../../systems/application/systems/rewardResolutionSystem";
-import { lootTablesData } from "../../domain/lootTablesData";
 import type {
   LootResolution,
   LootTableDefinition,
   ResolvedLootDrop,
 } from "../../domain/lootTypes";
+import { getLootTableMasterData } from "../../infrastructure/combatMasterDataAdapter";
 
 function pickWeightedEntry(table: LootTableDefinition) {
   const availableEntries = table.itemEntries.filter(
@@ -136,7 +137,14 @@ export function resolveLootTable(table: LootTableDefinition): LootResolution {
 export function resolveEncounterLoot(
   encounterKey: EncounterKey
 ): LootResolution | null {
-  const table = lootTablesData[encounterKey];
+  const encounter = encountersData[encounterKey];
+
+  if (!encounter) {
+    return null;
+  }
+
+  const tableKey = encounter?.lootTableKey;
+  const table = tableKey ? getLootTableMasterData(tableKey) : null;
 
   if (!table) {
     return null;

@@ -62,20 +62,7 @@
 }
 
 .character-card-portrait {
-  width: 62px;
-  height: 62px;
-  border: 1px solid rgba(95, 118, 152, 0.42);
-  border-radius: 16px;
-  background:
-    radial-gradient(circle at top, rgba(126, 162, 216, 0.12), transparent 40%),
-    linear-gradient(180deg, rgba(22, 31, 47, 0.94) 0%, rgba(11, 18, 29, 0.98) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--muted);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  flex-shrink: 0;
 }
 
 .character-card-content {
@@ -107,10 +94,15 @@
 }
 
 .character-class-preview-header {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  display: block;
   margin-bottom: 18px;
+}
+
+.character-class-preview-header__identity {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
 }
 
 .character-class-preview-header strong {
@@ -211,6 +203,27 @@
   color: var(--muted);
   font-size: 12px;
   line-height: 1.45;
+}
+
+.character-select-preview-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.character-select-preview-card__content {
+  min-width: 0;
+}
+
+.character-select-preview-card__content strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.character-select-preview-card__content p {
+  margin: 0;
 }
 
 @media (max-width: 860px) {

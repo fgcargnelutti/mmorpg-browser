@@ -5,6 +5,8 @@ import {
   characterClassesData,
   type CharacterClassKey,
 } from "../data/characterClassesData";
+import { resolveCharacterAvatarByClassKey } from "../data/characterAvatarCatalog";
+import CharacterAvatar from "../components/CharacterAvatar";
 
 export type CharacterSummary = {
   id: string;
@@ -41,6 +43,9 @@ export default function CharacterSelectScreen({
   const selectedClass = selectedCharacter
     ? characterClassesData[selectedCharacter.classKey]
     : null;
+  const selectedAvatar = selectedCharacter
+    ? resolveCharacterAvatarByClassKey(selectedCharacter.classKey)
+    : null;
 
   return (
     <main className="character-flow-screen character-select-screen">
@@ -74,17 +79,28 @@ export default function CharacterSelectScreen({
             </span>
             {selectedCharacter && selectedClass ? (
               <span className="character-flow-status-pill">
-                {selectedClass.name} • Level {selectedCharacter.level}
+                {selectedClass.name} - Level {selectedCharacter.level}
               </span>
             ) : null}
           </div>
 
           <div className="character-flow-hero-card">
             <span className="character-flow-hero-card__label">Active Preview</span>
-            {selectedCharacter && selectedClass ? (
+            {selectedCharacter && selectedClass && selectedAvatar ? (
               <>
-                <strong>{selectedCharacter.name}</strong>
-                <p>{selectedClass.title}</p>
+                <div className="character-select-preview-card">
+                  <CharacterAvatar
+                    src={selectedAvatar.imageSrc}
+                    alt={selectedAvatar.altLabel}
+                    size="lg"
+                  />
+
+                  <div className="character-select-preview-card__content">
+                    <strong>{selectedCharacter.name}</strong>
+                    <p>{selectedClass.title}</p>
+                  </div>
+                </div>
+
                 <div className="character-flow-inline-stats">
                   <span>HP {selectedClass.baseHp}</span>
                   <span>SP {selectedClass.baseSp}</span>
@@ -127,6 +143,9 @@ export default function CharacterSelectScreen({
                 characters.map((character) => {
                   const isSelected = character.id === selectedCharacterId;
                   const characterClass = characterClassesData[character.classKey];
+                  const characterAvatar = resolveCharacterAvatarByClassKey(
+                    character.classKey
+                  );
 
                   return (
                     <button
@@ -135,9 +154,12 @@ export default function CharacterSelectScreen({
                       className={`character-card ${isSelected ? "is-selected" : ""}`}
                       onClick={() => setSelectedCharacterId(character.id)}
                     >
-                      <div className="character-card-portrait">
-                        <span>Portrait</span>
-                      </div>
+                      <CharacterAvatar
+                        src={characterAvatar.imageSrc}
+                        alt={characterAvatar.altLabel}
+                        size="sm"
+                        className="character-card-portrait"
+                      />
 
                       <div className="character-card-content">
                         <strong>{character.name}</strong>
@@ -151,13 +173,23 @@ export default function CharacterSelectScreen({
             </div>
 
             <aside className="character-class-preview character-flow-scroll-panel">
-              {selectedCharacter && selectedClass ? (
+              {selectedCharacter && selectedClass && selectedAvatar ? (
                 <>
                   <div className="character-class-preview-header">
-                    <strong>{selectedCharacter.name}</strong>
-                    <span>
-                      {selectedClass.name} • Level {selectedCharacter.level}
-                    </span>
+                    <div className="character-class-preview-header__identity">
+                      <CharacterAvatar
+                        src={selectedAvatar.imageSrc}
+                        alt={selectedAvatar.altLabel}
+                        size="md"
+                      />
+
+                      <div>
+                        <strong>{selectedCharacter.name}</strong>
+                        <span>
+                          {selectedClass.name} - Level {selectedCharacter.level}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="character-class-preview-section">
@@ -216,7 +248,7 @@ export default function CharacterSelectScreen({
                 <>
                   <strong>{selectedCharacter.name}</strong>
                   <span>
-                    {selectedClass.name} • Level {selectedCharacter.level}
+                    {selectedClass.name} - Level {selectedCharacter.level}
                   </span>
                 </>
               ) : (

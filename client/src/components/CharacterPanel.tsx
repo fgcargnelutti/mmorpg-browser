@@ -1,4 +1,5 @@
 import StatusIcon from "./StatusIcon";
+import CharacterAvatar from "./CharacterAvatar";
 
 type Condition = {
   key: string;
@@ -21,6 +22,8 @@ type CharacterPanelProps = {
   xpText: string;
   name: string;
   characterClass: string;
+  avatarSrc: string;
+  avatarAlt: string;
   conditions: Condition[];
   buffs: ActiveBuff[];
 };
@@ -30,13 +33,21 @@ export default function CharacterPanel({
   xpText,
   name,
   characterClass,
+  avatarSrc,
+  avatarAlt,
   conditions,
   buffs,
 }: CharacterPanelProps) {
   return (
     <section className="ui-panel sidebar-panel sidebar-panel--content character-panel">
-      <div className="char-name">{name}</div>
-      <div className="char-subtitle">{characterClass}</div>
+      <div className="character-panel-header">
+        <CharacterAvatar src={avatarSrc} alt={avatarAlt} size="md" />
+
+        <div className="character-panel-header__identity">
+          <div className="char-name">{name}</div>
+          <div className="char-subtitle">{characterClass}</div>
+        </div>
+      </div>
 
       <div className="character-progress-section">
         <div className="character-progress-value">

@@ -1,4 +1,5 @@
 import type { Reward } from "../../domain/rewardTypes";
+import { getItemDefinition } from "../../../items";
 
 export type RewardPlayerSnapshot = {
   inventory: string[];
@@ -17,6 +18,10 @@ export function applyRewardsToPlayerSnapshot<T extends RewardPlayerSnapshot>(
 
   for (const reward of rewards) {
     if (reward.type === "item") {
+      if (reward.amount <= 0 || !getItemDefinition(reward.itemKey)) {
+        continue;
+      }
+
       for (let count = 0; count < reward.amount; count += 1) {
         nextInventory.push(reward.itemKey);
       }
@@ -24,6 +29,10 @@ export function applyRewardsToPlayerSnapshot<T extends RewardPlayerSnapshot>(
     }
 
     if (reward.type === "gold") {
+      if (reward.amount <= 0) {
+        continue;
+      }
+
       for (let count = 0; count < reward.amount; count += 1) {
         nextInventory.push("gold");
       }
@@ -31,11 +40,19 @@ export function applyRewardsToPlayerSnapshot<T extends RewardPlayerSnapshot>(
     }
 
     if (reward.type === "xp") {
+      if (reward.amount <= 0) {
+        continue;
+      }
+
       nextTotalXp += reward.amount;
       continue;
     }
 
     if (reward.type === "stamina") {
+      if (reward.amount <= 0) {
+        continue;
+      }
+
       nextStamina = Math.min(snapshot.maxStamina, nextStamina + reward.amount);
     }
   }

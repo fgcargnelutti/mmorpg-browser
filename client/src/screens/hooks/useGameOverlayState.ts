@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { EncounterKey } from "../../data/encountersData";
 import type { FishingSpotKey } from "../../features/fishing";
 import type { MiningSpotKey } from "../../features/mining";
@@ -7,6 +7,7 @@ import type { ContextAction, NpcProfileKey } from "../../features/world";
 export type GameContextState = "hidden" | "expanded" | "minimized";
 
 export type ActiveEncounter = {
+  instanceId: number;
   key: EncounterKey;
   enemyHp: number;
   combatLog: string[];
@@ -41,11 +42,13 @@ type OpenActivitySessionParams<TConfigKey> = {
 };
 
 function createEncounterState({
+  instanceId,
   encounterKey,
   enemyHp,
   introText,
-}: OpenEncounterParams): ActiveEncounter {
+}: OpenEncounterParams & { instanceId: number }): ActiveEncounter {
   return {
+    instanceId,
     key: encounterKey,
     enemyHp,
     combatLog: [introText],
@@ -55,6 +58,7 @@ function createEncounterState({
 }
 
 export function useGameOverlayState() {
+  const encounterInstanceCounterRef = useRef(0);
   const [contextState, setContextState] = useState<GameContextState>("hidden");
   const [npcDialogOpen, setNpcDialogOpen] = useState(false);
   const [activeNpcProfileKey, setActiveNpcProfileKey] =
@@ -110,8 +114,10 @@ export function useGameOverlayState() {
     closeSideDialogs();
     closeWorldActivityOverlays();
     setContextState("hidden");
+    encounterInstanceCounterRef.current += 1;
     setActiveEncounter(
       createEncounterState({
+        instanceId: encounterInstanceCounterRef.current,
         encounterKey,
         enemyHp,
         introText,

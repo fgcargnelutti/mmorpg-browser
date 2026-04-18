@@ -7,6 +7,17 @@
   gap: 10px;
 }
 
+.character-panel-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.character-panel-header__identity {
+  min-width: 0;
+}
+
 /* NAME + CLASS */
 .char-name {
   font-size: 16px;

@@ -13,8 +13,18 @@ export {
   depositInventoryItemToHideoutStorage,
   withdrawHideoutStorageItemToInventory,
 } from "./application/systems/hideoutStorageSystem";
+export {
+  createHideoutStorageTransferRequest,
+  deserializeHideoutState,
+  serializeHideoutState,
+} from "./infrastructure/hideoutPersistenceAdapter";
 export { default as HideoutDialog } from "./presentation/components/HideoutDialog";
 
+export type {
+  HideoutStorageTransferRequest,
+  PersistedHideoutPayload,
+  PersistedHideoutStructureEntry,
+} from "./infrastructure/hideoutPersistenceAdapter";
 export type {
   HideoutState,
   HideoutStructureProgressState,

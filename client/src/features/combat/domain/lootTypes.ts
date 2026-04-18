@@ -2,7 +2,13 @@ import type { Reward } from "../../systems/domain/rewardTypes";
 import type { EncounterKey } from "../../../data/encountersData";
 
 export type LootSourceType = "creature" | "boss";
-export type LootEntryRarity = "common" | "uncommon" | "rare" | "boss";
+export type LootEntryRarity =
+  | "common"
+  | "uncommon"
+  | "rare"
+  | "ultra-rare"
+  | "boss";
+export type LootTableId = "goblin-common" | "boss-prototype-minotaur";
 
 export type LootItemEntry = {
   itemKey: string;
@@ -21,7 +27,7 @@ export type LootRewardEntry = {
 };
 
 export type LootTableDefinition = {
-  key: string;
+  key: LootTableId;
   encounterKey?: EncounterKey;
   sourceType: LootSourceType;
   sourceKey: string;

@@ -2,8 +2,11 @@ import Tooltip from "./Tooltip";
 
 type InventoryItem = {
   key: string;
+  itemKey: string;
   name: string;
-  icon: string;
+  iconGlyph: string;
+  iconLabel: string;
+  iconTone: string;
   count: number;
   weight: number;
   description: string;
@@ -49,8 +52,18 @@ export default function InventoryPanel({
                 </>
               }
             >
-              <div className="inventory-slot inventory-square-slot">
-                <span className="inventory-item-icon">{item.icon}</span>
+              <div
+                className={`inventory-slot inventory-square-slot inventory-square-slot--${item.iconTone}`}
+                aria-label={`${item.name}, quantity ${item.count}`}
+              >
+                <span
+                  className="inventory-item-icon"
+                  aria-hidden="true"
+                  title={item.iconLabel}
+                >
+                  {item.iconGlyph}
+                </span>
+                <span className="inventory-item-name">{item.name}</span>
                 <span className="inventory-item-count">x{item.count}</span>
               </div>
             </Tooltip>

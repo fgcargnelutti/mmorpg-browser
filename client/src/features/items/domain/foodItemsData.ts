@@ -4,7 +4,7 @@ export const foodItemsData: ItemDefinition[] = [
   {
     key: "fish",
     name: "River Fish",
-    icon: "ðŸŸ",
+    iconKey: "fish",
     weight: 0.8,
     description: "A small river catch. Better cooked than eaten raw.",
     stats: ["Food item"],
@@ -16,7 +16,7 @@ export const foodItemsData: ItemDefinition[] = [
   {
     key: "cookie",
     name: "Cookie",
-    icon: "ðŸª",
+    iconKey: "ration",
     weight: 0.1,
     description: "A hard travel biscuit that somehow survived the damp.",
     stats: ["Food item"],
@@ -28,7 +28,7 @@ export const foodItemsData: ItemDefinition[] = [
   {
     key: "fruit",
     name: "Wild Fruit",
-    icon: "ðŸŽ",
+    iconKey: "fruit",
     weight: 0.2,
     description: "A handful of fruit gathered from the old rural outskirts.",
     stats: ["Natural good"],
@@ -40,7 +40,7 @@ export const foodItemsData: ItemDefinition[] = [
   {
     key: "rabbit-meat",
     name: "Rabbit Meat",
-    icon: "ðŸ–",
+    iconKey: "meat",
     weight: 0.6,
     description: "Freshly hunted small game from the hills and brush.",
     stats: ["Food item"],

@@ -1,42 +1,34 @@
 import type { CreatureBestiaryData } from "./bestiaryTypes";
+import { getCreatureSpeciesSnapshot } from "../../creatures";
+import { getBestiaryDropsForSpecies } from "../../combat/application/selectors/getBestiaryDropsForSpecies";
+
+const goblinSpecies = getCreatureSpeciesSnapshot("goblin");
+const goblinBestiaryDrops = getBestiaryDropsForSpecies("goblin");
+
+if (!goblinSpecies) {
+  throw new Error("Missing canonical species data for goblin.");
+}
+
+if (!goblinBestiaryDrops) {
+  throw new Error("Missing canonical loot data for goblin.");
+}
 
 export const creatureCompendiumData: Record<string, CreatureBestiaryData> = {
   goblin: {
-    key: "goblin",
-    name: "Goblin",
-    category: "humanoid",
-    threatTier: "common",
-    habitatTags: ["road", "ruins", "town"],
-    isBossCandidate: false,
-    maxHp: 18,
-    maxSp: 6,
-    drops: [
-      { itemKey: "gold", label: "Gold Coins", rarity: "common", dropChancePercent: 100 },
-      { itemKey: "rabbit-meat", label: "Rabbit Meat", rarity: "common", dropChancePercent: 100 },
-      { itemKey: "rope", label: "Rope", rarity: "common", dropChancePercent: 70 },
-      { itemKey: "pickaxe", label: "Pickaxe", rarity: "uncommon", dropChancePercent: 25 },
-      { itemKey: "goblin-essence", label: "Goblin Essence", rarity: "rare", dropChancePercent: 1 },
-      { itemKey: "goblin-helmet", label: "Goblin Helmet", rarity: "ultra-rare", dropChancePercent: 0.03 },
-    ],
-    weaknesses: ["Bleed", "Direct melee pressure"],
-    resistances: ["Fear", "Harsh terrain"],
-    strengths: ["Ambushes", "Quick retaliation"],
-    attacks: [
-      {
-        key: "jagged-slash",
-        label: "Jagged Slash",
-        description: "A fast cut from a crude blade meant to punish hesitation.",
-      },
-      {
-        key: "roadside-lunge",
-        label: "Roadside Lunge",
-        description: "A sudden leap meant to overwhelm isolated travelers.",
-      },
-    ],
-    notes: [
-      "Often found near roads and broken ruins.",
-      "Aggressive when they believe they outnumber a target.",
-    ],
+    key: goblinSpecies.id,
+    name: goblinSpecies.name,
+    category: goblinSpecies.category,
+    threatTier: goblinSpecies.threatTier,
+    habitatTags: goblinSpecies.habitatTags,
+    isBossCandidate: goblinSpecies.isBossCandidate,
+    maxHp: goblinSpecies.maxHp,
+    maxSp: goblinSpecies.maxSp,
+    drops: goblinBestiaryDrops,
+    weaknesses: goblinSpecies.weaknesses,
+    resistances: goblinSpecies.resistances,
+    strengths: goblinSpecies.strengths,
+    attacks: goblinSpecies.attacks,
+    notes: goblinSpecies.notes,
   },
   orc: {
     key: "orc",

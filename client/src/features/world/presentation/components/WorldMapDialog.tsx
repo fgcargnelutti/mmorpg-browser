@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import GameDialog from "../../../../components/GameDialog";
+import CharacterAvatar from "../../../../components/CharacterAvatar";
 import type { MapId } from "../../domain/mapsData";
 import {
   worldFastTravelActivityOptions,
@@ -38,6 +39,8 @@ type WorldMapDialogProps = {
     message: string;
   } | null;
   onDismissOverlayToast?: () => void;
+  playerAvatarSrc: string;
+  playerAvatarAlt: string;
 };
 
 function clamp(value: number, min: number, max: number) {
@@ -109,6 +112,8 @@ export default function WorldMapDialog({
   onDismissFastTravelReport,
   overlayToast,
   onDismissOverlayToast,
+  playerAvatarSrc,
+  playerAvatarAlt,
 }: WorldMapDialogProps) {
   const frameRef = useRef<HTMLDivElement | null>(null);
   const [artboardSize, setArtboardSize] = useState({
@@ -435,7 +440,13 @@ export default function WorldMapDialog({
                   }
                 >
                   <span className="world-overview-player-pin__pulse" aria-hidden="true" />
-                  <span className="world-overview-player-pin__marker" aria-hidden="true" />
+                  <span className="world-overview-player-pin__marker" aria-hidden="true">
+                    <CharacterAvatar
+                      src={playerAvatarSrc}
+                      alt={playerAvatarAlt}
+                      size="pin"
+                    />
+                  </span>
                 </div>
               ) : null}
             </div>

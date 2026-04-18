@@ -4,7 +4,7 @@ export const currencyItemsData: ItemDefinition[] = [
   {
     key: "gold",
     name: "Gold",
-    icon: "ðŸª™",
+    iconKey: "coin",
     weight: 0.05,
     description: "Currency used for simple trade.",
     stats: ["Trade currency"],

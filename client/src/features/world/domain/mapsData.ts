@@ -17,7 +17,6 @@ import {
   thousandIslandsContinentArt,
   vaultwaysContinentArt,
 } from "../../../assets/world/continent-maps";
-import type { EncounterKey } from "../../../data/encountersData";
 import {
   northForestMapArt,
   sewerMapArt,
@@ -83,7 +82,6 @@ export type MapData = {
   description?: string;
   actions?: ContextAction[];
   globalActions?: MapGlobalAction[];
-  huntingEncounterPool?: EncounterKey[];
   entryLocationKey?: LocationKey;
   defaultPoiVariant?: PoiVariant;
   pois: MapPoi[];
@@ -371,6 +369,15 @@ export const mapsData: Record<MapId, MapData> = {
     defaultPoiVariant: "danger",
     description:
       "A damp and suffocating tunnel beneath the town. The smell alone warns you this place is not abandoned.",
+    globalActions: [
+      {
+        id: "search-for-hunt",
+        label: "Search for Hunt",
+        description:
+          "Sweep the tunnels and keep moving as new threats emerge from the dark.",
+        effect: "search-for-hunt",
+      },
+    ],
     actions: [
       {
         id: "sewer-overview",
@@ -416,7 +423,6 @@ export const mapsData: Record<MapId, MapData> = {
             label: "Explore deeper",
             description: "You hear movement in the darkness.",
             effect: "trigger_encounter",
-            encounterKey: "north-road-goblin",
           },
           {
             id: "search-scrap-central",
@@ -450,7 +456,6 @@ export const mapsData: Record<MapId, MapData> = {
             label: "Advance carefully",
             description: "Step deeper into the dark passage.",
             effect: "trigger_encounter",
-            encounterKey: "north-road-goblin",
           },
           {
             id: "search-scrap-deep",
@@ -481,6 +486,15 @@ export const mapsData: Record<MapId, MapData> = {
     defaultPoiVariant: "building",
     description:
       "Cold wind pushes through the trees, and every trail feels older than the outpost below.",
+    globalActions: [
+      {
+        id: "search-for-hunt",
+        label: "Search for Hunt",
+        description:
+          "Range through the woods and press on whenever another target reveals itself.",
+        effect: "search-for-hunt",
+      },
+    ],
     pois: [
       {
         id: "outpost",
@@ -524,7 +538,6 @@ export const mapsData: Record<MapId, MapData> = {
             label: "Goblin Battle",
             description: "Challenge the goblins hiding in the ruins.",
             effect: "trigger_encounter",
-            encounterKey: "north-forest-goblin-ruins-goblin",
           },
           {
             id: "north-forest-retreat",
@@ -656,7 +669,6 @@ export const mapsData: Record<MapId, MapData> = {
         effect: "search-for-hunt",
       },
     ],
-    huntingEncounterPool: ["southwest-farm-goblin-raider"],
     pois: [
       {
         id: "return-road",

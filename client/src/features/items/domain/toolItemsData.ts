@@ -4,7 +4,7 @@ export const toolItemsData: ItemDefinition[] = [
   {
     key: "pickaxe",
     name: "Pickaxe",
-    icon: "Pick",
+    iconKey: "pickaxe",
     weight: 3.2,
     description: "A practical mining tool that can still fetch a fair price.",
     stats: ["Tool item"],

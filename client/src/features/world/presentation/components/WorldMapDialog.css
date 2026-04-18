@@ -318,34 +318,15 @@
 .world-overview-player-pin__marker {
   position: relative;
   display: block;
-  width: 18px;
-  height: 18px;
-  border-radius: 999px 999px 999px 0;
-  transform: rotate(-45deg);
-  background: linear-gradient(180deg, #f3cf8b 0%, #c98c38 100%);
-  border: 1px solid rgba(255, 236, 201, 0.48);
-  box-shadow:
-    0 12px 18px rgba(1, 7, 15, 0.34),
-    0 0 12px rgba(236, 196, 110, 0.28);
-}
-
-.world-overview-player-pin__marker::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: rgba(43, 28, 11, 0.78);
-  transform: translate(-50%, -50%);
 }
 
 .world-overview-player-pin--traveling .world-overview-player-pin__marker {
-  background: linear-gradient(180deg, #f5dfa8 0%, #dea04f 100%);
-  box-shadow:
-    0 12px 18px rgba(1, 7, 15, 0.34),
-    0 0 16px rgba(245, 217, 153, 0.34);
+  filter: brightness(1.06);
+}
+
+.world-overview-player-pin .character-avatar {
+  position: relative;
+  z-index: 1;
 }
 
 .world-overview-travel-progress {

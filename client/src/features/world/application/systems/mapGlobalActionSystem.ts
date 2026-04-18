@@ -1,4 +1,5 @@
 import type { MapData, MapGlobalAction } from "../../domain/mapsData";
+import { getMapEncounterPool } from "../selectors/getMapEncounterPool";
 
 export function getMapGlobalActions(mapData: MapData): MapGlobalAction[] {
   return mapData.globalActions ?? [];
@@ -9,5 +10,5 @@ export function isSearchForHuntAction(action: MapGlobalAction): boolean {
 }
 
 export function canMapStartHunting(mapData: MapData): boolean {
-  return (mapData.huntingEncounterPool?.length ?? 0) > 0;
+  return getMapEncounterPool(mapData.id).length > 0;
 }

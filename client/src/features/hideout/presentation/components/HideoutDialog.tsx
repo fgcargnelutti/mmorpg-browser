@@ -34,14 +34,16 @@ type HideoutDialogProps = {
   inventoryEntries: Array<{
     itemKey: string;
     name: string;
-    icon: string;
+    iconGlyph: string;
+    iconLabel: string;
     count: number;
     description: string;
   }>;
   storageEntries: Array<{
     itemKey: string;
     name: string;
-    icon: string;
+    iconGlyph: string;
+    iconLabel: string;
     count: number;
     description: string;
   }>;
@@ -171,7 +173,7 @@ export default function HideoutDialog({
                           title={`${entry.name} x${entry.count}`}
                         >
                           <span className="hideout-storage-slot__icon">
-                            {entry.icon}
+                            {entry.iconGlyph}
                           </span>
                           <span className="hideout-storage-slot__count">
                             x{entry.count}
@@ -213,7 +215,7 @@ export default function HideoutDialog({
                           title={`${entry.name} x${entry.count}`}
                         >
                           <span className="hideout-storage-slot__icon">
-                            {entry.icon}
+                            {entry.iconGlyph}
                           </span>
                           <span className="hideout-storage-slot__count">
                             x{entry.count}

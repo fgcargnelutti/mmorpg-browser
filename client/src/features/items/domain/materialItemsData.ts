@@ -4,7 +4,7 @@ export const materialItemsData: ItemDefinition[] = [
   {
     key: "stone",
     name: "Stone",
-    icon: "ðŸª¨",
+    iconKey: "stone",
     weight: 1.5,
     description: "A rough stone used for crafting and construction.",
     stats: ["Crafting material"],
@@ -16,7 +16,7 @@ export const materialItemsData: ItemDefinition[] = [
   {
     key: "herb",
     name: "Herb",
-    icon: "ðŸŒ¿",
+    iconKey: "herb",
     weight: 0.2,
     description: "A medicinal herb with basic healing properties.",
     stats: ["Consumable ingredient"],
@@ -28,8 +28,8 @@ export const materialItemsData: ItemDefinition[] = [
   {
     key: "wood",
     name: "Wood",
-    icon: "ðŸªµ",
-    weight: 2.0,
+    iconKey: "wood",
+    weight: 2,
     description: "Dry timber used for fuel, tools, and structures.",
     stats: ["Crafting material"],
     category: "material",
@@ -40,8 +40,8 @@ export const materialItemsData: ItemDefinition[] = [
   {
     key: "rope",
     name: "Rope",
-    icon: "ðŸª¢",
-    weight: 1.0,
+    iconKey: "rope",
+    weight: 1,
     description: "Useful for climbing, binding, and field repairs.",
     stats: ["Traversal utility"],
     category: "material",
@@ -52,7 +52,7 @@ export const materialItemsData: ItemDefinition[] = [
   {
     key: "paper",
     name: "Paper Scrap",
-    icon: "ðŸ“œ",
+    iconKey: "paper",
     weight: 0.1,
     description: "A fragile sheet salvaged from old records and books.",
     stats: ["Quest item material"],

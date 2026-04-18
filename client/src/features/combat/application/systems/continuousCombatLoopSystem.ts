@@ -1,5 +1,6 @@
 import type { EncounterKey } from "../../../../data/encountersData";
 import type { MapData } from "../../../world/domain/mapsData";
+import { getMapEncounterPool } from "../../../world/application/selectors/getMapEncounterPool";
 
 export type ContinuousCombatLoopStatus = "idle" | "hunting" | "stopped";
 
@@ -13,7 +14,7 @@ export function pickRandomEncounterFromMap(
   mapData: MapData,
   randomValue = Math.random()
 ): EncounterKey | null {
-  const pool = mapData.huntingEncounterPool ?? [];
+  const pool = getMapEncounterPool(mapData.id);
 
   if (pool.length === 0) {
     return null;

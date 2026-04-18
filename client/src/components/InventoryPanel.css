@@ -18,25 +18,26 @@
 
 .inventory-grid {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   align-content: start;
 }
 
 .inventory-grid-slots {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
 }
 
 .inventory-square-slot {
   position: relative;
   aspect-ratio: 1 / 1;
-  min-height: 58px;
-  padding: 6px;
+  min-height: 72px;
+  padding: 10px 8px 8px;
   background: linear-gradient(180deg, rgba(24, 34, 50, 0.94) 0%, rgba(12, 18, 29, 0.98) 100%);
   border: 1px solid var(--line-soft);
   border-radius: 12px;
-  display: flex;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: center;
+  justify-items: center;
   cursor: default;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.03),
@@ -57,19 +58,64 @@
     0 12px 18px rgba(1, 6, 13, 0.14);
 }
 
+.inventory-square-slot--currency {
+  border-color: rgba(204, 177, 93, 0.34);
+}
+
+.inventory-square-slot--equipment {
+  border-color: rgba(116, 152, 198, 0.34);
+}
+
+.inventory-square-slot--survival {
+  border-color: rgba(121, 170, 110, 0.34);
+}
+
+.inventory-square-slot--resource {
+  border-color: rgba(141, 124, 102, 0.34);
+}
+
+.inventory-square-slot--quest {
+  border-color: rgba(153, 132, 194, 0.34);
+}
+
+.inventory-square-slot--monster {
+  border-color: rgba(189, 99, 122, 0.34);
+}
+
 .inventory-item-icon {
-  font-size: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   line-height: 1;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.inventory-item-name {
+  width: 100%;
+  font-size: 10px;
+  line-height: 1.2;
+  color: var(--text-soft);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .inventory-item-count {
   position: absolute;
-  right: 4px;
-  bottom: 2px;
+  right: 6px;
+  bottom: 6px;
   font-size: 10px;
+  font-weight: 700;
   color: var(--text-soft);
-  background: rgba(6, 10, 18, 0.68);
-  padding: 1px 4px;
+  background: rgba(6, 10, 18, 0.88);
+  padding: 2px 6px;
   border: 1px solid rgba(120, 143, 179, 0.2);
   border-radius: 999px;
 }
@@ -90,12 +136,12 @@
 
 @media (max-width: 780px) {
   .inventory-grid-slots {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
   }
 }
 
 @media (max-width: 520px) {
   .inventory-grid-slots {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
   }
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import LoginScreen from "./screens/LoginScreen";
 import CharacterSelectScreen, {
@@ -8,6 +8,7 @@ import CharacterCreationScreen from "./screens/CharacterCreationScreen";
 import GameScreen from "./screens/GameScreen";
 import { charactersData } from "./data/charactersData";
 import { NotificationProvider } from "./features/notifications";
+import { validateMasterDataReferences } from "./features/systems/application/systems/masterDataValidationSystem";
 
 type AppScreen = "login" | "character-select" | "character-create" | "game";
 
@@ -17,6 +18,22 @@ export default function App() {
   const [selectedCharacter, setSelectedCharacter] =
     useState<CharacterSummary | null>(null);
   const [characters, setCharacters] = useState<CharacterSummary[]>(charactersData);
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) {
+      return;
+    }
+
+    const report = validateMasterDataReferences();
+
+    if (report.errors.length > 0) {
+      console.error("Master data validation errors detected:", report.errors);
+    }
+
+    if (report.warnings.length > 0) {
+      console.warn("Master data validation warnings detected:", report.warnings);
+    }
+  }, []);
 
   const handleLoginSuccess = (username: string) => {
     setLoggedUser(username);

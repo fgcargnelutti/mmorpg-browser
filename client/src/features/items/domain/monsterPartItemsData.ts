@@ -4,7 +4,7 @@ export const monsterPartItemsData: ItemDefinition[] = [
   {
     key: "goblin-essence",
     name: "Goblin Essence",
-    icon: "Ess",
+    iconKey: "essence",
     weight: 0.2,
     description: "A strange residue harvested from a goblin's lingering corruption.",
     stats: ["Monster material"],

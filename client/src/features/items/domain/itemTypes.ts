@@ -12,7 +12,8 @@ export type ItemCategory =
 export type ItemDefinition = {
   key: string;
   name: string;
-  icon: string;
+  icon?: string;
+  iconKey: string;
   weight: number;
   description: string;
   stats?: string[];

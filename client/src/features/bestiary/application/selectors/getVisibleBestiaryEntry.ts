@@ -1,4 +1,5 @@
 import { creatureCompendiumData } from "../../domain/creatureCompendiumData";
+import { getCreatureSpeciesSnapshot } from "../../../creatures";
 import type {
   CreatureBestiaryKey,
   PlayerBestiaryEntryState,
@@ -9,8 +10,15 @@ export function getVisibleBestiaryEntry(
   entry: PlayerBestiaryEntryState
 ): VisibleBestiaryEntry | null {
   const creatureData = creatureCompendiumData[entry.creatureKey];
+  const speciesSnapshot = getCreatureSpeciesSnapshot(entry.creatureKey);
 
-  if (!creatureData) {
+  if (!creatureData && !speciesSnapshot) {
+    return null;
+  }
+
+  const resolvedBaseData = speciesSnapshot ?? creatureData;
+
+  if (!resolvedBaseData) {
     return null;
   }
 
@@ -18,11 +26,11 @@ export function getVisibleBestiaryEntry(
     creatureKey: entry.creatureKey,
     killCount: entry.killCount,
     unlockedTier: entry.unlockedTier,
-    name: creatureData.name,
-    category: creatureData.category,
-    threatTier: creatureData.threatTier,
-    habitatTags: creatureData.habitatTags,
-    isBossCandidate: creatureData.isBossCandidate,
+    name: resolvedBaseData.name,
+    category: resolvedBaseData.category,
+    threatTier: resolvedBaseData.threatTier,
+    habitatTags: resolvedBaseData.habitatTags,
+    isBossCandidate: resolvedBaseData.isBossCandidate,
   };
 
   if (
@@ -30,26 +38,26 @@ export function getVisibleBestiaryEntry(
     entry.unlockedTier === "common-drops" ||
     entry.unlockedTier === "complete"
   ) {
-    visibleEntry.maxHp = creatureData.maxHp;
-    visibleEntry.maxSp = creatureData.maxSp;
+    visibleEntry.maxHp = resolvedBaseData.maxHp;
+    visibleEntry.maxSp = resolvedBaseData.maxSp;
   }
 
   if (
-    entry.unlockedTier === "common-drops" ||
-    entry.unlockedTier === "complete"
+    creatureData &&
+    (entry.unlockedTier === "common-drops" || entry.unlockedTier === "complete")
   ) {
     visibleEntry.drops = creatureData.drops.filter(
       (drop) => drop.rarity === "common" || drop.rarity === "uncommon"
     );
   }
 
-  if (entry.unlockedTier === "complete") {
+  if (creatureData && entry.unlockedTier === "complete") {
     visibleEntry.drops = creatureData.drops;
-    visibleEntry.weaknesses = creatureData.weaknesses;
-    visibleEntry.resistances = creatureData.resistances;
-    visibleEntry.strengths = creatureData.strengths;
-    visibleEntry.attacks = creatureData.attacks;
-    visibleEntry.notes = creatureData.notes;
+    visibleEntry.weaknesses = resolvedBaseData.weaknesses;
+    visibleEntry.resistances = resolvedBaseData.resistances;
+    visibleEntry.strengths = resolvedBaseData.strengths;
+    visibleEntry.attacks = resolvedBaseData.attacks;
+    visibleEntry.notes = resolvedBaseData.notes;
   }
 
   return visibleEntry;

@@ -26,7 +26,7 @@ import {
   WorldMap,
   WorldMapDialog,
   discoverablePoisData,
-  mapsData,
+  resolveMapData,
   npcProfilesData,
   resolveWorldFastTravelReport,
   worldMapPoisData,
@@ -68,10 +68,13 @@ import {
 } from "../features/quests";
 import { BestiaryDialog, useBestiary } from "../features/bestiary";
 import { SkillTreeDialog, useTalentTree } from "../features/specializations";
+import { type EncounterKey } from "../data/encountersData";
+import { resolveEncounterData } from "../features/combat/application/selectors/resolveEncounterData";
 import {
-  encountersData,
-  type EncounterKey,
-} from "../data/encountersData";
+  getItemDefinition,
+  resolveInventoryItemView,
+  resolveInventoryItemViews,
+} from "../features/items";
 import { inventoryCatalog } from "../data/inventoryCatalog";
 import { equipmentRows } from "../data/equipmentData";
 import { conditionsData } from "../data/conditionsData";
@@ -83,6 +86,7 @@ import {
   resolveConditionAdjustedAttackDamage,
   resolveConditionAdjustedStaminaCost,
 } from "../features/systems/application/systems/playerConditionSystem";
+import { applyPlayerDamageState } from "../features/progression/application/systems/progressionVitalsSystem";
 import {
   countInventoryItem,
   countInventoryItemsByKeys,
@@ -122,6 +126,7 @@ import type { CharacterSummary } from "./CharacterSelectScreen";
 import type { DialogueOption } from "../components/NpcDialog";
 import type { ChatMessage } from "../components/ChatPanel";
 import { useGameOverlayState } from "./hooks/useGameOverlayState";
+import { resolveCharacterAvatarByClassKey } from "../data/characterAvatarCatalog";
 
 type GameScreenProps = {
   selectedCharacter: CharacterSummary;
@@ -166,7 +171,12 @@ function resolveInventoryDisplayItem(itemKey: string, count: number) {
   };
 }
 
+void resolveInventoryDisplayItem;
+
 export default function GameScreen({ selectedCharacter }: GameScreenProps) {
+  const selectedCharacterAvatar = resolveCharacterAvatarByClassKey(
+    selectedCharacter.classKey
+  );
   const { notifyError, notifySuccess, notifyInfo } = useNotifications();
   const [eventLogs, setEventLogs] = useState<string[]>([
     "System: The wasteland is silent today.",
@@ -213,6 +223,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     null
   );
   const continuousCombatLoopStopRef = useRef<string | null>(null);
+  const processedLootEncounterInstanceIdsRef = useRef<Set<number>>(new Set());
 
   const [currentMap, setCurrentMap] = useState<MapId>("belagard");
   const {
@@ -300,7 +311,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     quests: questDefinitions,
   });
 
-  const currentMapData = mapsData[currentMap];
+  const currentMapData = resolveMapData(currentMap);
   const linkedCurrentMapPoi =
     worldMapPoisData.find((poi) => poi.linkedMapIds?.includes(currentMap)) ?? null;
   // Prefer the prototype/testing continent override when present; otherwise fall back
@@ -330,7 +341,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
   const npcLoreNotes = activeNpcProfile.loreNotes;
 
   const activeEncounterData = activeEncounter
-    ? encountersData[activeEncounter.key]
+    ? resolveEncounterData(activeEncounter.key)
     : null;
   const activeFishingConfig = activeFishingSession
     ? fishingConfigs[activeFishingSession.configKey]
@@ -446,7 +457,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     closeWorldActivityOverlays();
     setContextState("expanded");
 
-    const destinationMap = mapsData[destinationMapId];
+    const destinationMap = resolveMapData(destinationMapId);
 
     const travelResolution = destinationMap.entryLocationKey
       ? handleTravel(destinationMap.entryLocationKey)
@@ -677,7 +688,14 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
   ]);
 
   const openEncounter = useCallback((encounterKey: EncounterKey) => {
-    const encounter = encountersData[encounterKey];
+    const encounter = resolveEncounterData(encounterKey);
+
+    if (!encounter) {
+      notifyError("Encounter configuration is unavailable.", {
+        title: "Combat unavailable",
+      });
+      return;
+    }
 
     setTriggeredEncounters((prev) =>
       prev.includes(encounterKey) ? prev : [...prev, encounterKey]
@@ -718,7 +736,14 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     if (!activeEncounter || !player) return;
     if (activeEncounter.isResolved || activeEncounter.resolution !== null) return;
 
-    const encounter = encountersData[activeEncounter.key];
+    const encounter = resolveEncounterData(activeEncounter.key);
+
+    if (!encounter) {
+      notifyError("Encounter configuration is unavailable.", {
+        title: "Combat unavailable",
+      });
+      return;
+    }
     const attackStaminaCost = resolveConditionAdjustedStaminaCost(player, 1);
 
     if (!canSpendPlayerStamina(player, attackStaminaCost)) {
@@ -749,6 +774,11 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     );
 
     if (nextEnemyHp <= 0) {
+      if (processedLootEncounterInstanceIdsRef.current.has(activeEncounter.instanceId)) {
+        return;
+      }
+
+      processedLootEncounterInstanceIdsRef.current.add(activeEncounter.instanceId);
       const victoryRewards = resolveBattleVictoryRewards(encounter);
 
       setActiveEncounter({
@@ -779,7 +809,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       } else {
         setPlayer(playerAfterAttackCost);
       }
-      registerBestiaryKill(encounter.creatureKey, encounter.enemyName);
+      registerBestiaryKill(encounter.speciesId, encounter.enemyName);
       logQuestUpdates(
         applyQuestEvent({
           type: "encounter",
@@ -802,15 +832,16 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       return;
     }
 
-    const nextPlayerHp = Math.max(
-      0,
-      player.currentHp - encounter.enemyAttackDamage
+    const playerAfterRetaliation = applyPlayerDamageState(
+      playerAfterAttackCost,
+      encounter.enemyAttackDamage
     );
+    const nextPlayerHp = playerAfterRetaliation.currentHp;
 
     applyDamageToPlayer(encounter.enemyAttackDamage, encounter.enemyName);
 
     if (nextPlayerHp <= 0) {
-      setPlayer(playerAfterAttackCost);
+      setPlayer(playerAfterRetaliation);
       setActiveEncounter({
         ...activeEncounter,
         enemyHp: nextEnemyHp,
@@ -833,7 +864,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       return;
     }
 
-    setPlayer(playerAfterAttackCost);
+    setPlayer(playerAfterRetaliation);
     setActiveEncounter({
       ...activeEncounter,
       enemyHp: nextEnemyHp,
@@ -866,7 +897,14 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     if (!activeEncounter) return;
     if (!player) return;
 
-    const encounter = encountersData[activeEncounter.key];
+    const encounter = resolveEncounterData(activeEncounter.key);
+
+    if (!encounter) {
+      notifyError("Encounter configuration is unavailable.", {
+        title: "Combat unavailable",
+      });
+      return;
+    }
     const retreatRoll = Math.random();
     const staminaPenalty = player.stamina > 0 ? 1 : 0;
     const damagePenalty =
@@ -1258,7 +1296,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     closeWorldActivityOverlays();
     setContextState("expanded");
 
-    const destinationMap = mapsData[arrivalMapId];
+    const destinationMap = resolveMapData(arrivalMapId);
     const travelResolution = destinationMap.entryLocationKey
       ? handleTravel(destinationMap.entryLocationKey)
       : null;
@@ -1575,7 +1613,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       replacePlayerInventory(previousPlayer, nextInventory)
     );
 
-    const itemLabel = inventoryCatalog[itemKey]?.name ?? itemKey;
+    const itemLabel = getItemDefinition(itemKey)?.name ?? itemKey;
 
     notifyInfo(itemKey === "gold" ? "Gold stored" : `${itemLabel} stored`, {
       title: "Hideout chest",
@@ -1603,7 +1641,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
       replacePlayerInventory(previousPlayer, nextInventory)
     );
 
-    const itemLabel = inventoryCatalog[itemKey]?.name ?? itemKey;
+    const itemLabel = getItemDefinition(itemKey)?.name ?? itemKey;
 
     notifyInfo(
       itemKey === "gold" ? "Gold returned to inventory" : `${itemLabel} returned`,
@@ -1950,11 +1988,14 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     counts.set(item, (counts.get(item) ?? 0) + 1);
   }
 
-  const groupedInventory = Array.from(counts.entries()).map(
-    ([itemKey, count]) => resolveInventoryDisplayItem(itemKey, count)
+  const groupedInventory = resolveInventoryItemViews(
+    Array.from(counts.entries()).map(([itemKey, count]) => ({
+      itemKey,
+      count,
+    }))
   );
   const hideoutStorageDisplayEntries = storageEntries.map(({ itemKey, count }) =>
-    resolveInventoryDisplayItem(itemKey, count)
+    resolveInventoryItemView(itemKey, count)
   );
 
   const currentWeight = groupedInventory.reduce(
@@ -2208,6 +2249,8 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
                   isOpen={worldMapDialogOpen}
                   currentMap={currentMap}
                   currentWorldMapPoiId={currentWorldMapPoiId}
+                  playerAvatarSrc={selectedCharacterAvatar.imageSrc}
+                  playerAvatarAlt={selectedCharacterAvatar.altLabel}
                   onClose={handleCloseWorldMap}
                   onPoiSelect={handleSelectWorldMapPoi}
                   onFastTravelConfirm={handleConfirmWorldMapFastTravel}
@@ -2246,6 +2289,8 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
             xpText={xpText}
             name={player.name}
             characterClass={selectedClass.name}
+            avatarSrc={selectedCharacterAvatar.imageSrc}
+            avatarAlt={selectedCharacterAvatar.altLabel}
             conditions={resolvedCharacterConditions}
             buffs={buffsData}
           />

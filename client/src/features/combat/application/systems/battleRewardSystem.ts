@@ -1,4 +1,5 @@
 import type { EncounterData } from "../../../../data/encountersData";
+import { getItemDefinition } from "../../../items";
 import { collectRewardMessages } from "../../../systems/application/systems/rewardResolutionSystem";
 import { resolveEncounterLoot } from "./lootResolutionSystem";
 
@@ -22,8 +23,9 @@ function formatLootSummary(encounter: EncounterData, lootResolution: NonNullable
       drop.rarity === "rare" || drop.rarity === "boss"
         ? `${drop.rarity.toUpperCase()} `
         : "";
+    const itemLabel = getItemDefinition(drop.itemKey)?.name ?? drop.itemKey;
 
-    return `${rarityPrefix}${drop.amount}x ${drop.itemKey}`;
+    return `${rarityPrefix}${drop.amount}x ${itemLabel}`;
   });
 
   return `System: Loot recovered from ${encounter.enemyName}: ${labels.join(", ")}.`;
@@ -37,7 +39,11 @@ export function resolveBattleVictoryRewards(
   if (!lootResolution) {
     return {
       rewards: [],
-      eventLogMessages: [],
+      eventLogMessages: encounter.lootTableKey
+        ? [
+            `System: Loot configuration for ${encounter.enemyName} is unavailable, so no loot was granted.`,
+          ]
+        : [],
       lootFound: false,
     };
   }
