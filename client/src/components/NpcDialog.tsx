@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import GameDialog from "./GameDialog";
 import "./NpcDialog.css";
 import { janePortraitArt } from "../assets/npcs/portraits";
 import type { NpcShopOffer } from "../features/world/domain/npcProfilesData";
+import type { InventoryPanelItem } from "./InventoryPanel";
 
 export type DialogueTopicState =
   | "unlocked"
@@ -29,8 +30,10 @@ type NpcDialogProps = {
   onClose: () => void;
   onOptionSelect: (optionId: string) => void;
   onBuyItem?: (offer: NpcShopOffer) => void;
-  onSell?: () => void;
+  onSellItems?: (items: Array<{ itemKey: string; count: number }>) => boolean;
   buyOffers?: NpcShopOffer[];
+  sellInventoryEntries?: InventoryPanelItem[];
+  sellPlaceholderMessage?: string;
   narrativeHint?: string;
   showNarrativeStatus?: boolean;
   narrativeStatusText?: string;
@@ -60,13 +63,18 @@ export default function NpcDialog({
   onClose,
   onOptionSelect,
   onBuyItem,
-  onSell,
+  onSellItems,
   buyOffers = [],
+  sellInventoryEntries = [],
+  sellPlaceholderMessage = "Drag items from your inventory into this panel to prepare a trade.",
   narrativeHint = "This NPC still has an important role in the story.",
   portraitSrc,
 }: NpcDialogProps) {
   const dialogueScrollRef = useRef<HTMLDivElement | null>(null);
   const [tradeMode, setTradeMode] = useState<TradeMode>(null);
+  const [selectedBuyItemKey, setSelectedBuyItemKey] = useState<string | null>(null);
+  const [sellBasketEntries, setSellBasketEntries] = useState<InventoryPanelItem[]>([]);
+  const [selectedSellItemKey, setSelectedSellItemKey] = useState<string | null>(null);
   const resolvedPortrait = portraitSrc ?? janePortraitArt;
 
   useEffect(() => {
@@ -74,21 +82,151 @@ export default function NpcDialog({
     dialogueScrollRef.current.scrollTop = dialogueScrollRef.current.scrollHeight;
   }, [dialogueLines]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setTradeMode(null);
+      setSelectedBuyItemKey(null);
+      setSellBasketEntries([]);
+      setSelectedSellItemKey(null);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    setSelectedBuyItemKey((currentKey) => {
+      if (!buyOffers.length) {
+        return null;
+      }
+
+      if (currentKey && buyOffers.some((offer) => offer.itemKey === currentKey)) {
+        return currentKey;
+      }
+
+      return buyOffers[0].itemKey;
+    });
+  }, [buyOffers]);
+
+  useEffect(() => {
+    setSellBasketEntries((currentEntries) =>
+      currentEntries.filter((entry) =>
+        sellInventoryEntries.some(
+          (inventoryEntry) =>
+            inventoryEntry.itemKey === entry.itemKey &&
+            inventoryEntry.count === entry.count
+        )
+      )
+    );
+  }, [sellInventoryEntries]);
+
   const visibleTopics = dialogueOptions.filter(
     (option) => option.state !== "locked"
   );
   const activeTradeMode = isOpen ? tradeMode : null;
+  const selectedBuyOffer =
+    buyOffers.find((offer) => offer.itemKey === selectedBuyItemKey) ?? null;
+  const selectedSellEntry =
+    sellBasketEntries.find((entry) => entry.itemKey === selectedSellItemKey) ?? null;
+  const sellableInventoryMap = useMemo(
+    () => new Map(sellInventoryEntries.map((entry) => [entry.itemKey, entry])),
+    [sellInventoryEntries]
+  );
+
+  const openTradeMode = (mode: Exclude<TradeMode, null>) => {
+    setTradeMode((currentMode) => (currentMode === mode ? null : mode));
+  };
+
+  const allowSellDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  };
+
+  const handleSellDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+
+    const rawPayload = event.dataTransfer.getData(
+      "application/howl-of-collapse-trade-item"
+    );
+
+    if (!rawPayload) {
+      return;
+    }
+
+    const payload = JSON.parse(rawPayload) as { itemKey: string; count: number };
+    const inventoryEntry = sellableInventoryMap.get(payload.itemKey);
+
+    if (!inventoryEntry) {
+      return;
+    }
+
+    setTradeMode("sell");
+    setSellBasketEntries((currentEntries) => {
+      if (currentEntries.some((entry) => entry.itemKey === inventoryEntry.itemKey)) {
+        return currentEntries;
+      }
+
+      return [...currentEntries, inventoryEntry];
+    });
+    setSelectedSellItemKey(inventoryEntry.itemKey);
+  };
+
+  const handleSellSelected = () => {
+    if (!selectedSellEntry) {
+      return;
+    }
+
+    const didSell = onSellItems?.([
+      {
+        itemKey: selectedSellEntry.itemKey,
+        count: selectedSellEntry.count,
+      },
+    ]);
+
+    if (!didSell) {
+      return;
+    }
+
+    setSellBasketEntries((currentEntries) =>
+      currentEntries.filter((entry) => entry.itemKey !== selectedSellEntry.itemKey)
+    );
+    setSelectedSellItemKey((currentKey) =>
+      currentKey === selectedSellEntry.itemKey ? null : currentKey
+    );
+  };
+
+  const handleRemoveSellEntry = (itemKey: string) => {
+    setSellBasketEntries((currentEntries) =>
+      currentEntries.filter((entry) => entry.itemKey !== itemKey)
+    );
+    setSelectedSellItemKey((currentKey) =>
+      currentKey === itemKey ? null : currentKey
+    );
+  };
+
+  const handleSellAll = () => {
+    if (sellBasketEntries.length === 0) {
+      return;
+    }
+
+    const didSell = onSellItems?.(
+      sellBasketEntries.map((entry) => ({
+        itemKey: entry.itemKey,
+        count: entry.count,
+      }))
+    );
+
+    if (!didSell) {
+      return;
+    }
+
+    setSellBasketEntries([]);
+    setSelectedSellItemKey(null);
+  };
 
   if (!isOpen) return null;
 
   return (
     <div className="npc-dialog-anchor">
       <GameDialog title={npcName} subtitle={npcRole} onClose={onClose}>
-        <div
-          className={`npc-dialog-layout ${
-            activeTradeMode ? "npc-dialog-layout--with-trade" : ""
-          }`}
-        >
+        <div className="npc-dialog-layout">
           <div className="npc-dialog-main">
             <div className="npc-dialog-top-row">
               <div className="npc-dialog-portrait">
@@ -164,7 +302,7 @@ export default function NpcDialog({
             </div>
 
             <div className="npc-dialog-footer">
-              <div className="npc-dialog-footer-hint">
+              <div className="npc-dialog-footer-hint npc-dialog-footer-hint--narrative">
                 <span className="npc-dialog-footer-hint-icon">✦</span>
                 <span>{narrativeHint}</span>
               </div>
@@ -183,9 +321,7 @@ export default function NpcDialog({
                   className={`npc-dialog-footer-button ${
                     activeTradeMode === "buy" ? "is-active" : ""
                   }`}
-                  onClick={() =>
-                    setTradeMode((prev) => (prev === "buy" ? null : "buy"))
-                  }
+                  onClick={() => openTradeMode("buy")}
                 >
                   Buy
                 </button>
@@ -195,9 +331,7 @@ export default function NpcDialog({
                   className={`npc-dialog-footer-button ${
                     activeTradeMode === "sell" ? "is-active" : ""
                   }`}
-                  onClick={() =>
-                    setTradeMode((prev) => (prev === "sell" ? null : "sell"))
-                  }
+                  onClick={() => openTradeMode("sell")}
                 >
                   Sell
                 </button>
@@ -205,63 +339,185 @@ export default function NpcDialog({
             </div>
           </div>
 
-          {activeTradeMode ? (
-            <aside className="npc-trade-panel">
-              <div className="npc-trade-panel__header">
-                <h4>{activeTradeMode === "buy" ? "Buy Items" : "Sell Items"}</h4>
+          <aside
+            className={`npc-trade-panel ${
+              activeTradeMode ? "npc-trade-panel--visible" : ""
+            }`}
+          >
+            {activeTradeMode ? (
+              <>
+                <div className="npc-trade-panel__header">
+                  <h4>{activeTradeMode === "buy" ? "Buy Items" : "Sell Items"}</h4>
+                  <p>
+                    {activeTradeMode === "buy"
+                      ? "Select an item from the merchant list, then confirm the purchase below."
+                      : "Drop inventory items here, select one entry, and confirm the sale below."}
+                  </p>
+                </div>
+
+                {activeTradeMode === "buy" ? (
+                  <>
+                    <div className="npc-trade-panel__content npc-trade-panel__content--list">
+                      {buyOffers.length > 0 ? (
+                        <div className="trade-list">
+                          {buyOffers.map((offer) => (
+                            <button
+                              key={offer.itemKey}
+                              type="button"
+                              className={`trade-list-item ${
+                                selectedBuyItemKey === offer.itemKey
+                                  ? "is-selected"
+                                  : ""
+                              }`}
+                              onClick={() => setSelectedBuyItemKey(offer.itemKey)}
+                            >
+                              <div className="trade-list-item__main">
+                                <strong>{offer.label}</strong>
+                                <span>{offer.description}</span>
+                              </div>
+                              <span className="trade-list-item__value">
+                                {offer.priceGold} Gold
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="trade-empty-state">
+                          <strong>No stock available</strong>
+                          <p>
+                            This merchant does not have a real buy inventory in the
+                            current prototype.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="npc-trade-panel__footer">
+                      <div className="npc-trade-panel__selection">
+                        {selectedBuyOffer ? (
+                          <>
+                            <strong>{selectedBuyOffer.label}</strong>
+                            <span>{selectedBuyOffer.priceGold} Gold</span>
+                          </>
+                        ) : (
+                          <span>Select an item to buy.</span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        className="npc-trade-panel__confirm-button"
+                        onClick={() => {
+                          if (selectedBuyOffer) {
+                            onBuyItem?.(selectedBuyOffer);
+                          }
+                        }}
+                        disabled={!selectedBuyOffer}
+                      >
+                        Buy
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="npc-trade-panel__content npc-trade-panel__content--sell">
+                      <div
+                        className="trade-drop-zone"
+                        onDragOver={allowSellDrop}
+                        onDrop={handleSellDrop}
+                      >
+                        <strong>Sell Basket</strong>
+                        <p>{sellPlaceholderMessage}</p>
+                      </div>
+
+                      {sellBasketEntries.length > 0 ? (
+                        <div className="trade-list">
+                          {sellBasketEntries.map((entry) => (
+                            <div
+                              key={entry.itemKey}
+                              className={`trade-list-item ${
+                                selectedSellItemKey === entry.itemKey
+                                  ? "is-selected"
+                                  : ""
+                              }`}
+                            >
+                              <div className="trade-list-item__main">
+                                <button
+                                  type="button"
+                                  className="trade-list-item__select"
+                                  onClick={() => setSelectedSellItemKey(entry.itemKey)}
+                                >
+                                  <strong>{entry.name}</strong>
+                                  <span>{entry.description}</span>
+                                </button>
+                              </div>
+                              <div className="trade-list-item__meta">
+                                <span className="trade-list-item__value">
+                                  x{entry.count}
+                                </span>
+                                <button
+                                  type="button"
+                                  className="trade-list-item__remove"
+                                  onClick={() => handleRemoveSellEntry(entry.itemKey)}
+                                  aria-label={`Remove ${entry.name} from sell basket`}
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="trade-empty-state">
+                          <strong>No items in the sell basket</strong>
+                          <p>
+                            Drag an eligible inventory stack into this panel to
+                            prepare the trade.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="npc-trade-panel__footer">
+                      <div className="npc-trade-panel__selection">
+                        {selectedSellEntry ? (
+                          <>
+                            <strong>{selectedSellEntry.name}</strong>
+                            <span>x{selectedSellEntry.count}</span>
+                          </>
+                        ) : (
+                          <span>Select a dropped item to sell.</span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        className="npc-trade-panel__secondary-button"
+                        onClick={handleSellAll}
+                        disabled={sellBasketEntries.length === 0}
+                      >
+                        Sell All
+                      </button>
+                      <button
+                        type="button"
+                        className="npc-trade-panel__confirm-button"
+                        onClick={handleSellSelected}
+                        disabled={!selectedSellEntry}
+                      >
+                        Sell
+                      </button>
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <div className="npc-trade-panel__placeholder">
+                <strong>Trade</strong>
                 <p>
-                  {activeTradeMode === "buy"
-                    ? "Merchant stock for testing."
-                    : "Trade area prepared for future drag and drop."}
+                  Open Buy or Sell to manage commerce without shrinking the
+                  dialogue space.
                 </p>
               </div>
-
-              {activeTradeMode === "buy" ? (
-                <div className="npc-trade-panel__content">
-                  {buyOffers.length > 0 ? (
-                    buyOffers.map((offer) => (
-                      <div key={offer.itemKey} className="trade-item-card">
-                        <strong>{offer.label}</strong>
-                        <span>{offer.description}</span>
-                        <button
-                          type="button"
-                          onClick={() => onBuyItem?.(offer)}
-                        >
-                          Buy • {offer.priceGold} Gold
-                        </button>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="trade-drop-zone">
-                      <strong>No stock available</strong>
-                      <p>
-                        This merchant does not have a real buy inventory in the
-                        current prototype.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="npc-trade-panel__content">
-                  <div className="trade-drop-zone">
-                    <strong>Sell Area</strong>
-                    <p>
-                      In the future, you will drag items from the inventory and
-                      drop them here.
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    className="trade-sell-all-button"
-                    onClick={onSell}
-                  >
-                    Sell All Resources
-                  </button>
-                </div>
-              )}
-            </aside>
-          ) : null}
+            )}
+          </aside>
         </div>
       </GameDialog>
     </div>

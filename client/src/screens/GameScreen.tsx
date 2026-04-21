@@ -14,6 +14,7 @@ import "../components/SideNavRail.css";
 
 import SkillsPanel from "../components/SkillsPanel";
 import InventoryPanel from "../components/InventoryPanel";
+import type { InventoryPanelItem } from "../components/InventoryPanel";
 import CharacterPanel from "../components/CharacterPanel";
 import EquipmentPanel from "../components/EquipmentPanel";
 import EventLogPanel from "../components/EventLogPanel";
@@ -21,6 +22,7 @@ import ChatPanel from "../components/ChatPanel";
 import TopPanel from "../components/TopPanel";
 import RegionPlayersIndicator from "../components/RegionPlayersIndicator";
 import SideNavRail, { sideNavIcons } from "../components/SideNavRail";
+import { useCombatEncounter } from "../features/combat/application/hooks/useCombatEncounter";
 
 import {
   WorldMap,
@@ -83,10 +85,8 @@ import { collectRewardMessages } from "../features/systems/application/systems/r
 import { applyRewardsToPlayerSnapshot } from "../features/systems/application/systems/playerRewardStateSystem";
 import {
   applyConditionActionWear,
-  resolveConditionAdjustedAttackDamage,
   resolveConditionAdjustedStaminaCost,
 } from "../features/systems/application/systems/playerConditionSystem";
-import { applyPlayerDamageState } from "../features/progression/application/systems/progressionVitalsSystem";
 import {
   countInventoryItem,
   countInventoryItemsByKeys,
@@ -102,9 +102,7 @@ import {
   createActionPerformedMessage,
   createConversationStartedMessage,
   createDirectMessagePlaceholder,
-  createEncounterLostMessage,
   createEncounterStartedMessage,
-  createEncounterWonMessage,
   createHideoutReasonMessage,
   createHideoutStorageMessage,
   createHideoutUpgradeMessage,
@@ -130,6 +128,7 @@ import { resolveCharacterAvatarByClassKey } from "../data/characterAvatarCatalog
 
 type GameScreenProps = {
   selectedCharacter: CharacterSummary;
+  onDisconnect: () => void;
 };
 
 function formatChatTimestamp(date = new Date()) {
@@ -173,7 +172,10 @@ function resolveInventoryDisplayItem(itemKey: string, count: number) {
 
 void resolveInventoryDisplayItem;
 
-export default function GameScreen({ selectedCharacter }: GameScreenProps) {
+export default function GameScreen({
+  selectedCharacter,
+  onDisconnect,
+}: GameScreenProps) {
   const selectedCharacterAvatar = resolveCharacterAvatarByClassKey(
     selectedCharacter.classKey
   );
@@ -223,7 +225,6 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     null
   );
   const continuousCombatLoopStopRef = useRef<string | null>(null);
-  const processedLootEncounterInstanceIdsRef = useRef<Set<number>>(new Set());
 
   const [currentMap, setCurrentMap] = useState<MapId>("belagard");
   const {
@@ -277,7 +278,6 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     handleTravel,
     tryTriggerLoreDiscovery,
     gainCharacterXp,
-    applyDamageToPlayer,
     learnRumor,
     discoverPoi,
     recordSkillTraining,
@@ -703,8 +703,6 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
 
     openEncounterOverlay({
       encounterKey,
-      enemyHp: encounter.enemyMaxHp,
-      introText: encounter.introText,
     });
 
     setEventLogs((prev) => [
@@ -717,6 +715,69 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     setActiveEncounter(null);
     setContextState("expanded");
   }, [setActiveEncounter, setContextState]);
+  const {
+    combatState,
+    actionAvailabilities: combatActionAvailabilities,
+    dispatchCombatAction,
+    retreatEncounter,
+    closeCombat,
+  } = useCombatEncounter({
+    activeEncounter,
+    encounterData: activeEncounterData,
+    playerSnapshot: player
+      ? {
+          ...player,
+          maxHp: computedMaxHp,
+          maxSp: computedSp,
+        }
+      : null,
+    playerClassKey: selectedCharacter.classKey,
+    setPlayer,
+    onCloseEncounter: closeEncounterOverlayState,
+    onEventLogs: (messages) => {
+      setEventLogs((prev) => [...prev, ...messages]);
+    },
+    onGainEncounterXp: gainCharacterXp,
+    onRegisterVictory: (speciesId, enemyName) => {
+      registerBestiaryKill(
+        speciesId as Parameters<typeof registerBestiaryKill>[0],
+        enemyName
+      );
+    },
+    onResolveVictoryRewards: (encounter) => {
+      const victoryRewards = resolveBattleVictoryRewards(encounter);
+
+      if (victoryRewards.rewards.length > 0) {
+        setPlayer((previousPlayer) =>
+          applyRewardsToPlayerSnapshot(previousPlayer, victoryRewards.rewards)
+        );
+      }
+
+      return victoryRewards.eventLogMessages;
+    },
+    onRecordTraining: (event) => {
+      recordSkillTraining(event as Parameters<typeof recordSkillTraining>[0]);
+    },
+    onEncounterQuestProgress: (encounterKey) => {
+      logQuestUpdates(
+        applyQuestEvent({
+          type: "encounter",
+          encounterKey,
+        })
+      );
+    },
+  });
+
+  const combatLoopEncounterState = activeEncounter
+    ? {
+        key: activeEncounter.key,
+        isResolved: combatState?.status === "resolved",
+        resolution:
+          combatState?.resolution === "victory" || combatState?.resolution === "defeat"
+            ? combatState.resolution
+            : null,
+      }
+    : null;
 
   const {
     loopState: continuousCombatLoopState,
@@ -727,257 +788,26 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     resetLoop,
   } = useContinuousCombatLoop({
     mapData: currentMapData,
-    activeEncounter,
+    activeEncounter: combatLoopEncounterState,
     onOpenEncounter: openEncounter,
     onCloseEncounter: closeEncounterOverlayState,
   });
 
-  const handleAttackEncounter = () => {
-    if (!activeEncounter || !player) return;
-    if (activeEncounter.isResolved || activeEncounter.resolution !== null) return;
-
-    const encounter = resolveEncounterData(activeEncounter.key);
-
-    if (!encounter) {
-      notifyError("Encounter configuration is unavailable.", {
-        title: "Combat unavailable",
-      });
-      return;
-    }
-    const attackStaminaCost = resolveConditionAdjustedStaminaCost(player, 1);
-
-    if (!canSpendPlayerStamina(player, attackStaminaCost)) {
-      const insufficientStaminaMessage = createInsufficientStaminaMessage("Attack");
-
-      setActiveEncounter({
-        ...activeEncounter,
-        combatLog: [...activeEncounter.combatLog, insufficientStaminaMessage],
-      });
-      setEventLogs((prev) => [...prev, insufficientStaminaMessage]);
-
-      return;
-    }
-
-    const playerAttackDamage = resolveConditionAdjustedAttackDamage(
-      player,
-      encounter.playerAttackDamage
-    );
-    recordSkillTraining({
-      type: "combat.attack",
-      combatStyle: "melee",
-      encounterKey: activeEncounter.key,
-    });
-
-    const nextEnemyHp = Math.max(0, activeEncounter.enemyHp - playerAttackDamage);
-    const playerAfterAttackCost = applyConditionActionWear(
-      spendPlayerStamina(player, attackStaminaCost)
-    );
-
-    if (nextEnemyHp <= 0) {
-      if (processedLootEncounterInstanceIdsRef.current.has(activeEncounter.instanceId)) {
-        return;
-      }
-
-      processedLootEncounterInstanceIdsRef.current.add(activeEncounter.instanceId);
-      const victoryRewards = resolveBattleVictoryRewards(encounter);
-
-      setActiveEncounter({
-        ...activeEncounter,
-        enemyHp: 0,
-        isResolved: true,
-        resolution: "victory",
-        combatLog: [
-          ...activeEncounter.combatLog,
-          `You strike the ${encounter.enemyName} for ${playerAttackDamage} damage.`,
-          ...(hasPoison
-            ? ["Poison burns through your system as the fight ends."]
-            : []),
-          encounter.victoryText,
-        ],
-      });
-
-      gainCharacterXp(encounter.rewardXp, `Defeated ${encounter.enemyName}`);
-      if (victoryRewards.rewards.length > 0) {
-        setPlayer((previousPlayer) =>
-          applyRewardsToPlayerSnapshot(
-            applyConditionActionWear(
-              spendPlayerStamina(previousPlayer, attackStaminaCost)
-            ),
-            victoryRewards.rewards
-          )
-        );
-      } else {
-        setPlayer(playerAfterAttackCost);
-      }
-      registerBestiaryKill(encounter.speciesId, encounter.enemyName);
-      logQuestUpdates(
-        applyQuestEvent({
-          type: "encounter",
-          encounterKey: activeEncounter.key,
-        })
-      );
-      recordSkillTraining({
-        type: "combat.victory",
-        combatStyle: "melee",
-        encounterKey: activeEncounter.key,
-      });
-
-      setEventLogs((prev) => [
-        ...prev,
-        createSystemMessage(`Attack costs ${attackStaminaCost} stamina.`),
-        createEncounterWonMessage(encounter.enemyName),
-        ...victoryRewards.eventLogMessages,
-      ]);
-
-      return;
-    }
-
-    const playerAfterRetaliation = applyPlayerDamageState(
-      playerAfterAttackCost,
-      encounter.enemyAttackDamage
-    );
-    const nextPlayerHp = playerAfterRetaliation.currentHp;
-
-    applyDamageToPlayer(encounter.enemyAttackDamage, encounter.enemyName);
-
-    if (nextPlayerHp <= 0) {
-      setPlayer(playerAfterRetaliation);
-      setActiveEncounter({
-        ...activeEncounter,
-        enemyHp: nextEnemyHp,
-        isResolved: true,
-        resolution: "defeat",
-        combatLog: [
-          ...activeEncounter.combatLog,
-          `You strike the ${encounter.enemyName} for ${playerAttackDamage} damage.`,
-          `${encounter.enemyName} retaliates for ${encounter.enemyAttackDamage} damage.`,
-          `You collapse under the ${encounter.enemyName}'s attack.`,
-        ],
-      });
-
-      setEventLogs((prev) => [
-        ...prev,
-        createSystemMessage(`Attack costs ${attackStaminaCost} stamina.`),
-        createEncounterLostMessage(encounter.enemyName),
-      ]);
-
-      return;
-    }
-
-    setPlayer(playerAfterRetaliation);
-    setActiveEncounter({
-      ...activeEncounter,
-      enemyHp: nextEnemyHp,
-      combatLog: [
-        ...activeEncounter.combatLog,
-        `You strike the ${encounter.enemyName} for ${playerAttackDamage} damage.`,
-        `${encounter.enemyName} retaliates for ${encounter.enemyAttackDamage} damage.`,
-        ...(hasPoison
-          ? ["Poison weakens you for 1 HP and 1 SP during the exchange."]
-          : []),
-      ],
-    });
-
-    if (hasPoison) {
-      setEventLogs((prev) => [
-        ...prev,
-        createSystemMessage(`Attack costs ${attackStaminaCost} stamina.`),
-        createSystemMessage("Poison drains 1 HP and 1 SP during the fight."),
-      ]);
-      return;
-    }
-
-    setEventLogs((prev) => [
-      ...prev,
-      createSystemMessage(`Attack costs ${attackStaminaCost} stamina.`),
-    ]);
-  };
-
-  const handleRetreatEncounter = () => {
-    if (!activeEncounter) return;
-    if (!player) return;
-
-    const encounter = resolveEncounterData(activeEncounter.key);
-
-    if (!encounter) {
-      notifyError("Encounter configuration is unavailable.", {
-        title: "Combat unavailable",
-      });
-      return;
-    }
-    const retreatRoll = Math.random();
-    const staminaPenalty = player.stamina > 0 ? 1 : 0;
-    const damagePenalty =
-      retreatRoll >= 0.35 ? Math.min(encounter.enemyAttackDamage, player.currentHp - 1) : 0;
-    const inflictInjury =
-      retreatRoll >= 0.55 && !player.activeConditions.includes("injury");
-    const inflictPoison =
-      retreatRoll >= 0.8 && !player.activeConditions.includes("poison");
-
-    setPlayer((previousPlayer) => {
-      const spentStaminaPlayer =
-        staminaPenalty > 0
-          ? spendPlayerStamina(previousPlayer, staminaPenalty)
-          : previousPlayer;
-
-      const nextActiveConditions = Array.from(
-        new Set([
-          ...spentStaminaPlayer.activeConditions,
-          ...(inflictInjury ? ["injury"] : []),
-          ...(inflictPoison ? ["poison"] : []),
-        ])
-      );
-
-      return {
-        ...spentStaminaPlayer,
-        currentHp: Math.max(1, spentStaminaPlayer.currentHp - damagePenalty),
-        activeConditions: nextActiveConditions,
-      };
-    });
-
+  const handleRetreatEncounter = useCallback(() => {
     if (isHunting) {
       stopLoop("retreat");
     }
 
-    setEventLogs((prev) => [
-      ...prev,
-      createSystemMessage(encounter.retreatText),
-      ...(staminaPenalty > 0
-        ? [createSystemMessage(`Retreat costs ${staminaPenalty} stamina.`)]
-        : []),
-      ...(damagePenalty > 0
-        ? [
-            createSystemMessage(
-              `The ${encounter.enemyName} catches you on the way out for ${damagePenalty} damage.`
-            ),
-          ]
-        : []),
-      ...(inflictInjury
-        ? [
-            createSystemMessage(
-              "You escape, but the scramble leaves you with an injury."
-            ),
-          ]
-        : []),
-      ...(inflictPoison
-        ? [
-            createSystemMessage(
-              "A final hit leaves lingering poison in your system."
-            ),
-          ]
-        : []),
-    ]);
-    setActiveEncounter(null);
-    setContextState("expanded");
-  };
+    retreatEncounter();
+  }, [isHunting, retreatEncounter, stopLoop]);
 
-  const handleCloseEncounter = () => {
-    if (activeEncounter && !activeEncounter.isResolved && isHunting) {
+  const handleCloseEncounter = useCallback(() => {
+    if (combatState && combatState.status === "active" && isHunting) {
       stopLoop("manual");
     }
 
-    closeEncounterOverlayState();
-  };
+    closeCombat();
+  }, [closeCombat, combatState, isHunting, stopLoop]);
 
   const handleGlobalMapAction = useCallback(
     (action: MapGlobalAction) => {
@@ -1742,6 +1572,58 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
     ]);
   };
 
+  const handleNpcSellItems = (items: Array<{ itemKey: string; count: number }>) => {
+    if (!player || items.length === 0) {
+      return false;
+    }
+
+    const goldPerItem = activeNpcProfile.sellPriceGoldPerItem ?? 2;
+    const totalItemCount = items.reduce((total, entry) => total + entry.count, 0);
+    let nextSnapshot = player;
+
+    for (const entry of items) {
+      const availableCount = countInventoryItem(nextSnapshot.inventory, entry.itemKey);
+
+      if (availableCount < entry.count) {
+        return false;
+      }
+
+      const consumption = consumeInventoryItemAmount(
+        nextSnapshot,
+        entry.itemKey,
+        entry.count
+      );
+
+      if (!consumption.didConsume) {
+        return false;
+      }
+
+      nextSnapshot = consumption.nextSnapshot;
+    }
+
+    const goldEarned = totalItemCount * goldPerItem;
+
+    setPlayer(
+      applyRewardsToPlayerSnapshot(nextSnapshot, [
+        {
+          type: "gold",
+          amount: goldEarned,
+        },
+      ])
+    );
+
+    notifySuccess(`${goldEarned} Gold received`, {
+      title: "Trade completed",
+    });
+
+    setEventLogs((prev) => [
+      ...prev,
+      createSellResourcesMessage(totalItemCount, goldEarned),
+    ]);
+
+    return true;
+  };
+
   const handleNpcOptionSelect = (optionId: string) => {
     if (activeNpcProfileKey === "jane") {
       if (optionId === "who-are-you") {
@@ -1997,6 +1879,9 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
   const hideoutStorageDisplayEntries = storageEntries.map(({ itemKey, count }) =>
     resolveInventoryItemView(itemKey, count)
   );
+  const sellableInventoryEntries: InventoryPanelItem[] = groupedInventory.filter((item) =>
+    (activeNpcProfile.sellableItemKeys ?? []).includes(item.itemKey)
+  );
 
   const currentWeight = groupedInventory.reduce(
     (total, item) => total + item.weight * item.count,
@@ -2004,8 +1889,16 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
   );
 
   const xpText = xpProgress
-    ? `${xpProgress.xpIntoLevel}/${xpProgress.xpToNextLevel} XP`
-    : "0/0 XP";
+    ? `XP ${xpProgress.xpIntoLevel} of ${xpProgress.xpToNextLevel}`
+    : "XP 0 of 0";
+  const xpProgressPercent = xpProgress
+    ? xpProgress.xpToNextLevel > 0
+      ? Math.max(
+          0,
+          Math.min(100, (xpProgress.xpIntoLevel / xpProgress.xpToNextLevel) * 100)
+        )
+      : 0
+    : 0;
 
   const sideNavItems = [
     {
@@ -2053,11 +1946,28 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
         "Open the full talent and specialization window.",
     },
   ];
+  const disconnectNavItem = {
+    id: "disconnect",
+    label: "Disconnect",
+    icon: sideNavIcons.disconnect,
+    onClick: () => {
+      const shouldDisconnect = window.confirm(
+        "Disconnect and return to the login screen?"
+      );
+
+      if (!shouldDisconnect) {
+        return;
+      }
+
+      onDisconnect();
+    },
+    tooltipDescription: "Leave the current session and return to the login screen.",
+  };
 
   return (
     <main className="game-shell">
       <section className="game-grid">
-        <SideNavRail items={sideNavItems} />
+        <SideNavRail items={sideNavItems} footerItem={disconnectNavItem} />
 
         <section className="world-panel">
           <TopPanel
@@ -2130,30 +2040,26 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
             onCloseNpcDialog={handleCloseNpcDialog}
             onNpcOptionSelect={handleNpcOptionSelect}
             onNpcBuyItem={handleNpcBuyItem}
-            onNpcSell={() => {
-              if (activeNpcProfileKey === "maria") {
-                handleSellResources({
-                  id: "maria-sell-natural-goods",
-                  label: "Sell Natural Goods",
-                  description: "Sell fruit and natural goods to Maria.",
-                  effect: "sell_resources",
-                  sellableItemKeys: ["fruit", "herb", "fish", "rabbit-meat"],
-                  goldPerItem: 3,
-                });
-                return;
-              }
-
-              handleSellResources();
-            }}
+            onNpcSellItems={handleNpcSellItems}
             npcBuyOffers={activeNpcProfile.buyOffers}
-            combatDialogOpen={Boolean(activeEncounter && activeEncounterData)}
+            npcSellInventoryEntries={sellableInventoryEntries}
+            npcSellPlaceholderMessage={activeNpcProfile.sellPlaceholderMessage}
+            combatDialogOpen={Boolean(activeEncounter && activeEncounterData && combatState)}
             combatEnemyName={activeEncounterData?.enemyName ?? ""}
             combatEnemyTitle={activeEncounterData?.enemyTitle ?? ""}
-            combatEnemyHp={activeEncounter?.enemyHp ?? 0}
+            combatEnemyHp={
+              combatState && activeEncounterData
+                ? combatState.combatants[
+                    combatState.enemyCombatantIds[0] ?? ""
+                  ]?.currentHp ?? 0
+                : 0
+            }
             combatEnemyMaxHp={activeEncounterData?.enemyMaxHp ?? 0}
-            combatLog={activeEncounter?.combatLog ?? []}
-            combatResolved={activeEncounter?.isResolved ?? false}
-            onCombatAttack={handleAttackEncounter}
+            combatLog={combatState?.combatLog.map((entry) => entry.message) ?? []}
+            combatState={combatState}
+            combatActionAvailabilities={combatActionAvailabilities}
+            combatResolved={combatState?.status === "resolved"}
+            onCombatAction={dispatchCombatAction}
             onCombatRetreat={handleRetreatEncounter}
             onCloseCombatDialog={handleCloseEncounter}
             discoverablePois={discoverablePoisData}
@@ -2287,6 +2193,7 @@ export default function GameScreen({ selectedCharacter }: GameScreenProps) {
           <CharacterPanel
             level={computedLevel}
             xpText={xpText}
+            xpProgressPercent={xpProgressPercent}
             name={player.name}
             characterClass={selectedClass.name}
             avatarSrc={selectedCharacterAvatar.imageSrc}

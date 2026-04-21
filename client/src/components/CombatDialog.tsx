@@ -1,5 +1,11 @@
 import GameDialog from "./GameDialog";
 import "./CombatDialog.css";
+import CombatActionBar from "../features/combat/presentation/components/CombatActionBar";
+import type {
+  CombatActionAvailability,
+  CombatActionId,
+  CombatState,
+} from "../features/combat/domain/combatEngineTypes";
 
 type CombatDialogProps = {
   isOpen: boolean;
@@ -8,8 +14,10 @@ type CombatDialogProps = {
   enemyHp: number;
   enemyMaxHp: number;
   combatLog: string[];
+  combatState: CombatState | null;
+  actionAvailabilities: CombatActionAvailability[];
   isResolved: boolean;
-  onAttack: () => void;
+  onAction: (actionId: CombatActionId) => void;
   onRetreat: () => void;
   onClose: () => void;
   loopStatusLabel?: string | null;
@@ -23,8 +31,10 @@ export default function CombatDialog({
   enemyHp,
   enemyMaxHp,
   combatLog,
+  combatState,
+  actionAvailabilities,
   isResolved,
-  onAttack,
+  onAction,
   onRetreat,
   onClose,
   loopStatusLabel,
@@ -34,6 +44,9 @@ export default function CombatDialog({
 
   const hpPercent =
     enemyMaxHp > 0 ? Math.max(0, (enemyHp / enemyMaxHp) * 100) : 0;
+  const activeCombatantName = combatState
+    ? combatState.combatants[combatState.turn.activeCombatantId]?.name ?? "Unknown"
+    : "Unknown";
 
   return (
     <div className="combat-dialog-anchor">
@@ -72,6 +85,18 @@ export default function CombatDialog({
             ))}
           </div>
 
+          {combatState && !isResolved ? (
+            <CombatActionBar
+              combatState={combatState}
+              activeCombatantName={activeCombatantName}
+              actionAvailabilities={actionAvailabilities}
+              onAction={onAction}
+              disabled={
+                combatState.turn.activeCombatantId !== combatState.playerCombatantId
+              }
+            />
+          ) : null}
+
           <div className="combat-dialog-actions">
             {loopStatusLabel ? (
               <div className="combat-dialog-loop-status">
@@ -96,23 +121,13 @@ export default function CombatDialog({
                 Close
               </button>
             ) : (
-              <>
-                <button
-                  type="button"
-                  className="combat-dialog-button combat-dialog-button--primary"
-                  onClick={onAttack}
-                >
-                  Attack
-                </button>
-
-                <button
-                  type="button"
-                  className="combat-dialog-button"
-                  onClick={onRetreat}
-                >
-                  Retreat
-                </button>
-              </>
+              <button
+                type="button"
+                className="combat-dialog-button"
+                onClick={onRetreat}
+              >
+                Retreat
+              </button>
             )}
           </div>
         </div>

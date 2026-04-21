@@ -24,6 +24,7 @@ export type CreatureSpeciesData = {
     playerAttackDamage: number;
     enemyAttackDamage: number;
     rewardXp: number;
+    enemyBaseInitiative: number;
   };
   traits: {
     weaknesses: string[];
@@ -48,6 +49,7 @@ export type CreatureSpeciesSnapshot = {
     playerAttackDamage: number;
     enemyAttackDamage: number;
     rewardXp: number;
+    enemyBaseInitiative: number;
   };
   weaknesses: string[];
   resistances: string[];

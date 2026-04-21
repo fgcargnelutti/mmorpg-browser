@@ -19,6 +19,7 @@ export const creatureSpeciesData: Partial<
       playerAttackDamage: 6,
       enemyAttackDamage: 3,
       rewardXp: 12,
+      enemyBaseInitiative: 5,
     },
     traits: {
       weaknesses: ["Bleed", "Direct melee pressure"],

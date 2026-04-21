@@ -1,3 +1,5 @@
+import Tooltip from "./Tooltip";
+
 type EquipmentSlot = {
   key: string;
   label: string;
@@ -27,19 +29,24 @@ export default function EquipmentPanel({
             className={`equipment-row-grid equipment-cols-${row.length}`}
           >
             {row.map((slot) => (
-              <div key={slot.key} className="equip-slot">
-                <span className="equip-slot-icon">{slot.icon}</span>
-
-                <div className="inline-tooltip equip-tooltip">
-                  <strong>{slot.itemName}</strong>
-                  <p>{slot.label}</p>
-                  <ul>
-                    {slot.tooltip.map((line) => (
-                      <li key={line}>{line}</li>
-                    ))}
-                  </ul>
+              <Tooltip
+                key={slot.key}
+                content={
+                  <div className="equipment-tooltip-content">
+                    <strong>{slot.itemName}</strong>
+                    <p>{slot.label}</p>
+                    <div className="equipment-tooltip-stats">
+                      {slot.tooltip.map((line) => (
+                        <p key={line}>{line}</p>
+                      ))}
+                    </div>
+                  </div>
+                }
+              >
+                <div key={slot.key} className="equip-slot">
+                  <span className="equip-slot-icon">{slot.icon}</span>
                 </div>
-              </div>
+              </Tooltip>
             ))}
           </div>
         ))}

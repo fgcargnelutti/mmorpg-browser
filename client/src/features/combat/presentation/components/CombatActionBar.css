@@ -1,0 +1,103 @@
+.combat-action-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid rgba(76, 95, 123, 0.4);
+  border-radius: 14px;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 15, 24, 0.86) 0%,
+    rgba(8, 12, 19, 0.94) 100%
+  );
+}
+
+.combat-action-bar__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.combat-action-bar__header strong {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.combat-action-bar__header span {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.combat-action-bar__grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.combat-action-bar__button {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  min-height: 62px;
+  padding: 10px;
+  border: 1px solid rgba(89, 110, 140, 0.46);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #243447 0%, #172231 100%);
+  color: var(--text-soft);
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.combat-action-bar__button:hover:not(:disabled) {
+  background: linear-gradient(180deg, #2f4662 0%, #1d2d40 100%);
+  border-color: rgba(136, 162, 205, 0.62);
+  box-shadow: 0 12px 18px rgba(1, 6, 13, 0.18);
+  transform: translateY(-1px);
+}
+
+.combat-action-bar__button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.combat-action-bar__button--basic-attack {
+  border-color: rgba(210, 177, 115, 0.56);
+}
+
+.combat-action-bar__button--dodge {
+  border-color: rgba(130, 170, 219, 0.42);
+}
+
+.combat-action-bar__button--use-potion {
+  border-color: rgba(120, 182, 142, 0.42);
+}
+
+.combat-action-bar__button--skill {
+  border-color: rgba(143, 129, 214, 0.32);
+}
+
+.combat-action-bar__label {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.combat-action-bar__hotkey {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+@media (max-width: 720px) {
+  .combat-action-bar__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

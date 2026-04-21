@@ -23,6 +23,7 @@
   pointer-events: none;
   border-radius: 12px;
   backdrop-filter: blur(8px);
+  text-align: left;
 }
 
 .portal-tooltip strong {
@@ -48,4 +49,8 @@
   margin-bottom: 4px;
   color: var(--muted);
   font-size: 12px;
+}
+
+.portal-tooltip p:last-child {
+  margin-bottom: 0;
 }

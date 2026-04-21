@@ -18,6 +18,7 @@ export type EncounterTemplate = {
     playerAttackDamage?: number;
     enemyAttackDamage?: number;
     rewardXp?: number;
+    enemyBaseInitiative?: number;
   };
   introText: string;
   victoryText: string;

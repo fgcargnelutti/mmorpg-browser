@@ -17,6 +17,7 @@ export type EncounterData = {
   playerAttackDamage: number;
   enemyAttackDamage: number;
   rewardXp: number;
+  enemyBaseInitiative: number;
   introText: string;
   victoryText: string;
   retreatText: string;

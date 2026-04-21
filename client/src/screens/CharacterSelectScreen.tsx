@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./CharacterFlow.css";
 import "./CharacterSelectScreen.css";
 import {
@@ -7,6 +7,8 @@ import {
 } from "../data/characterClassesData";
 import { resolveCharacterAvatarByClassKey } from "../data/characterAvatarCatalog";
 import CharacterAvatar from "../components/CharacterAvatar";
+import CharacterClassDetailsSidebar from "../components/character-flow/CharacterClassDetailsSidebar";
+import CharacterCenteredCarousel from "../components/character-flow/CharacterCenteredCarousel";
 
 export type CharacterSummary = {
   id: string;
@@ -20,13 +22,21 @@ type CharacterSelectScreenProps = {
   characters: CharacterSummary[];
   onEnterWorld: (character: CharacterSummary) => void;
   onCreateNewCharacter: () => void;
+  onDeleteCharacter: (characterId: string) => void;
 };
 
+function getWrappedCharacter(characters: CharacterSummary[], index: number) {
+  if (characters.length === 0) return null;
+
+  const normalizedIndex = (index + characters.length) % characters.length;
+  return characters[normalizedIndex] ?? null;
+}
+
 export default function CharacterSelectScreen({
-  username,
   characters,
   onEnterWorld,
   onCreateNewCharacter,
+  onDeleteCharacter,
 }: CharacterSelectScreenProps) {
   const initialSelectedId = useMemo(
     () => characters[0]?.id ?? null,
@@ -37,15 +47,68 @@ export default function CharacterSelectScreen({
     initialSelectedId
   );
 
+  useEffect(() => {
+    if (characters.length === 0) {
+      setSelectedCharacterId(null);
+      return;
+    }
+
+    const hasSelectedCharacter = characters.some(
+      (character) => character.id === selectedCharacterId
+    );
+
+    if (!hasSelectedCharacter) {
+      setSelectedCharacterId(characters[0].id);
+    }
+  }, [characters, selectedCharacterId]);
+
+  const selectedIndex = characters.findIndex(
+    (character) => character.id === selectedCharacterId
+  );
+
   const selectedCharacter =
-    characters.find((character) => character.id === selectedCharacterId) ?? null;
+    (selectedIndex >= 0 ? characters[selectedIndex] : null) ?? null;
 
   const selectedClass = selectedCharacter
     ? characterClassesData[selectedCharacter.classKey]
     : null;
+
   const selectedAvatar = selectedCharacter
     ? resolveCharacterAvatarByClassKey(selectedCharacter.classKey)
     : null;
+
+  const previousCharacter =
+    selectedIndex >= 0 ? getWrappedCharacter(characters, selectedIndex - 1) : null;
+  const nextCharacter =
+    selectedIndex >= 0 ? getWrappedCharacter(characters, selectedIndex + 1) : null;
+
+  const handleSelectOffset = (offset: number) => {
+    if (characters.length <= 1 || selectedIndex < 0) {
+      return;
+    }
+
+    const targetCharacter = getWrappedCharacter(characters, selectedIndex + offset);
+
+    if (targetCharacter) {
+      setSelectedCharacterId(targetCharacter.id);
+    }
+  };
+
+  const handleDeleteSelectedCharacter = () => {
+    if (!selectedCharacter) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Delete ${selectedCharacter.name}? This action cannot be undone.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    onDeleteCharacter(selectedCharacter.id);
+  };
 
   return (
     <main className="character-flow-screen character-select-screen">
@@ -54,223 +117,107 @@ export default function CharacterSelectScreen({
       <div className="character-flow-vignette" />
 
       <section className="character-flow-shell character-select-shell">
-        <aside className="character-flow-hero">
-          <div className="character-flow-hero__eyebrow">Frontier Roster</div>
-          <div className="character-flow-hero__title-block">
-            <h1>Character Selection</h1>
-            <p>Welcome back, {username}. Choose who steps into the wasteland next.</p>
-          </div>
+        <section className="character-flow-panel character-select-panel">
+          {selectedCharacter && selectedClass ? (
+            <div className="character-select-layout">
+              <CharacterClassDetailsSidebar
+                prefix="character-select"
+                name={selectedCharacter.name}
+                classNameLabel={selectedClass.name}
+                level={selectedCharacter.level}
+                characterClass={selectedClass}
+              />
 
-          <div className="character-flow-hero__copy">
-            <p className="character-flow-hero__line">
-              Review your survivors, compare their specializations, and enter the
-              world with a clearer sense of role and risk.
-            </p>
-            <p className="character-flow-hero__line">
-              This roster will grow into a richer selection surface as companions,
-              progression, and account-level management expand.
-            </p>
-          </div>
+              <div className="character-select-stage">
+                <CharacterCenteredCarousel
+                  prefix="character-select"
+                  ariaLabel="Character roster"
+                  onPrevious={() => handleSelectOffset(-1)}
+                  onNext={() => handleSelectOffset(1)}
+                  disableNavigation={characters.length <= 1}
+                  previousCard={
+                    previousCharacter
+                      ? {
+                          name: previousCharacter.name,
+                          meta: characterClassesData[previousCharacter.classKey].name,
+                          onSelect: () =>
+                            setSelectedCharacterId(previousCharacter.id),
+                        }
+                      : null
+                  }
+                  nextCard={
+                    nextCharacter
+                      ? {
+                          name: nextCharacter.name,
+                          meta: characterClassesData[nextCharacter.classKey].name,
+                          onSelect: () => setSelectedCharacterId(nextCharacter.id),
+                        }
+                      : null
+                  }
+                  activeCard={
+                    <article className="character-select-carousel-card is-active">
+                      {selectedAvatar ? (
+                        <CharacterAvatar
+                          src={selectedAvatar.imageSrc}
+                          alt={selectedAvatar.altLabel}
+                          size="lg"
+                          className="character-select-carousel-avatar"
+                        />
+                      ) : null}
 
-          <div className="character-flow-status-row">
-            <span className="character-flow-status-pill">
-              <span className="character-flow-status-pill__dot" />
-              {characters.length} registered survivors
-            </span>
-            {selectedCharacter && selectedClass ? (
-              <span className="character-flow-status-pill">
-                {selectedClass.name} - Level {selectedCharacter.level}
-              </span>
-            ) : null}
-          </div>
-
-          <div className="character-flow-hero-card">
-            <span className="character-flow-hero-card__label">Active Preview</span>
-            {selectedCharacter && selectedClass && selectedAvatar ? (
-              <>
-                <div className="character-select-preview-card">
-                  <CharacterAvatar
-                    src={selectedAvatar.imageSrc}
-                    alt={selectedAvatar.altLabel}
-                    size="lg"
-                  />
-
-                  <div className="character-select-preview-card__content">
-                    <strong>{selectedCharacter.name}</strong>
-                    <p>{selectedClass.title}</p>
-                  </div>
-                </div>
-
-                <div className="character-flow-inline-stats">
-                  <span>HP {selectedClass.baseHp}</span>
-                  <span>SP {selectedClass.baseSp}</span>
-                  <span>Stamina {selectedClass.baseStamina}</span>
-                </div>
-              </>
-            ) : (
-              <>
-                <strong>No character selected</strong>
-                <p>Select a survivor to inspect their current class profile.</p>
-              </>
-            )}
-          </div>
-        </aside>
-
-        <section className="character-flow-panel">
-          <div className="character-flow-panel__header character-select-header">
-            <div>
-              <h2>Roster</h2>
-              <p>Choose a survivor or create a new one before entering the world.</p>
-            </div>
-
-            <button
-              type="button"
-              className="character-flow-button character-flow-button--secondary"
-              onClick={onCreateNewCharacter}
-            >
-              New Character
-            </button>
-          </div>
-
-          <div className="character-select-body">
-            <div className="character-select-list character-flow-scroll-panel">
-              {characters.length === 0 ? (
-                <div className="character-empty-state">
-                  <strong>No characters found</strong>
-                  <span>Create your first character to enter the world.</span>
-                </div>
-              ) : (
-                characters.map((character) => {
-                  const isSelected = character.id === selectedCharacterId;
-                  const characterClass = characterClassesData[character.classKey];
-                  const characterAvatar = resolveCharacterAvatarByClassKey(
-                    character.classKey
-                  );
-
-                  return (
-                    <button
-                      key={character.id}
-                      type="button"
-                      className={`character-card ${isSelected ? "is-selected" : ""}`}
-                      onClick={() => setSelectedCharacterId(character.id)}
-                    >
-                      <CharacterAvatar
-                        src={characterAvatar.imageSrc}
-                        alt={characterAvatar.altLabel}
-                        size="sm"
-                        className="character-card-portrait"
-                      />
-
-                      <div className="character-card-content">
-                        <strong>{character.name}</strong>
-                        <span>{characterClass.name}</span>
-                        <small>Level {character.level}</small>
-                      </div>
-                    </button>
-                  );
-                })
-              )}
-            </div>
-
-            <aside className="character-class-preview character-flow-scroll-panel">
-              {selectedCharacter && selectedClass && selectedAvatar ? (
-                <>
-                  <div className="character-class-preview-header">
-                    <div className="character-class-preview-header__identity">
-                      <CharacterAvatar
-                        src={selectedAvatar.imageSrc}
-                        alt={selectedAvatar.altLabel}
-                        size="md"
-                      />
-
-                      <div>
+                      <div className="character-select-carousel-card__content">
                         <strong>{selectedCharacter.name}</strong>
                         <span>
-                          {selectedClass.name} - Level {selectedCharacter.level}
+                          {selectedClass.name} • Level {selectedCharacter.level}
                         </span>
                       </div>
-                    </div>
-                  </div>
+                    </article>
+                  }
+                />
 
-                  <div className="character-class-preview-section">
-                    <h2>{selectedClass.title}</h2>
-                    <p>{selectedClass.description}</p>
-                  </div>
+                <div className="character-select-footer">
+                  <button
+                    type="button"
+                    className="character-flow-button character-flow-button--primary"
+                    onClick={() => onEnterWorld(selectedCharacter)}
+                  >
+                    Enter World
+                  </button>
 
-                  <div className="character-class-preview-section">
-                    <h3>Base Stats</h3>
+                  <button
+                    type="button"
+                    className="character-flow-button character-flow-button--secondary"
+                    onClick={onCreateNewCharacter}
+                  >
+                    Create New Character
+                  </button>
 
-                    <div className="character-class-stats-grid">
-                      <div className="character-class-stat-card character-flow-stat-card">
-                        <small>HP</small>
-                        <strong>{selectedClass.baseHp}</strong>
-                      </div>
-
-                      <div className="character-class-stat-card character-flow-stat-card">
-                        <small>SP</small>
-                        <strong>{selectedClass.baseSp}</strong>
-                      </div>
-
-                      <div className="character-class-stat-card character-flow-stat-card">
-                        <small>Stamina</small>
-                        <strong>{selectedClass.baseStamina}</strong>
-                      </div>
-
-                      <div className="character-class-stat-card character-flow-stat-card">
-                        <small>Carry Weight</small>
-                        <strong>{selectedClass.carryWeight} kg</strong>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="character-class-preview-section">
-                    <h3>Traits</h3>
-
-                    <ul className="character-class-traits-list">
-                      {selectedClass.traits.map((trait) => (
-                        <li key={trait}>{trait}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </>
-              ) : (
-                <div className="character-empty-state">
-                  <strong>No character selected</strong>
-                  <span>Select a character to preview its class details.</span>
+                  <button
+                    type="button"
+                    className="character-select-delete-link"
+                    onClick={handleDeleteSelectedCharacter}
+                  >
+                    Delete Character
+                  </button>
                 </div>
-              )}
-            </aside>
-          </div>
-
-          <div className="character-flow-panel__footer character-select-footer">
-            <div className="character-flow-summary">
-              {selectedCharacter && selectedClass ? (
-                <>
-                  <strong>{selectedCharacter.name}</strong>
-                  <span>
-                    {selectedClass.name} - Level {selectedCharacter.level}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <strong>No character selected</strong>
-                  <span>Select a character to enter the world.</span>
-                </>
-              )}
+              </div>
             </div>
+          ) : (
+            <div className="character-empty-state character-select-empty">
+              <strong>No characters found</strong>
+              <span>Create a new character to start building your roster.</span>
 
-            <button
-              type="button"
-              className="character-flow-button character-flow-button--primary"
-              disabled={!selectedCharacter}
-              onClick={() => {
-                if (!selectedCharacter) return;
-                onEnterWorld(selectedCharacter);
-              }}
-            >
-              Enter World
-            </button>
-          </div>
+              <div className="character-select-footer">
+                <button
+                  type="button"
+                  className="character-flow-button character-flow-button--secondary"
+                  onClick={onCreateNewCharacter}
+                >
+                  Create New Character
+                </button>
+              </div>
+            </div>
+          )}
         </section>
       </section>
     </main>

@@ -43,8 +43,8 @@ export default function TopPanel({
               return (
                 <div key={stat.label} className="top-stat-block">
                   <div className="top-stat-label-row">
-                    <span>{stat.label}</span>
-                    <strong>
+                    <span className="top-stat-label">{stat.label}</span>
+                    <strong className="top-stat-value">
                       {stat.value}/{stat.max}
                     </strong>
                   </div>

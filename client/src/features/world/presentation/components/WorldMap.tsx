@@ -13,6 +13,12 @@ import type {
 import type { MapData, MapGlobalAction, MapPoi } from "../../domain/mapsData";
 import type { DialogueOption } from "../../../../components/NpcDialog";
 import type { NpcShopOffer } from "../../domain/npcProfilesData";
+import type { InventoryPanelItem } from "../../../../components/InventoryPanel";
+import type {
+  CombatActionAvailability,
+  CombatActionId,
+  CombatState,
+} from "../../../combat/domain/combatEngineTypes";
 
 type WorldMapProps = {
   currentLocation: LocationKey;
@@ -37,8 +43,10 @@ type WorldMapProps = {
   onCloseNpcDialog: () => void;
   onNpcOptionSelect: (optionId: string) => void;
   onNpcBuyItem: (offer: NpcShopOffer) => void;
-  onNpcSell: () => void;
+  onNpcSellItems: (items: Array<{ itemKey: string; count: number }>) => boolean;
   npcBuyOffers?: NpcShopOffer[];
+  npcSellInventoryEntries?: InventoryPanelItem[];
+  npcSellPlaceholderMessage?: string;
 
   npcNarrativeHint?: string;
   showNpcNarrativeStatus?: boolean;
@@ -50,8 +58,10 @@ type WorldMapProps = {
   combatEnemyHp: number;
   combatEnemyMaxHp: number;
   combatLog: string[];
+  combatState: CombatState | null;
+  combatActionAvailabilities: CombatActionAvailability[];
   combatResolved: boolean;
-  onCombatAttack: () => void;
+  onCombatAction: (actionId: CombatActionId) => void;
   onCombatRetreat: () => void;
   onCloseCombatDialog: () => void;
 
@@ -84,8 +94,10 @@ export default function WorldMap({
   onCloseNpcDialog,
   onNpcOptionSelect,
   onNpcBuyItem,
-  onNpcSell,
+  onNpcSellItems,
   npcBuyOffers,
+  npcSellInventoryEntries,
+  npcSellPlaceholderMessage,
   npcNarrativeHint,
   showNpcNarrativeStatus,
   npcNarrativeStatusText,
@@ -95,8 +107,10 @@ export default function WorldMap({
   combatEnemyHp,
   combatEnemyMaxHp,
   combatLog,
+  combatState,
+  combatActionAvailabilities,
   combatResolved,
-  onCombatAttack,
+  onCombatAction,
   onCombatRetreat,
   onCloseCombatDialog,
   discoverablePois,
@@ -105,14 +119,14 @@ export default function WorldMap({
   onDiscoverPoi,
   overlayContent,
 }: WorldMapProps) {
-  const [hoveredDiscoverablePoi, setHoveredDiscoverablePoi] = useState<
-    string | null
-  >(null);
-  const [hoverProgressPercent, setHoverProgressPercent] = useState(0);
+  const [activeDiscoverablePoiHover, setActiveDiscoverablePoiHover] = useState<{
+    poiKey: string;
+    durationMs: number;
+  } | null>(null);
   const [selectedMapPoiId, setSelectedMapPoiId] = useState<string | null>(null);
 
-  const hoverStartTimeRef = useRef<number | null>(null);
-  const hoverAnimationFrameRef = useRef<number | null>(null);
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const activeHoverPoiKeyRef = useRef<string | null>(null);
   const atmosphereProfile = mapAtmosphereData[mapData.id];
 
   const interactiveMapPois = useMemo(
@@ -163,23 +177,18 @@ export default function WorldMap({
   }, [currentLocationPoi, interactiveMapPois, selectedMapPoiId, visibleMapPois]);
 
   const clearHoverTracking = () => {
-    hoverStartTimeRef.current = null;
+    activeHoverPoiKeyRef.current = null;
 
-    if (hoverAnimationFrameRef.current !== null) {
-      cancelAnimationFrame(hoverAnimationFrameRef.current);
-      hoverAnimationFrameRef.current = null;
+    if (hoverTimeoutRef.current !== null) {
+      window.clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
     }
 
-    setHoveredDiscoverablePoi(null);
-    setHoverProgressPercent(0);
+    setActiveDiscoverablePoiHover(null);
   };
 
   useEffect(() => {
-    return () => {
-      if (hoverAnimationFrameRef.current !== null) {
-        cancelAnimationFrame(hoverAnimationFrameRef.current);
-      }
-    };
+    return () => clearHoverTracking();
   }, []);
 
   const startPoiDiscoveryHover = (poiKey: DiscoverablePoiKey) => {
@@ -187,41 +196,29 @@ export default function WorldMap({
 
     const poiData = discoverablePois[poiKey];
 
-    if (hoverAnimationFrameRef.current !== null) {
-      cancelAnimationFrame(hoverAnimationFrameRef.current);
-      hoverAnimationFrameRef.current = null;
+    activeHoverPoiKeyRef.current = poiKey;
+    setActiveDiscoverablePoiHover({
+      poiKey,
+      durationMs: poiData.hoverDurationMs,
+    });
+
+    if (hoverTimeoutRef.current !== null) {
+      window.clearTimeout(hoverTimeoutRef.current);
     }
 
-    setHoveredDiscoverablePoi(poiKey);
-    setHoverProgressPercent(0);
-    hoverStartTimeRef.current = null;
-
-    const tick = (timestamp: number) => {
-      if (hoverStartTimeRef.current === null) {
-        hoverStartTimeRef.current = timestamp;
-      }
-
-      const elapsed = timestamp - hoverStartTimeRef.current;
-      const nextProgress = Math.min(
-        100,
-        (elapsed / poiData.hoverDurationMs) * 100
-      );
-
-      setHoverProgressPercent(nextProgress);
-
-      if (elapsed >= poiData.hoverDurationMs) {
+    hoverTimeoutRef.current = window.setTimeout(() => {
+      if (activeHoverPoiKeyRef.current === poiKey) {
         onDiscoverPoi(poiKey);
         clearHoverTracking();
-        return;
       }
-
-      hoverAnimationFrameRef.current = requestAnimationFrame(tick);
-    };
-
-    hoverAnimationFrameRef.current = requestAnimationFrame(tick);
+    }, poiData.hoverDurationMs);
   };
 
-  const stopPoiDiscoveryHover = () => {
+  const stopPoiDiscoveryHover = (poiKey: DiscoverablePoiKey) => {
+    if (activeHoverPoiKeyRef.current !== poiKey) {
+      return;
+    }
+
     clearHoverTracking();
   };
 
@@ -325,7 +322,7 @@ export default function WorldMap({
             <div
               key={discoverablePoi.key}
               className={`poi-discovery-zone ${
-                hoveredDiscoverablePoi === discoverablePoi.key
+                activeDiscoverablePoiHover?.poiKey === discoverablePoi.key
                   ? "is-hovering"
                   : ""
               }`}
@@ -334,7 +331,7 @@ export default function WorldMap({
                 left: discoverablePoi.discoveryZonePosition.left,
               }}
               onMouseEnter={() => startPoiDiscoveryHover(discoverablePoi.key)}
-              onMouseLeave={stopPoiDiscoveryHover}
+              onMouseLeave={() => stopPoiDiscoveryHover(discoverablePoi.key)}
             >
               <div className="poi-discovery-zone__inner">
                 <div className="poi-discovery-zone__hint">
@@ -344,7 +341,16 @@ export default function WorldMap({
                 <div className="poi-discovery-zone__progress">
                   <div
                     className="poi-discovery-zone__progress-fill"
-                    style={{ width: `${hoverProgressPercent}%` }}
+                    style={{
+                      width:
+                        activeDiscoverablePoiHover?.poiKey === discoverablePoi.key
+                          ? "100%"
+                          : "0%",
+                      transitionDuration:
+                        activeDiscoverablePoiHover?.poiKey === discoverablePoi.key
+                          ? `${activeDiscoverablePoiHover.durationMs}ms`
+                          : "0ms",
+                    }}
                   />
                 </div>
               </div>
@@ -380,8 +386,10 @@ export default function WorldMap({
             onClose={onCloseNpcDialog}
             onOptionSelect={onNpcOptionSelect}
             onBuyItem={onNpcBuyItem}
-            onSell={onNpcSell}
+            onSellItems={onNpcSellItems}
             buyOffers={npcBuyOffers}
+            sellInventoryEntries={npcSellInventoryEntries}
+            sellPlaceholderMessage={npcSellPlaceholderMessage}
             narrativeHint={npcNarrativeHint}
             showNarrativeStatus={showNpcNarrativeStatus}
             narrativeStatusText={npcNarrativeStatusText}
@@ -394,8 +402,10 @@ export default function WorldMap({
             enemyHp={combatEnemyHp}
             enemyMaxHp={combatEnemyMaxHp}
             combatLog={combatLog}
+            combatState={combatState}
+            actionAvailabilities={combatActionAvailabilities}
             isResolved={combatResolved}
-            onAttack={onCombatAttack}
+            onAction={onCombatAction}
             onRetreat={onCombatRetreat}
             onClose={onCloseCombatDialog}
             loopStatusLabel={

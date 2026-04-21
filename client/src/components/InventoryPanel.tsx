@@ -1,6 +1,6 @@
 import Tooltip from "./Tooltip";
 
-type InventoryItem = {
+export type InventoryPanelItem = {
   key: string;
   itemKey: string;
   name: string;
@@ -14,7 +14,7 @@ type InventoryItem = {
 };
 
 type InventoryPanelProps = {
-  items: InventoryItem[];
+  items: InventoryPanelItem[];
   currentWeight: number;
   maxWeight: number;
 };
@@ -24,6 +24,9 @@ export default function InventoryPanel({
   currentWeight,
   maxWeight,
 }: InventoryPanelProps) {
+  const visibleSlotCount = Math.max(items.length, 20);
+  const emptySlotCount = Math.max(0, visibleSlotCount - items.length);
+
   return (
     <section className="ui-panel sidebar-panel sidebar-panel--scroll inventory-panel">
       <div className="panel-title-row inventory-title-row">
@@ -35,7 +38,7 @@ export default function InventoryPanel({
 
       <div className="inventory-grid inventory-grid-slots">
         {items.length === 0 ? (
-          <div className="empty-box">Inventory is empty.</div>
+          <div className="inventory-empty-copy">Inventory is empty.</div>
         ) : (
           items.map((item) => (
             <Tooltip
@@ -55,6 +58,17 @@ export default function InventoryPanel({
               <div
                 className={`inventory-slot inventory-square-slot inventory-square-slot--${item.iconTone}`}
                 aria-label={`${item.name}, quantity ${item.count}`}
+                draggable
+                onDragStart={(event) => {
+                  event.dataTransfer.effectAllowed = "move";
+                  event.dataTransfer.setData(
+                    "application/howl-of-collapse-trade-item",
+                    JSON.stringify({
+                      itemKey: item.itemKey,
+                      count: item.count,
+                    })
+                  );
+                }}
               >
                 <span
                   className="inventory-item-icon"
@@ -69,6 +83,16 @@ export default function InventoryPanel({
             </Tooltip>
           ))
         )}
+
+        {Array.from({ length: emptySlotCount }).map((_, index) => (
+          <div
+            key={`empty-slot-${index}`}
+            className="inventory-slot inventory-square-slot inventory-square-slot--empty"
+            aria-hidden="true"
+          >
+            <span className="inventory-slot-placeholder" />
+          </div>
+        ))}
       </div>
     </section>
   );

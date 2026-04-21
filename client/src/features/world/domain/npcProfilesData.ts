@@ -26,6 +26,8 @@ export type NpcProfileData = {
   buyPlaceholderMessage: string;
   sellPlaceholderMessage: string;
   buyOffers?: NpcShopOffer[];
+  sellableItemKeys?: string[];
+  sellPriceGoldPerItem?: number;
 };
 
 export const npcProfilesData: Record<NpcProfileKey, NpcProfileData> = {
@@ -61,6 +63,8 @@ export const npcProfilesData: Record<NpcProfileKey, NpcProfileData> = {
     narrativeStatusText: "Jane still seems to be holding back information.",
     buyPlaceholderMessage: "System: Jane is ready to sell basic survival gear.",
     sellPlaceholderMessage: "System: Jane is ready to buy gathered resources.",
+    sellableItemKeys: ["stone", "wood", "herb", "fish", "rope", "paper"],
+    sellPriceGoldPerItem: 3,
     buyOffers: [
       {
         itemKey: "short-sword",
@@ -112,6 +116,8 @@ export const npcProfilesData: Record<NpcProfileKey, NpcProfileData> = {
     buyPlaceholderMessage: "System: Maria's potion stock is still a placeholder.",
     sellPlaceholderMessage:
       "System: Maria examines your natural goods with professional interest.",
+    sellableItemKeys: ["fruit", "herb", "fish", "rabbit-meat"],
+    sellPriceGoldPerItem: 2,
     buyOffers: [],
   },
 };

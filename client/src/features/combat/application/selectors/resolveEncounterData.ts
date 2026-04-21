@@ -40,6 +40,9 @@ export function resolveEncounterTemplate(
       template.statOverrides?.enemyAttackDamage ??
       species.combatDefaults.enemyAttackDamage,
     rewardXp: template.statOverrides?.rewardXp ?? species.combatDefaults.rewardXp,
+    enemyBaseInitiative:
+      template.statOverrides?.enemyBaseInitiative ??
+      species.combatDefaults.enemyBaseInitiative,
     introText: template.introText,
     victoryText: template.victoryText,
     retreatText: template.retreatText,

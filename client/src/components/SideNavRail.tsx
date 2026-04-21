@@ -14,6 +14,7 @@ export type SideNavRailItem = {
 
 type SideNavRailProps = {
   items: SideNavRailItem[];
+  footerItem?: SideNavRailItem;
 };
 
 function SideNavRailIconHome() {
@@ -139,53 +140,89 @@ function SideNavRailIconWorldMap() {
   );
 }
 
+function SideNavRailIconDisconnect() {
+  return (
+    <svg viewBox="0 0 24 24" className="side-nav-rail__svg" aria-hidden="true">
+      <path
+        d="M10 4.8H7.8A2.8 2.8 0 0 0 5 7.6v8.8a2.8 2.8 0 0 0 2.8 2.8H10"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13 8.2 18 12l-5 3.8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10.4 12H18"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export const sideNavIcons = {
   bestiary: <SideNavRailIconBestiary />,
+  disconnect: <SideNavRailIconDisconnect />,
   hideout: <SideNavRailIconHome />,
   quests: <SideNavRailIconQuests />,
   skillTree: <SideNavRailIconSkillTree />,
   worldMap: <SideNavRailIconWorldMap />,
 };
 
-export default function SideNavRail({ items }: SideNavRailProps) {
+function renderRailItem(item: SideNavRailItem) {
+  const buttonClassName = [
+    "side-nav-rail__button",
+    item.isActive ? "side-nav-rail__button--active" : "",
+    item.isDisabled ? "side-nav-rail__button--disabled" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const button = (
+    <button
+      key={item.id}
+      type="button"
+      className={buttonClassName}
+      onClick={item.onClick}
+      aria-label={item.label}
+      aria-pressed={item.isActive ? true : undefined}
+      disabled={item.isDisabled}
+    >
+      <span className="side-nav-rail__icon">{item.icon}</span>
+    </button>
+  );
+
+  const tooltipContent = (
+    <div className="side-nav-rail__tooltip">
+      <strong>{item.label}</strong>
+      {item.tooltipDescription ? <p>{item.tooltipDescription}</p> : null}
+    </div>
+  );
+
+  return (
+    <Tooltip key={item.id} content={tooltipContent}>
+      {button}
+    </Tooltip>
+  );
+}
+
+export default function SideNavRail({ items, footerItem }: SideNavRailProps) {
   return (
     <aside className="side-nav-rail ui-panel" aria-label="Game navigation">
-      {items.map((item) => {
-        const buttonClassName = [
-          "side-nav-rail__button",
-          item.isActive ? "side-nav-rail__button--active" : "",
-          item.isDisabled ? "side-nav-rail__button--disabled" : "",
-        ]
-          .filter(Boolean)
-          .join(" ");
-
-        const button = (
-          <button
-            key={item.id}
-            type="button"
-            className={buttonClassName}
-            onClick={item.onClick}
-            aria-label={item.label}
-            aria-pressed={item.isActive ? true : undefined}
-            disabled={item.isDisabled}
-          >
-            <span className="side-nav-rail__icon">{item.icon}</span>
-          </button>
-        );
-
-        const tooltipContent = (
-          <div className="side-nav-rail__tooltip">
-            <strong>{item.label}</strong>
-            {item.tooltipDescription ? <p>{item.tooltipDescription}</p> : null}
-          </div>
-        );
-
-        return (
-          <Tooltip key={item.id} content={tooltipContent}>
-            {button}
-          </Tooltip>
-        );
-      })}
+      <div className="side-nav-rail__main">{items.map(renderRailItem)}</div>
+      {footerItem ? (
+        <div className="side-nav-rail__footer">{renderRailItem(footerItem)}</div>
+      ) : null}
     </aside>
   );
 }

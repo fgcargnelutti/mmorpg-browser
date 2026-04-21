@@ -59,6 +59,22 @@ export default function App() {
     setScreen("character-select");
   };
 
+  const handleDeleteCharacter = (characterId: string) => {
+    setCharacters((prev) =>
+      prev.filter((character) => character.id !== characterId)
+    );
+
+    setSelectedCharacter((prev) =>
+      prev?.id === characterId ? null : prev
+    );
+  };
+
+  const handleDisconnect = () => {
+    setSelectedCharacter(null);
+    setLoggedUser(null);
+    setScreen("login");
+  };
+
   let content;
 
   if (screen === "login") {
@@ -78,10 +94,16 @@ export default function App() {
         characters={characters}
         onEnterWorld={handleEnterWorld}
         onCreateNewCharacter={handleOpenCreateCharacter}
+        onDeleteCharacter={handleDeleteCharacter}
       />
     );
   } else {
-    content = <GameScreen selectedCharacter={selectedCharacter} />;
+    content = (
+      <GameScreen
+        selectedCharacter={selectedCharacter}
+        onDisconnect={handleDisconnect}
+      />
+    );
   }
 
   return <NotificationProvider>{content}</NotificationProvider>;

@@ -19,6 +19,7 @@ export default function RegionPlayersIndicator({
   onInviteToHunt,
 }: RegionPlayersIndicatorProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [inspectedPlayerId, setInspectedPlayerId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const panelId = useId();
   const { players, onlineCount } = useRegionPlayers({
@@ -46,11 +47,13 @@ export default function RegionPlayersIndicator({
       if (!containerRef.current) return;
       if (containerRef.current.contains(event.target as Node)) return;
       setIsOpen(false);
+      setInspectedPlayerId(null);
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setIsOpen(false);
+        setInspectedPlayerId(null);
       }
     };
 
@@ -68,7 +71,10 @@ export default function RegionPlayersIndicator({
       <button
         type="button"
         className={`region-players__trigger ${isOpen ? "is-open" : ""}`}
-        onClick={() => setIsOpen((previous) => !previous)}
+        onClick={() => {
+          setIsOpen((previous) => !previous);
+          setInspectedPlayerId(null);
+        }}
         aria-expanded={isOpen}
         aria-haspopup="dialog"
         aria-controls={panelId}
@@ -109,6 +115,21 @@ export default function RegionPlayersIndicator({
                   </div>
 
                   <div className="region-players__actions">
+                    <button
+                      type="button"
+                      className={`region-players__action-button ${
+                        inspectedPlayerId === player.id
+                          ? "region-players__action-button--active"
+                          : ""
+                      }`}
+                      onClick={() =>
+                        setInspectedPlayerId((currentId) =>
+                          currentId === player.id ? null : player.id
+                        )
+                      }
+                    >
+                      Inspect
+                    </button>
                     {regionPlayerActions.map((action) => (
                       <button
                         key={action.id}
@@ -120,6 +141,30 @@ export default function RegionPlayersIndicator({
                       </button>
                     ))}
                   </div>
+
+                  {inspectedPlayerId === player.id ? (
+                    <div
+                      className="region-players__inspect-panel"
+                      aria-label={`Inspect ${player.name}`}
+                    >
+                      <div className="region-players__inspect-row">
+                        <span>Player</span>
+                        <strong>{player.name}</strong>
+                      </div>
+                      <div className="region-players__inspect-row">
+                        <span>Region</span>
+                        <strong>{currentMapName}</strong>
+                      </div>
+                      <div className="region-players__inspect-row">
+                        <span>Status</span>
+                        <strong>Online</strong>
+                      </div>
+                      <p className="region-players__inspect-note">
+                        {player.detail ??
+                          "No additional inspection details are available yet."}
+                      </p>
+                    </div>
+                  ) : null}
                 </article>
               ))}
             </div>

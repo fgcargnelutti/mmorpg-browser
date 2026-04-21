@@ -9,10 +9,6 @@ export type GameContextState = "hidden" | "expanded" | "minimized";
 export type ActiveEncounter = {
   instanceId: number;
   key: EncounterKey;
-  enemyHp: number;
-  combatLog: string[];
-  isResolved: boolean;
-  resolution: "victory" | "defeat" | null;
 };
 
 export type ActiveFishingSession = {
@@ -27,8 +23,6 @@ export type ActiveMiningSession = {
 
 type OpenEncounterParams = {
   encounterKey: EncounterKey;
-  enemyHp: number;
-  introText: string;
 };
 
 type OpenNpcDialogParams = {
@@ -44,16 +38,10 @@ type OpenActivitySessionParams<TConfigKey> = {
 function createEncounterState({
   instanceId,
   encounterKey,
-  enemyHp,
-  introText,
 }: OpenEncounterParams & { instanceId: number }): ActiveEncounter {
   return {
     instanceId,
     key: encounterKey,
-    enemyHp,
-    combatLog: [introText],
-    isResolved: false,
-    resolution: null,
   };
 }
 
@@ -106,11 +94,7 @@ export function useGameOverlayState() {
     setContextState("expanded");
   };
 
-  const openEncounter = ({
-    encounterKey,
-    enemyHp,
-    introText,
-  }: OpenEncounterParams) => {
+  const openEncounter = ({ encounterKey }: OpenEncounterParams) => {
     closeSideDialogs();
     closeWorldActivityOverlays();
     setContextState("hidden");
@@ -119,8 +103,6 @@ export function useGameOverlayState() {
       createEncounterState({
         instanceId: encounterInstanceCounterRef.current,
         encounterKey,
-        enemyHp,
-        introText,
       })
     );
   };
