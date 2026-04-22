@@ -46,6 +46,7 @@ export type CombatActionDefinition = {
   id: CombatActionId;
   type: CombatActionType;
   label: string;
+  description?: string;
   hotkey?: CombatHotkey;
   consumesAction: boolean;
   iconKey?: string;

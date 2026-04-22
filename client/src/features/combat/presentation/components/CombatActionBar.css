@@ -3,6 +3,7 @@
   flex-direction: column;
   gap: 10px;
   padding: 10px;
+  overflow: visible;
   border: 1px solid rgba(76, 95, 123, 0.4);
   border-radius: 14px;
   background: linear-gradient(
@@ -35,6 +36,7 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
+  overflow: visible;
 }
 
 .combat-action-bar__controls {
@@ -53,6 +55,7 @@
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
+  padding-top: 4px;
   padding-bottom: 2px;
   scrollbar-width: thin;
   scrollbar-color: rgba(85, 108, 141, 0.54) rgba(8, 13, 21, 0.8);
@@ -78,11 +81,15 @@
     box-shadow 0.16s ease;
 }
 
+.combat-action-bar__button--skill-image {
+  gap: 4px;
+  padding: 4px 4px 6px;
+}
+
 .combat-action-bar__button:hover:not(:disabled) {
   background: linear-gradient(180deg, #2f4662 0%, #1d2d40 100%);
   border-color: rgba(136, 162, 205, 0.62);
   box-shadow: 0 12px 18px rgba(1, 6, 13, 0.18);
-  transform: translateY(-1px);
 }
 
 .combat-action-bar__button:disabled {
@@ -108,6 +115,31 @@
   object-fit: contain;
   image-rendering: auto;
   filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.28));
+}
+
+.combat-action-bar__button--basic-attack .combat-action-bar__icon-image,
+.combat-action-bar__button--use-potion .combat-action-bar__icon-image,
+.combat-action-bar__button--dodge .combat-action-bar__icon-image,
+.combat-action-bar__button--dodge .combat-action-bar__icon {
+  width: 52px;
+  height: 52px;
+  padding: 4px 6px;
+  border: 1px solid rgba(114, 136, 170, 0.3);
+  border-radius: 12px;
+  background: linear-gradient(
+    180deg,
+    rgba(20, 29, 42, 0.92) 0%,
+    rgba(11, 18, 28, 0.96) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 6px 14px rgba(4, 8, 15, 0.18);
+}
+
+.combat-action-bar__button--skill-image .combat-action-bar__icon-image {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
 }
 
 .combat-action-bar__button--basic-attack {

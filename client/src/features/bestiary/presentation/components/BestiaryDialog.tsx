@@ -8,6 +8,7 @@ import type {
   CreatureDropRateTier,
   VisibleBestiaryEntry,
 } from "../../domain/bestiaryTypes";
+import { resolveCreaturePortraitByKey } from "../../../creatures/application/selectors/resolveCreaturePortrait";
 import "./BestiaryDialog.css";
 
 type BestiaryDialogProps = {
@@ -91,6 +92,9 @@ export default function BestiaryDialog({
   const ultraRareDrops = selectedEntry
     ? getDropsByRarity(selectedEntry.drops, "ultra-rare")
     : [];
+  const selectedCreaturePortrait = selectedEntry
+    ? resolveCreaturePortraitByKey(selectedEntry.creatureKey)
+    : null;
 
   if (!isOpen) {
     return null;
@@ -161,6 +165,12 @@ export default function BestiaryDialog({
                 </div>
 
                 <div className="bestiary-detail-scroll">
+                  {selectedCreaturePortrait ? (
+                    <div className="bestiary-detail-portrait">
+                      <img src={selectedCreaturePortrait} alt={selectedEntry.name} />
+                    </div>
+                  ) : null}
+
                   <div className="bestiary-detail-summary">
                     <div className="bestiary-detail-summary__item">
                       <span>Category</span>

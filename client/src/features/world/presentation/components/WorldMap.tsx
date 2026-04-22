@@ -14,6 +14,7 @@ import type { MapData, MapGlobalAction, MapPoi } from "../../domain/mapsData";
 import type { DialogueOption } from "../../../../components/NpcDialog";
 import type { NpcShopOffer } from "../../domain/npcProfilesData";
 import type { InventoryPanelItem } from "../../../../components/InventoryPanel";
+import type { CharacterClassKey } from "../../../../data/characterClassesData";
 import type {
   CombatActionAvailability,
   CombatActionId,
@@ -59,6 +60,7 @@ type WorldMapProps = {
   combatEnemyMaxHp: number;
   combatLog: string[];
   combatState: CombatState | null;
+  playerClassKey: CharacterClassKey;
   combatActionAvailabilities: CombatActionAvailability[];
   combatResolved: boolean;
   onCombatAction: (actionId: CombatActionId) => void;
@@ -108,6 +110,7 @@ export default function WorldMap({
   combatEnemyMaxHp,
   combatLog,
   combatState,
+  playerClassKey,
   combatActionAvailabilities,
   combatResolved,
   onCombatAction,
@@ -403,6 +406,7 @@ export default function WorldMap({
             enemyMaxHp={combatEnemyMaxHp}
             combatLog={combatLog}
             combatState={combatState}
+            playerClassKey={playerClassKey}
             actionAvailabilities={combatActionAvailabilities}
             isResolved={combatResolved}
             onAction={onCombatAction}

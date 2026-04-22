@@ -150,6 +150,22 @@
   gap: 18px;
 }
 
+.bestiary-detail-portrait {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0 2px;
+}
+
+.bestiary-detail-portrait img {
+  display: block;
+  width: min(100%, 180px);
+  max-height: 180px;
+  object-fit: contain;
+  image-rendering: auto;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.26));
+}
+
 .bestiary-detail-summary {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -2058,6 +2058,7 @@ export default function GameScreen({
             combatEnemyMaxHp={activeEncounterData?.enemyMaxHp ?? 0}
             combatLog={combatState?.combatLog.map((entry) => entry.message) ?? []}
             combatState={combatState}
+            playerClassKey={selectedCharacter.classKey}
             combatActionAvailabilities={combatActionAvailabilities}
             combatResolved={combatState?.status === "resolved"}
             onCombatAction={dispatchCombatAction}

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { CharacterClassKey } from "../../../../data/characterClassesData";
 import Tooltip from "../../../../components/Tooltip";
 import type {
   CombatActionAvailability,
@@ -9,9 +10,11 @@ import {
   combatActionBarOrder,
   combatActionCatalog,
 } from "../../domain/combatActionCatalog";
+import { resolveClassCombatActionDefinition } from "../../domain/classCombatActionPresets";
 import "./CombatActionBar.css";
 
 type CombatActionBarProps = {
+  playerClassKey: CharacterClassKey;
   combatState: CombatState;
   activeCombatantName: string;
   actionAvailabilities: CombatActionAvailability[];
@@ -21,6 +24,7 @@ type CombatActionBarProps = {
 };
 
 export default function CombatActionBar({
+  playerClassKey,
   combatState,
   activeCombatantName,
   actionAvailabilities,
@@ -46,14 +50,25 @@ export default function CombatActionBar({
 
         <div className="combat-action-bar__grid">
           {combatActionBarOrder.map((actionId) => {
-            const action = combatActionCatalog[actionId];
+            const action = resolveClassCombatActionDefinition(
+              playerClassKey,
+              combatActionCatalog[actionId]
+            );
             const availability = availabilityByActionId.get(actionId);
             const isDisabled =
               disabled || (availability ? !availability.isEnabled : true);
+            const usesLargeImageSlot =
+              Boolean(action.iconImageSrc) &&
+              (action.type === "skill" ||
+                action.id === "basic-attack" ||
+                action.id === "dodge" ||
+                action.type === "use-potion");
+
             const tooltipContent = (
               <>
                 <strong>{action.label}</strong>
                 <p>Hotkey: {action.hotkey ?? "-"}</p>
+                {action.description ? <p>{action.description}</p> : null}
                 {availability?.reason ? <p>{availability.reason}</p> : null}
               </>
             );
@@ -62,7 +77,7 @@ export default function CombatActionBar({
               <Tooltip key={action.id} content={tooltipContent}>
                 <button
                   type="button"
-                  className={`combat-action-bar__button combat-action-bar__button--${action.type}`}
+                  className={`combat-action-bar__button combat-action-bar__button--${action.type} ${usesLargeImageSlot ? "combat-action-bar__button--skill-image" : ""}`}
                   onClick={() => onAction(action.id)}
                   disabled={isDisabled}
                   aria-label={action.label}

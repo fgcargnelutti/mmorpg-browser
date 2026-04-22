@@ -1,0 +1,58 @@
+import cookieImage from "../../../assets/items/food/cookie.png";
+import fishImage from "../../../assets/items/food/fish.png";
+import rabbitMeatImage from "../../../assets/items/food/rabbitmeat.png";
+import wildFruitImage from "../../../assets/items/food/wildfruit.png";
+export const foodItemsData = [
+    {
+        key: "fish",
+        name: "River Fish",
+        icon: fishImage,
+        iconKey: "fish",
+        weight: 0.8,
+        description: "A small river catch. Better cooked than eaten raw.",
+        stats: ["Food item"],
+        category: "food",
+        stackable: true,
+        baseValue: 3,
+        tags: ["food", "survival"],
+    },
+    {
+        key: "cookie",
+        name: "Cookie",
+        icon: cookieImage,
+        iconKey: "ration",
+        weight: 0.1,
+        description: "A hard travel biscuit that somehow survived the damp.",
+        stats: ["Food item"],
+        category: "food",
+        stackable: true,
+        baseValue: 2,
+        tags: ["food", "travel"],
+    },
+    {
+        key: "fruit",
+        name: "Wild Fruit",
+        icon: wildFruitImage,
+        iconKey: "fruit",
+        weight: 0.2,
+        description: "A handful of fruit gathered from the old rural outskirts.",
+        stats: ["Natural good"],
+        category: "food",
+        stackable: true,
+        baseValue: 2,
+        tags: ["food", "foraging"],
+    },
+    {
+        key: "rabbit-meat",
+        name: "Rabbit Meat",
+        icon: rabbitMeatImage,
+        iconKey: "meat",
+        weight: 0.6,
+        description: "Freshly hunted small game from the hills and brush.",
+        stats: ["Food item"],
+        category: "food",
+        stackable: true,
+        baseValue: 4,
+        tags: ["food", "hunting"],
+    },
+];

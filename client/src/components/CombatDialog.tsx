@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
+import type { CharacterClassKey } from "../data/characterClassesData";
 import GameDialog from "./GameDialog";
 import "./CombatDialog.css";
 import CombatActionBar from "../features/combat/presentation/components/CombatActionBar";
+import { resolveCreaturePortraitByName } from "../features/creatures/application/selectors/resolveCreaturePortrait";
 import type {
   CombatActionAvailability,
   CombatActionId,
@@ -16,6 +18,7 @@ type CombatDialogProps = {
   enemyMaxHp: number;
   combatLog: string[];
   combatState: CombatState | null;
+  playerClassKey: CharacterClassKey;
   actionAvailabilities: CombatActionAvailability[];
   isResolved: boolean;
   onAction: (actionId: CombatActionId) => void;
@@ -33,6 +36,7 @@ export default function CombatDialog({
   enemyMaxHp,
   combatLog,
   combatState,
+  playerClassKey,
   actionAvailabilities,
   isResolved,
   onAction,
@@ -57,6 +61,7 @@ export default function CombatDialog({
 
   const hpPercent =
     enemyMaxHp > 0 ? Math.max(0, (enemyHp / enemyMaxHp) * 100) : 0;
+  const creaturePortraitSrc = resolveCreaturePortraitByName(enemyName);
   const activeCombatantName = combatState
     ? combatState.combatants[combatState.turn.activeCombatantId]?.name ?? "Unknown"
     : "Unknown";
@@ -124,6 +129,13 @@ export default function CombatDialog({
 
                 <div className="combat-dialog-portrait-frame">
                   <div className="combat-dialog-portrait-glow" />
+                  {creaturePortraitSrc ? (
+                    <img
+                      className="combat-dialog-creature-image"
+                      src={creaturePortraitSrc}
+                      alt={enemyName}
+                    />
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -132,6 +144,7 @@ export default function CombatDialog({
           <div className="combat-dialog-bottom">
             {combatState ? (
               <CombatActionBar
+                playerClassKey={playerClassKey}
                 combatState={combatState}
                 activeCombatantName={activeCombatantName}
                 actionAvailabilities={actionAvailabilities}
