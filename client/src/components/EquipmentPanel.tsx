@@ -4,6 +4,7 @@ type EquipmentSlot = {
   key: string;
   label: string;
   icon: string;
+  iconImageSrc?: string;
   itemName: string;
   tooltip: string[];
   equipped?: boolean;
@@ -44,7 +45,16 @@ export default function EquipmentPanel({
                 }
               >
                 <div key={slot.key} className="equip-slot">
-                  <span className="equip-slot-icon">{slot.icon}</span>
+                  {slot.iconImageSrc ? (
+                    <img
+                      className="equip-slot-image"
+                      src={slot.iconImageSrc}
+                      alt=""
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <span className="equip-slot-icon">{slot.icon}</span>
+                  )}
                 </div>
               </Tooltip>
             ))}

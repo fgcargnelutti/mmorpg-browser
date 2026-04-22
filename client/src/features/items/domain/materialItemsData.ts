@@ -1,9 +1,15 @@
+import herbImage from "../../../assets/items/resources/herb.png";
+import ropeImage from "../../../assets/items/loot/rope.png";
+import paperScrapImage from "../../../assets/items/resources/paperscrap.png";
+import stoneImage from "../../../assets/items/resources/stone.png";
+import woodImage from "../../../assets/items/resources/wood.png";
 import type { ItemDefinition } from "./itemTypes";
 
 export const materialItemsData: ItemDefinition[] = [
   {
     key: "stone",
     name: "Stone",
+    icon: stoneImage,
     iconKey: "stone",
     weight: 1.5,
     description: "A rough stone used for crafting and construction.",
@@ -16,6 +22,7 @@ export const materialItemsData: ItemDefinition[] = [
   {
     key: "herb",
     name: "Herb",
+    icon: herbImage,
     iconKey: "herb",
     weight: 0.2,
     description: "A medicinal herb with basic healing properties.",
@@ -28,6 +35,7 @@ export const materialItemsData: ItemDefinition[] = [
   {
     key: "wood",
     name: "Wood",
+    icon: woodImage,
     iconKey: "wood",
     weight: 2,
     description: "Dry timber used for fuel, tools, and structures.",
@@ -40,6 +48,7 @@ export const materialItemsData: ItemDefinition[] = [
   {
     key: "rope",
     name: "Rope",
+    icon: ropeImage,
     iconKey: "rope",
     weight: 1,
     description: "Useful for climbing, binding, and field repairs.",
@@ -52,6 +61,7 @@ export const materialItemsData: ItemDefinition[] = [
   {
     key: "paper",
     name: "Paper Scrap",
+    icon: paperScrapImage,
     iconKey: "paper",
     weight: 0.1,
     description: "A fragile sheet salvaged from old records and books.",

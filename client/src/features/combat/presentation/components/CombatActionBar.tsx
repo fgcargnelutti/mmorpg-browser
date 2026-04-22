@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+import Tooltip from "../../../../components/Tooltip";
 import type {
   CombatActionAvailability,
   CombatActionId,
@@ -15,6 +17,7 @@ type CombatActionBarProps = {
   actionAvailabilities: CombatActionAvailability[];
   onAction: (actionId: CombatActionId) => void;
   disabled?: boolean;
+  leftControls?: ReactNode;
 };
 
 export default function CombatActionBar({
@@ -23,43 +26,71 @@ export default function CombatActionBar({
   actionAvailabilities,
   onAction,
   disabled = false,
+  leftControls,
 }: CombatActionBarProps) {
   const availabilityByActionId = new Map(
     actionAvailabilities.map((entry) => [entry.actionId, entry])
   );
-  const activeCombatant = combatState.combatants[combatState.turn.activeCombatantId];
 
   return (
     <section className="combat-action-bar">
       <div className="combat-action-bar__header">
         <strong>{activeCombatantName}'s turn</strong>
-        <span>
-          Round {combatState.turn.round} • Actions{" "}
-          {activeCombatant.actionEconomy.actionsRemaining}
-        </span>
+        <span>Round {combatState.turn.round}</span>
       </div>
 
-      <div className="combat-action-bar__grid">
-        {combatActionBarOrder.map((actionId) => {
-          const action = combatActionCatalog[actionId];
-          const availability = availabilityByActionId.get(actionId);
-          const isDisabled =
-            disabled || (availability ? !availability.isEnabled : true);
+      <div className="combat-action-bar__body">
+        {leftControls ? (
+          <div className="combat-action-bar__controls">{leftControls}</div>
+        ) : null}
 
-          return (
-            <button
-              key={action.id}
-              type="button"
-              className={`combat-action-bar__button combat-action-bar__button--${action.type}`}
-              onClick={() => onAction(action.id)}
-              disabled={isDisabled}
-              title={availability?.reason}
-            >
-              <span className="combat-action-bar__label">{action.label}</span>
-              <span className="combat-action-bar__hotkey">{action.hotkey ?? "-"}</span>
-            </button>
-          );
-        })}
+        <div className="combat-action-bar__grid">
+          {combatActionBarOrder.map((actionId) => {
+            const action = combatActionCatalog[actionId];
+            const availability = availabilityByActionId.get(actionId);
+            const isDisabled =
+              disabled || (availability ? !availability.isEnabled : true);
+            const tooltipContent = (
+              <>
+                <strong>{action.label}</strong>
+                <p>Hotkey: {action.hotkey ?? "-"}</p>
+                {availability?.reason ? <p>{availability.reason}</p> : null}
+              </>
+            );
+
+            return (
+              <Tooltip key={action.id} content={tooltipContent}>
+                <button
+                  type="button"
+                  className={`combat-action-bar__button combat-action-bar__button--${action.type}`}
+                  onClick={() => onAction(action.id)}
+                  disabled={isDisabled}
+                  aria-label={action.label}
+                >
+                  {action.iconImageSrc ? (
+                    <img
+                      className="combat-action-bar__icon-image"
+                      src={action.iconImageSrc}
+                      alt=""
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <span
+                      className="combat-action-bar__icon"
+                      data-icon-key={action.iconKey}
+                      aria-hidden="true"
+                    >
+                      {action.fallbackIcon ?? "•"}
+                    </span>
+                  )}
+                  <span className="combat-action-bar__hotkey">
+                    {action.hotkey ?? "-"}
+                  </span>
+                </button>
+              </Tooltip>
+            );
+          })}
+        </div>
       </div>
     </section>
   );

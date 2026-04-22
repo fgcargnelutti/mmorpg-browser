@@ -1,3 +1,6 @@
+import healthPotionImage from "../../../assets/items/potions/healthpotion.png";
+import manaPotionImage from "../../../assets/items/potions/manapotion.png";
+import staminaPotionImage from "../../../assets/items/potions/staminapotion.png";
 import type {
   CombatActionDefinition,
   CombatActionId,
@@ -11,6 +14,8 @@ export const combatActionCatalog: Record<CombatActionId, CombatActionDefinition>
     label: "Attack",
     hotkey: "Space",
     consumesAction: true,
+    iconKey: "attack",
+    fallbackIcon: "⚔",
   },
   "use-life-potion": {
     id: "use-life-potion",
@@ -18,6 +23,9 @@ export const combatActionCatalog: Record<CombatActionId, CombatActionDefinition>
     label: "Life Potion",
     hotkey: "1",
     consumesAction: true,
+    iconKey: "life-potion",
+    iconImageSrc: healthPotionImage,
+    fallbackIcon: "🧪",
     potionItemKey: "life-potion",
     potionResource: "hp",
   },
@@ -27,6 +35,9 @@ export const combatActionCatalog: Record<CombatActionId, CombatActionDefinition>
     label: "Mana Potion",
     hotkey: "2",
     consumesAction: true,
+    iconKey: "mana-potion",
+    iconImageSrc: manaPotionImage,
+    fallbackIcon: "🧴",
     potionItemKey: "mana-potion",
     potionResource: "sp",
   },
@@ -36,6 +47,9 @@ export const combatActionCatalog: Record<CombatActionId, CombatActionDefinition>
     label: "Variable Potion",
     hotkey: "3",
     consumesAction: true,
+    iconKey: "variable-potion",
+    iconImageSrc: staminaPotionImage,
+    fallbackIcon: "⚗",
     potionItemKey: "variable-potion",
     potionResource: "hybrid",
   },
@@ -45,6 +59,8 @@ export const combatActionCatalog: Record<CombatActionId, CombatActionDefinition>
     label: "Dodge",
     hotkey: "Ctrl",
     consumesAction: true,
+    iconKey: "dodge",
+    fallbackIcon: "🜂",
   },
   "skill-slot-1": {
     id: "skill-slot-1",
@@ -52,6 +68,8 @@ export const combatActionCatalog: Record<CombatActionId, CombatActionDefinition>
     label: "Skill 1",
     hotkey: "Q",
     consumesAction: false,
+    iconKey: "skill-slot-1",
+    fallbackIcon: "✦",
     skillSlot: 1,
   },
   "skill-slot-2": {
@@ -60,6 +78,8 @@ export const combatActionCatalog: Record<CombatActionId, CombatActionDefinition>
     label: "Skill 2",
     hotkey: "W",
     consumesAction: false,
+    iconKey: "skill-slot-2",
+    fallbackIcon: "✦",
     skillSlot: 2,
   },
   "skill-slot-3": {
@@ -68,6 +88,8 @@ export const combatActionCatalog: Record<CombatActionId, CombatActionDefinition>
     label: "Skill 3",
     hotkey: "E",
     consumesAction: false,
+    iconKey: "skill-slot-3",
+    fallbackIcon: "✦",
     skillSlot: 3,
   },
   "skill-slot-4": {
@@ -76,6 +98,8 @@ export const combatActionCatalog: Record<CombatActionId, CombatActionDefinition>
     label: "Skill 4",
     hotkey: "A",
     consumesAction: false,
+    iconKey: "skill-slot-4",
+    fallbackIcon: "✦",
     skillSlot: 4,
   },
   "skill-slot-5": {
@@ -84,6 +108,8 @@ export const combatActionCatalog: Record<CombatActionId, CombatActionDefinition>
     label: "Skill 5",
     hotkey: "S",
     consumesAction: false,
+    iconKey: "skill-slot-5",
+    fallbackIcon: "✦",
     skillSlot: 5,
   },
   "skill-slot-6": {
@@ -92,6 +118,8 @@ export const combatActionCatalog: Record<CombatActionId, CombatActionDefinition>
     label: "Skill 6",
     hotkey: "D",
     consumesAction: false,
+    iconKey: "skill-slot-6",
+    fallbackIcon: "✦",
     skillSlot: 6,
   },
   "skill-slot-7": {
@@ -100,6 +128,8 @@ export const combatActionCatalog: Record<CombatActionId, CombatActionDefinition>
     label: "Skill 7",
     hotkey: "Z",
     consumesAction: false,
+    iconKey: "skill-slot-7",
+    fallbackIcon: "✦",
     skillSlot: 7,
   },
   "skill-slot-8": {
@@ -108,6 +138,8 @@ export const combatActionCatalog: Record<CombatActionId, CombatActionDefinition>
     label: "Skill 8",
     hotkey: "X",
     consumesAction: false,
+    iconKey: "skill-slot-8",
+    fallbackIcon: "✦",
     skillSlot: 8,
   },
   "skill-slot-9": {
@@ -116,6 +148,8 @@ export const combatActionCatalog: Record<CombatActionId, CombatActionDefinition>
     label: "Skill 9",
     hotkey: "C",
     consumesAction: false,
+    iconKey: "skill-slot-9",
+    fallbackIcon: "✦",
     skillSlot: 9,
   },
 };

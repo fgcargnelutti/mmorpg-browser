@@ -1,9 +1,13 @@
+import goblinHelmetImage from "../../../assets/items/equipments/helmets/goblinhelmet.png";
+import crackedShieldImage from "../../../assets/items/equipments/shields/crackedshield.png";
+import shortSwordImage from "../../../assets/items/equipments/weapons/shortsword.png";
 import type { ItemDefinition } from "./itemTypes";
 
 export const equipmentItemsData: ItemDefinition[] = [
   {
     key: "short-sword",
     name: "Short Sword",
+    icon: shortSwordImage,
     iconKey: "sword",
     weight: 3.5,
     description: "A worn but reliable short sword.",
@@ -15,10 +19,11 @@ export const equipmentItemsData: ItemDefinition[] = [
   },
   {
     key: "shield",
-    name: "Scrap Shield",
+    name: "Cracked Shield",
+    icon: crackedShieldImage,
     iconKey: "shield",
     weight: 4.0,
-    description: "A basic shield made from reused metal and wood.",
+    description: "A basic shield that has seen too many impacts and repairs.",
     stats: ["Defense +3"],
     category: "equipment",
     stackable: false,
@@ -28,6 +33,7 @@ export const equipmentItemsData: ItemDefinition[] = [
   {
     key: "goblin-helmet",
     name: "Goblin Helmet",
+    icon: goblinHelmetImage,
     iconKey: "helmet",
     weight: 2.4,
     description: "A crude helm stolen and reforged by goblins over many raids.",

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import GameDialog from "./GameDialog";
 import "./CombatDialog.css";
 import CombatActionBar from "../features/combat/presentation/components/CombatActionBar";
@@ -27,7 +28,7 @@ type CombatDialogProps = {
 export default function CombatDialog({
   isOpen,
   enemyName,
-  enemyTitle,
+  enemyTitle: _enemyTitle,
   enemyHp,
   enemyMaxHp,
   combatLog,
@@ -37,9 +38,21 @@ export default function CombatDialog({
   onAction,
   onRetreat,
   onClose,
-  loopStatusLabel,
+  loopStatusLabel: _loopStatusLabel,
   onStopLoop,
 }: CombatDialogProps) {
+  const logViewportRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const logViewport = logViewportRef.current;
+
+    if (!logViewport) {
+      return;
+    }
+
+    logViewport.scrollTop = logViewport.scrollHeight;
+  }, [combatLog]);
+
   if (!isOpen) return null;
 
   const hpPercent =
@@ -47,88 +60,88 @@ export default function CombatDialog({
   const activeCombatantName = combatState
     ? combatState.combatants[combatState.turn.activeCombatantId]?.name ?? "Unknown"
     : "Unknown";
+  const hasCombatStarted = combatLog.length > 1;
+  const showStopHuntOnly = !hasCombatStarted && Boolean(onStopLoop);
+  const showRetreat = !isResolved && hasCombatStarted;
+  const leftControls = (
+    <>
+      {showStopHuntOnly && onStopLoop ? (
+        <button
+          type="button"
+          className="combat-dialog-button combat-dialog-button--secondary"
+          onClick={onStopLoop}
+        >
+          Stop Hunt
+        </button>
+      ) : null}
+
+      {showRetreat ? (
+        <button
+          type="button"
+          className="combat-dialog-button combat-dialog-button--secondary"
+          onClick={onRetreat}
+        >
+          Retreat
+        </button>
+      ) : null}
+    </>
+  );
 
   return (
     <div className="combat-dialog-anchor">
-      <GameDialog title={enemyName} subtitle={enemyTitle} onClose={onClose}>
+      <GameDialog title="" onClose={onClose}>
         <div className="combat-dialog-layout">
-          <div className="combat-dialog-enemy-card">
-            <div className="combat-dialog-enemy-header">
-              <strong>{enemyName}</strong>
-              <span>
-                HP {enemyHp} / {enemyMaxHp}
-              </span>
+          <div className="combat-dialog-main">
+            <div className="combat-dialog-log-panel">
+              <div className="combat-dialog-panel-title">Combat Log</div>
+
+              <div ref={logViewportRef} className="combat-dialog-log">
+                {combatLog.map((line, index) => (
+                  <p key={`${line}-${index}`}>{line}</p>
+                ))}
+              </div>
             </div>
 
-            <div className="combat-dialog-hp-bar">
-              <div
-                className="combat-dialog-hp-bar-fill"
-                style={{ width: `${hpPercent}%` }}
+            <div className="combat-dialog-creature-panel" aria-label="Creature panel">
+              <div className="combat-dialog-creature-stage">
+                <div className="combat-dialog-creature-overlay">
+                  <strong>{enemyName}</strong>
+
+                  <div className="combat-dialog-creature-hp">
+                    <span>Hitpoints</span>
+                    <span>
+                      {enemyHp} / {enemyMaxHp}
+                    </span>
+                  </div>
+
+                  <div className="combat-dialog-hp-bar">
+                    <div
+                      className="combat-dialog-hp-bar-fill"
+                      style={{ width: `${hpPercent}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="combat-dialog-portrait-frame">
+                  <div className="combat-dialog-portrait-glow" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="combat-dialog-bottom">
+            {combatState ? (
+              <CombatActionBar
+                combatState={combatState}
+                activeCombatantName={activeCombatantName}
+                actionAvailabilities={actionAvailabilities}
+                onAction={onAction}
+                leftControls={leftControls}
+                disabled={
+                  combatState.turn.activeCombatantId !== combatState.playerCombatantId
+                }
               />
-            </div>
-          </div>
-
-          <div className="combat-dialog-portrait-panel" aria-hidden="true">
-            <div className="combat-dialog-portrait-frame">
-              <div className="combat-dialog-portrait-badge">Creature</div>
-              <div className="combat-dialog-portrait-glow" />
-              <div className="combat-dialog-portrait-copy">
-                <strong>{enemyName}</strong>
-                <span>{enemyTitle}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="combat-dialog-log">
-            {combatLog.map((line, index) => (
-              <p key={`${line}-${index}`}>{line}</p>
-            ))}
-          </div>
-
-          {combatState && !isResolved ? (
-            <CombatActionBar
-              combatState={combatState}
-              activeCombatantName={activeCombatantName}
-              actionAvailabilities={actionAvailabilities}
-              onAction={onAction}
-              disabled={
-                combatState.turn.activeCombatantId !== combatState.playerCombatantId
-              }
-            />
-          ) : null}
-
-          <div className="combat-dialog-actions">
-            {loopStatusLabel ? (
-              <div className="combat-dialog-loop-status">
-                <span>{loopStatusLabel}</span>
-                {onStopLoop ? (
-                  <button
-                    type="button"
-                    className="combat-dialog-button"
-                    onClick={onStopLoop}
-                  >
-                    Stop Hunt
-                  </button>
-                ) : null}
-              </div>
             ) : null}
-            {isResolved ? (
-              <button
-                type="button"
-                className="combat-dialog-button combat-dialog-button--primary"
-                onClick={onClose}
-              >
-                Close
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="combat-dialog-button"
-                onClick={onRetreat}
-              >
-                Retreat
-              </button>
-            )}
           </div>
         </div>
       </GameDialog>

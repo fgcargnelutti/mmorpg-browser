@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { characterClassesData } from "../../../../data/characterClassesData";
 import {
   getLevelFromTotalXp,
@@ -53,6 +53,18 @@ import {
   createRewardApplicationMessages,
   createXpGainMessages,
 } from "../systems/progressionVitalsSystem";
+import { resolveCharacterRegenConfig } from "../../domain/regenerationData";
+import type { PlayerRegenState } from "../../domain/regenerationTypes";
+import {
+  applyOfflineStaminaRegen,
+  applyOnlineRegen,
+  createInitialPlayerRegenState,
+} from "../systems/playerRegenerationSystem";
+import {
+  deserializePlayerVitalsState,
+  serializePlayerVitalsState,
+  type PersistedPlayerVitalsPayload,
+} from "../systems/playerVitalsPersistenceAdapter";
 
 import type { LocationKey, ContextAction } from "../../../world/domain/locations";
 import type { CharacterSummary } from "../../../../screens/CharacterSelectScreen";
@@ -86,11 +98,100 @@ type UseCharacterProgressionParams = {
 type ProgressionState = {
   currentLocation: LocationKey;
   player: Player;
+  regenState: PlayerRegenState;
   sessionKey: string;
 };
 
+const initialCampaignInventory = [
+  "life-potion",
+  "mana-potion",
+  "variable-potion",
+  "rabbit-meat",
+  "rabbit-meat",
+  "rabbit-meat",
+  "rabbit-meat",
+  "rabbit-meat",
+];
+const playerVitalsStorageKeyPrefix = "howl-of-collapse:player-vitals:";
+const onlineRegenCheckIntervalMs = 15_000;
+
 function buildSessionKey(selectedCharacter: CharacterSummary) {
   return selectedCharacter.id;
+}
+
+function buildPlayerVitalsStorageKey(sessionKey: string) {
+  return `${playerVitalsStorageKeyPrefix}${sessionKey}`;
+}
+
+function resolveDerivedStats(
+  selectedClass: (typeof characterClassesData)[keyof typeof characterClassesData],
+  totalXp: number
+) {
+  const level = getLevelFromTotalXp(totalXp);
+  const maxHp = selectedClass.baseHp + (level - 1) * selectedClass.levelScaling.hpPerLevel;
+  const maxSp = selectedClass.baseSp + (level - 1) * selectedClass.levelScaling.spPerLevel;
+
+  return {
+    level,
+    maxHp,
+    maxSp,
+    maxStamina: selectedClass.baseStamina,
+  };
+}
+
+function readPersistedPlayerVitals(
+  sessionKey: string,
+  fallbackPlayer: Player,
+  fallbackRegenState: PlayerRegenState
+) {
+  if (typeof window === "undefined") {
+    return {
+      player: fallbackPlayer,
+      regenState: fallbackRegenState,
+    };
+  }
+
+  const rawPayload = window.localStorage.getItem(
+    buildPlayerVitalsStorageKey(sessionKey)
+  );
+
+  if (!rawPayload) {
+    return {
+      player: fallbackPlayer,
+      regenState: fallbackRegenState,
+    };
+  }
+
+  try {
+    const payload = JSON.parse(rawPayload) as PersistedPlayerVitalsPayload;
+
+    return deserializePlayerVitalsState(
+      payload,
+      sessionKey,
+      fallbackPlayer,
+      fallbackRegenState
+    );
+  } catch {
+    return {
+      player: fallbackPlayer,
+      regenState: fallbackRegenState,
+    };
+  }
+}
+
+function persistPlayerVitals(
+  sessionKey: string,
+  player: Pick<Player, "currentHp" | "currentSp" | "stamina">,
+  regenState: PlayerRegenState
+) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(
+    buildPlayerVitalsStorageKey(sessionKey),
+    JSON.stringify(serializePlayerVitalsState(sessionKey, player, regenState))
+  );
 }
 
 function createInitialPlayer(
@@ -110,7 +211,8 @@ function createInitialPlayer(
     stamina: selectedClass.baseStamina,
     maxStamina: selectedClass.baseStamina,
     activeConditions: [],
-    inventory: [],
+    // Every new campaign starts with the same baseline survival kit.
+    inventory: [...initialCampaignInventory],
     logs: [],
     discoveredLocations: ["merchant"],
     discoveredLore: [],
@@ -128,10 +230,35 @@ function createInitialState(
   selectedCharacter: CharacterSummary,
   selectedClass: (typeof characterClassesData)[keyof typeof characterClassesData]
 ): ProgressionState {
+  const sessionKey = buildSessionKey(selectedCharacter);
+  const now = Date.now();
+  const fallbackPlayer = createInitialPlayer(selectedCharacter, selectedClass);
+  const fallbackRegenState = createInitialPlayerRegenState(now);
+  const persistedState = readPersistedPlayerVitals(
+    sessionKey,
+    fallbackPlayer,
+    fallbackRegenState
+  );
+  const regenConfig = resolveCharacterRegenConfig(selectedCharacter.classKey);
+  const offlineRegenResolution = applyOfflineStaminaRegen(
+    {
+      ...fallbackPlayer,
+      ...persistedState.player,
+    },
+    persistedState.regenState,
+    regenConfig,
+    now
+  );
+
   return {
     currentLocation: "merchant",
-    player: createInitialPlayer(selectedCharacter, selectedClass),
-    sessionKey: buildSessionKey(selectedCharacter),
+    player: {
+      ...fallbackPlayer,
+      ...persistedState.player,
+      stamina: offlineRegenResolution.nextPlayer.stamina,
+    },
+    regenState: offlineRegenResolution.nextRegenState,
+    sessionKey,
   };
 }
 
@@ -147,6 +274,8 @@ export function useCharacterProgression({
   const [state, setState] = useState<ProgressionState>(() =>
     createInitialState(selectedCharacter, selectedClass)
   );
+  const latestPlayerRef = useRef<Player | null>(null);
+  const latestRegenStateRef = useRef<PlayerRegenState | null>(null);
 
   const resolvedState =
     state.sessionKey === sessionKey
@@ -155,14 +284,12 @@ export function useCharacterProgression({
 
   const currentLocation = resolvedState.currentLocation;
   const player = resolvedState.player;
+  const regenState = resolvedState.regenState;
 
-  const computedLevel = getLevelFromTotalXp(player.totalXp);
-  const computedMaxHp =
-    selectedClass.baseHp +
-    (computedLevel - 1) * selectedClass.levelScaling.hpPerLevel;
-  const computedSp =
-    selectedClass.baseSp +
-    (computedLevel - 1) * selectedClass.levelScaling.spPerLevel;
+  const derivedStats = resolveDerivedStats(selectedClass, player.totalXp);
+  const computedLevel = derivedStats.level;
+  const computedMaxHp = derivedStats.maxHp;
+  const computedSp = derivedStats.maxSp;
   const computedCarryWeight = selectedClass.carryWeight;
   const xpProgress = getXpProgressInCurrentLevel(player.totalXp);
   const skills = useMemo(
@@ -194,6 +321,84 @@ export function useCharacterProgression({
       };
     });
   };
+
+  useEffect(() => {
+    latestPlayerRef.current = player;
+    latestRegenStateRef.current = regenState;
+  }, [player, regenState]);
+
+  useEffect(() => {
+    const regenConfig = resolveCharacterRegenConfig(selectedCharacter.classKey);
+
+    const interval = window.setInterval(() => {
+      updateState((currentState) => {
+        const now = Date.now();
+        const currentDerivedStats = resolveDerivedStats(
+          selectedClass,
+          currentState.player.totalXp
+        );
+        const onlineRegenResolution = applyOnlineRegen(
+          currentState.player,
+          currentState.regenState,
+          regenConfig,
+          {
+            maxHp: currentDerivedStats.maxHp,
+            maxSp: currentDerivedStats.maxSp,
+            maxStamina: currentDerivedStats.maxStamina,
+          },
+          now
+        );
+
+        if (
+          onlineRegenResolution.summary.hpRecovered === 0 &&
+          onlineRegenResolution.summary.spRecovered === 0 &&
+          onlineRegenResolution.summary.staminaRecovered === 0 &&
+          onlineRegenResolution.nextRegenState.hpAnchorAt === currentState.regenState.hpAnchorAt &&
+          onlineRegenResolution.nextRegenState.spAnchorAt === currentState.regenState.spAnchorAt &&
+          onlineRegenResolution.nextRegenState.staminaAnchorAt ===
+            currentState.regenState.staminaAnchorAt
+        ) {
+          return currentState;
+        }
+
+        return {
+          ...currentState,
+          player: onlineRegenResolution.nextPlayer,
+          regenState: onlineRegenResolution.nextRegenState,
+        };
+      });
+    }, onlineRegenCheckIntervalMs);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [selectedCharacter.classKey, selectedClass]);
+
+  useEffect(() => {
+    persistPlayerVitals(sessionKey, player, regenState);
+  }, [player, regenState, sessionKey]);
+
+  useEffect(() => {
+    const handlePersistLastSeen = () => {
+      if (!latestPlayerRef.current || !latestRegenStateRef.current) {
+        return;
+      }
+
+      persistPlayerVitals(sessionKey, latestPlayerRef.current, {
+        ...latestRegenStateRef.current,
+        lastSeenAt: Date.now(),
+      });
+    };
+
+    window.addEventListener("pagehide", handlePersistLastSeen);
+    window.addEventListener("beforeunload", handlePersistLastSeen);
+
+    return () => {
+      handlePersistLastSeen();
+      window.removeEventListener("pagehide", handlePersistLastSeen);
+      window.removeEventListener("beforeunload", handlePersistLastSeen);
+    };
+  }, [sessionKey]);
 
   const recordSkillTraining = (event: SkillTrainingEvent) => {
     let levelUpMessages: string[] = [];

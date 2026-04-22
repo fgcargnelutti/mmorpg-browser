@@ -1,9 +1,14 @@
+import cookieImage from "../../../assets/items/food/cookie.png";
+import fishImage from "../../../assets/items/food/fish.png";
+import rabbitMeatImage from "../../../assets/items/food/rabbitmeat.png";
+import wildFruitImage from "../../../assets/items/food/wildfruit.png";
 import type { ItemDefinition } from "./itemTypes";
 
 export const foodItemsData: ItemDefinition[] = [
   {
     key: "fish",
     name: "River Fish",
+    icon: fishImage,
     iconKey: "fish",
     weight: 0.8,
     description: "A small river catch. Better cooked than eaten raw.",
@@ -16,6 +21,7 @@ export const foodItemsData: ItemDefinition[] = [
   {
     key: "cookie",
     name: "Cookie",
+    icon: cookieImage,
     iconKey: "ration",
     weight: 0.1,
     description: "A hard travel biscuit that somehow survived the damp.",
@@ -28,6 +34,7 @@ export const foodItemsData: ItemDefinition[] = [
   {
     key: "fruit",
     name: "Wild Fruit",
+    icon: wildFruitImage,
     iconKey: "fruit",
     weight: 0.2,
     description: "A handful of fruit gathered from the old rural outskirts.",
@@ -40,6 +47,7 @@ export const foodItemsData: ItemDefinition[] = [
   {
     key: "rabbit-meat",
     name: "Rabbit Meat",
+    icon: rabbitMeatImage,
     iconKey: "meat",
     weight: 0.6,
     description: "Freshly hunted small game from the hills and brush.",

@@ -20,6 +20,7 @@ export type InventoryItemView = {
   category: ItemCategory;
   stackable: boolean;
   iconGlyph: string;
+  iconImageSrc?: string;
   iconLabel: string;
   iconTone: InventoryItemVisualTone;
 };
@@ -89,6 +90,7 @@ export function resolveInventoryItemView(
       category: "material",
       stackable: true,
       iconGlyph: inventoryItemVisuals.crate.glyph,
+      iconImageSrc: undefined,
       iconLabel: inventoryItemVisuals.crate.label,
       iconTone: inventoryItemVisuals.crate.tone,
     };
@@ -108,6 +110,7 @@ export function resolveInventoryItemView(
     category: item.category,
     stackable: item.stackable,
     iconGlyph: visual.glyph,
+    iconImageSrc: item.icon,
     iconLabel: visual.label,
     iconTone: visual.tone,
   };

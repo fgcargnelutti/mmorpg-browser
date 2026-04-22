@@ -48,6 +48,9 @@ export type CombatActionDefinition = {
   label: string;
   hotkey?: CombatHotkey;
   consumesAction: boolean;
+  iconKey?: string;
+  iconImageSrc?: string;
+  fallbackIcon?: string;
   potionItemKey?: string;
   potionResource?: CombatPotionResource;
   skillSlot?: number;

@@ -31,19 +31,42 @@
   letter-spacing: 0.05em;
 }
 
-.combat-action-bar__grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+.combat-action-bar__body {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.combat-action-bar__controls {
+  display: flex;
+  align-items: center;
   gap: 8px;
+  flex: 0 0 auto;
+}
+
+.combat-action-bar__grid {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  justify-content: flex-end;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(85, 108, 141, 0.54) rgba(8, 13, 21, 0.8);
 }
 
 .combat-action-bar__button {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  align-items: flex-start;
-  min-height: 62px;
-  padding: 10px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 0 0 72px;
+  min-height: 58px;
+  padding: 6px 6px 7px;
   border: 1px solid rgba(89, 110, 140, 0.46);
   border-radius: 12px;
   background: linear-gradient(180deg, #243447 0%, #172231 100%);
@@ -67,6 +90,26 @@
   cursor: not-allowed;
 }
 
+.combat-action-bar__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  font-size: 17px;
+  line-height: 1;
+  color: var(--text-soft);
+}
+
+.combat-action-bar__icon-image {
+  display: block;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  image-rendering: auto;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.28));
+}
+
 .combat-action-bar__button--basic-attack {
   border-color: rgba(210, 177, 115, 0.56);
 }
@@ -83,21 +126,37 @@
   border-color: rgba(143, 129, 214, 0.32);
 }
 
-.combat-action-bar__label {
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 700;
-  text-align: left;
-}
-
 .combat-action-bar__hotkey {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 0.08em;
 }
 
-@media (max-width: 720px) {
-  .combat-action-bar__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.combat-action-bar__grid::-webkit-scrollbar {
+  height: 8px;
+}
+
+.combat-action-bar__grid::-webkit-scrollbar-track {
+  background: rgba(8, 13, 21, 0.8);
+}
+
+.combat-action-bar__grid::-webkit-scrollbar-thumb {
+  background: rgba(85, 108, 141, 0.54);
+  border: 1px solid rgba(10, 16, 25, 0.84);
+  border-radius: 999px;
+}
+
+@media (max-width: 900px) {
+  .combat-action-bar__body {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .combat-action-bar__controls {
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 }

@@ -19,29 +19,29 @@
 }
 
 .equipment-cols-2 {
-  grid-template-columns: repeat(2, 50px);
+  grid-template-columns: repeat(2, 72px);
 }
 
 .equipment-cols-3 {
-  grid-template-columns: repeat(3, 50px);
+  grid-template-columns: repeat(3, 72px);
 }
 
 .equipment-cols-4 {
-  grid-template-columns: repeat(4, 50px);
+  grid-template-columns: repeat(4, 72px);
 }
 
 .equip-slot {
   position: relative;
-  width: 50px;
-  height: 50px;
+  width: 72px;
+  height: 72px;
   display: grid;
   place-items: center;
-  background: linear-gradient(180deg, rgba(24, 34, 51, 0.96) 0%, rgba(12, 18, 29, 1) 100%);
-  border: 1px solid rgba(76, 96, 123, 0.48);
+  background: linear-gradient(180deg, rgba(38, 51, 72, 0.98) 0%, rgba(20, 29, 44, 1) 100%);
+  border: 1px solid rgba(108, 131, 170, 0.46);
   border-radius: 12px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.03),
-    0 8px 14px rgba(1, 6, 12, 0.1);
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 8px 14px rgba(1, 6, 12, 0.12);
   cursor: default;
   z-index: 1;
   transition:
@@ -53,15 +53,25 @@
 .equip-slot:hover {
   z-index: 9999;
   transform: translateY(-1px);
-  border-color: rgba(152, 177, 216, 0.5);
+  border-color: rgba(166, 191, 230, 0.62);
+  background: linear-gradient(180deg, rgba(46, 61, 85, 1) 0%, rgba(25, 35, 52, 1) 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 12px 18px rgba(1, 7, 14, 0.14);
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 12px 18px rgba(1, 7, 14, 0.16);
 }
 
 .equip-slot-icon {
-  font-size: 22px;
+  font-size: 30px;
   line-height: 1;
+}
+
+.equip-slot-image {
+  display: block;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  image-rendering: auto;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.22));
 }
 
 .equipment-tooltip-content,

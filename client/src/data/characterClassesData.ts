@@ -24,9 +24,6 @@ export type CharacterClassData = {
   baseStamina: number;
   carryWeight: number;
 
-  passiveStaminaRegenBonusPercent: number;
-  offlineStaminaRegenBonusPercent: number;
-
   staminaRecoveryOnHeavyAction: {
     chancePercent: number;
     minimumStaminaCost: number;
@@ -65,9 +62,6 @@ export const characterClassesData: Record<
     baseStamina: BASE_CHARACTER_STAMINA,
     carryWeight: 100,
 
-    passiveStaminaRegenBonusPercent: 10,
-    offlineStaminaRegenBonusPercent: 10,
-
     staminaRecoveryOnHeavyAction: {
       chancePercent: 20,
       minimumStaminaCost: 3,
@@ -92,8 +86,10 @@ export const characterClassesData: Record<
 
     traits: [
       "High HP, low SP.",
-      "Passive stamina regeneration is 10% faster.",
-      "Offline stamina regeneration is 10% faster.",
+      "Regenerates 1 HP every 3 seconds.",
+      "Regenerates 1 SP every 12 seconds.",
+      "Regenerates 1 stamina every 2 minutes and 24 seconds.",
+      "Offline stamina regenerates 1 point every 2 minutes.",
       "Can carry up to 100 kg.",
       "20% chance to recover 1 stamina after actions costing 3 or more stamina.",
       "20% resistance to injury chance.",
@@ -121,9 +117,6 @@ export const characterClassesData: Record<
     baseStamina: BASE_CHARACTER_STAMINA,
     carryWeight: 70,
 
-    passiveStaminaRegenBonusPercent: 0,
-    offlineStaminaRegenBonusPercent: 0,
-
     staminaRecoveryOnHeavyAction: {
       chancePercent: 0,
       minimumStaminaCost: 999,
@@ -147,7 +140,10 @@ export const characterClassesData: Record<
 
     traits: [
       "Low HP, high SP.",
-      "Stamina regeneration follows the normal rate.",
+      "Regenerates 1 HP every 12 seconds.",
+      "Regenerates 1 SP every 2 seconds.",
+      "Regenerates 1 stamina every 2 minutes and 24 seconds.",
+      "Offline stamina regenerates 1 point every 2 minutes.",
       "Can carry up to 70 kg.",
       "All jewel-derived bonuses are 10% more effective.",
       "Does not suffer suspicion-style social debuffs common to distrusted archetypes.",
@@ -174,9 +170,6 @@ export const characterClassesData: Record<
     baseStamina: BASE_CHARACTER_STAMINA,
     carryWeight: 80,
 
-    passiveStaminaRegenBonusPercent: 0,
-    offlineStaminaRegenBonusPercent: 0,
-
     staminaRecoveryOnHeavyAction: {
       chancePercent: 0,
       minimumStaminaCost: 999,
@@ -201,7 +194,10 @@ export const characterClassesData: Record<
 
     traits: [
       "Medium HP, medium SP.",
-      "Stamina regeneration follows the normal rate.",
+      "Regenerates 1 HP every 6 seconds.",
+      "Regenerates 1 SP every 6 seconds.",
+      "Regenerates 1 stamina every 2 minutes and 24 seconds.",
+      "Offline stamina regenerates 1 point every 2 minutes.",
       "Can carry up to 80 kg.",
       "10% chance to obtain additional loot when gathering resources.",
       "10% chance to avoid stamina consumption when performing map travel actions.",

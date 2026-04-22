@@ -858,7 +858,8 @@ export default function GameScreen({
     }
 
     stopLoop("manual");
-  }, [isHunting, stopLoop]);
+    closeCombat();
+  }, [closeCombat, isHunting, stopLoop]);
 
   useEffect(() => {
     if (continuousCombatLoopState.status !== "stopped") {
