@@ -20,6 +20,7 @@ import type {
   CombatActionId,
   CombatState,
 } from "../../../combat/domain/combatEngineTypes";
+import type { WorldBossMapNotification } from "../../../boss/application/selectors/resolveWorldBossMapNotification";
 
 type WorldMapProps = {
   currentLocation: LocationKey;
@@ -34,6 +35,13 @@ type WorldMapProps = {
   activeGlobalActionLabel?: string | null;
   globalActionStatus?: "idle" | "hunting" | "stopped";
   globalActionEncountersCompleted?: number;
+  worldBossNotice?: WorldBossMapNotification | null;
+  worldBossAction?: {
+    label: string;
+    description: string;
+    tone?: "join" | "leave";
+  } | null;
+  onWorldBossAction?: () => void;
 
   npcDialogOpen: boolean;
   npcName: string;
@@ -87,6 +95,9 @@ export default function WorldMap({
   activeGlobalActionLabel,
   globalActionStatus = "idle",
   globalActionEncountersCompleted = 0,
+  worldBossNotice,
+  worldBossAction,
+  onWorldBossAction,
   npcDialogOpen,
   npcName,
   npcRole,
@@ -375,6 +386,9 @@ export default function WorldMap({
             huntingStatus={globalActionStatus}
             activeActionLabel={activeGlobalActionLabel}
             completedEncounters={globalActionEncountersCompleted}
+            worldBossNotice={worldBossNotice}
+            worldBossAction={worldBossAction}
+            onWorldBossAction={onWorldBossAction}
             onAction={onGlobalAction}
             onStop={onStopGlobalAction}
           />

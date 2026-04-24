@@ -1,0 +1,193 @@
+.world-boss-result-anchor {
+  position: absolute;
+  inset: 0;
+  z-index: 26;
+}
+
+.world-boss-result-dialog {
+  display: grid;
+  gap: 14px;
+}
+
+.world-boss-result-dialog__hero {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(132, 155, 190, 0.36);
+}
+
+.world-boss-result-dialog__hero--victory {
+  background: linear-gradient(180deg, rgba(54, 73, 36, 0.92) 0%, rgba(20, 31, 19, 0.96) 100%);
+  border-color: rgba(177, 196, 129, 0.42);
+}
+
+.world-boss-result-dialog__hero--defeat {
+  background: linear-gradient(180deg, rgba(74, 41, 34, 0.92) 0%, rgba(31, 18, 18, 0.96) 100%);
+  border-color: rgba(188, 124, 111, 0.42);
+}
+
+.world-boss-result-dialog__hero span,
+.world-boss-result-dialog__card span,
+.world-boss-result-dialog__section-header span {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.world-boss-result-dialog__hero strong {
+  font-size: 24px;
+  color: var(--text);
+}
+
+.world-boss-result-dialog__hero p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-soft);
+}
+
+.world-boss-result-dialog__summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.world-boss-result-dialog__card {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(107, 127, 153, 0.34);
+  background: rgba(14, 22, 34, 0.82);
+}
+
+.world-boss-result-dialog__card strong,
+.world-boss-result-dialog__section-header strong {
+  color: var(--text);
+}
+
+.world-boss-result-dialog__card strong {
+  font-size: 18px;
+}
+
+.world-boss-result-dialog__rewards {
+  display: grid;
+  gap: 10px;
+}
+
+.world-boss-result-dialog__section-header {
+  display: grid;
+  gap: 4px;
+}
+
+.world-boss-result-dialog__reward-list {
+  display: grid;
+  gap: 10px;
+}
+
+.world-boss-result-dialog__reward-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(112, 132, 160, 0.28);
+  background: rgba(13, 21, 33, 0.88);
+}
+
+.world-boss-result-dialog__reward-card--xp {
+  border-color: rgba(102, 152, 219, 0.42);
+}
+
+.world-boss-result-dialog__reward-card--gold {
+  border-color: rgba(201, 172, 104, 0.42);
+}
+
+.world-boss-result-dialog__reward-card--item {
+  border-color: rgba(126, 166, 137, 0.4);
+}
+
+.world-boss-result-dialog__reward-card--stamina,
+.world-boss-result-dialog__reward-card--message {
+  border-color: rgba(134, 146, 168, 0.34);
+}
+
+.world-boss-result-dialog__reward-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(23, 33, 48, 0.92);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.world-boss-result-dialog__reward-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.world-boss-result-dialog__reward-copy strong {
+  font-size: 14px;
+}
+
+.world-boss-result-dialog__reward-copy span,
+.world-boss-result-dialog__empty-state {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-soft);
+}
+
+.world-boss-result-dialog__reward-amount {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #ecd8b0;
+}
+
+.world-boss-result-dialog__empty-state {
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(100, 120, 148, 0.28);
+  background: rgba(14, 21, 33, 0.74);
+}
+
+.world-boss-result-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.world-boss-result-dialog__close-button {
+  min-width: 124px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(179, 151, 104, 0.42);
+  background: linear-gradient(180deg, rgba(71, 53, 31, 0.96) 0%, rgba(31, 23, 14, 0.98) 100%);
+  color: var(--text-soft);
+  cursor: pointer;
+}
+
+.world-boss-result-dialog__close-button:hover {
+  border-color: rgba(215, 183, 124, 0.52);
+}
+
+@media (max-width: 900px) {
+  .world-boss-result-dialog__summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .world-boss-result-dialog__reward-card {
+    grid-template-columns: auto 1fr;
+  }
+
+  .world-boss-result-dialog__reward-amount {
+    grid-column: 1 / -1;
+  }
+}

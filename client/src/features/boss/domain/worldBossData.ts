@@ -14,6 +14,32 @@ export const worldBossData: Record<string, WorldBossDefinition> = {
     mapId: "north-forest",
     description:
       "A prototype World Boss used to validate synchronized raid-session combat, lane pressure, and contribution tracking.",
+    activationIntervalMs: 60 * 60 * 1000,
+    joinWindowDurationMs: 5 * 60 * 1000,
+    rewardPool: [
+      {
+        type: "xp",
+        amount: 120,
+        reason: "World Boss victory",
+      },
+      {
+        type: "gold",
+        amount: 18,
+        reason: "World Boss reward cache",
+      },
+      {
+        type: "item",
+        itemKey: "stone",
+        amount: 2,
+        reason: "Colossus fragments",
+      },
+      {
+        type: "item",
+        itemKey: "rope",
+        amount: 1,
+        reason: "Recovered field supply",
+      },
+    ],
     maxHp: 4000,
     maxSp: 250,
     baseRoundDurationMs: WORLD_BOSS_PLAYER_ROUND_DURATION_MS,

@@ -1,0 +1,184 @@
+.world-boss-lobby-anchor {
+  position: absolute;
+  inset: 0;
+  z-index: 26;
+}
+
+.world-boss-lobby {
+  display: grid;
+  gap: 14px;
+}
+
+.world-boss-lobby__overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.world-boss-lobby__overview-card {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(117, 137, 166, 0.38);
+  background: rgba(16, 24, 37, 0.76);
+}
+
+.world-boss-lobby__overview-card span {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.world-boss-lobby__overview-card strong {
+  font-size: 18px;
+  color: var(--text);
+}
+
+.world-boss-lobby__boss-position {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(176, 138, 91, 0.36);
+  background: linear-gradient(180deg, rgba(61, 42, 22, 0.44) 0%, rgba(29, 21, 14, 0.54) 100%);
+}
+
+.world-boss-lobby__boss-position strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #f1d7a2;
+}
+
+.world-boss-lobby__boss-position p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(234, 224, 206, 0.84);
+}
+
+.world-boss-lobby__lanes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.world-boss-lobby__lane-card {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(107, 127, 153, 0.38);
+  background: rgba(14, 21, 33, 0.82);
+  color: var(--text-soft);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease;
+}
+
+.world-boss-lobby__lane-card:hover {
+  transform: translateY(-1px);
+  border-color: rgba(151, 179, 220, 0.56);
+  box-shadow: 0 14px 22px rgba(2, 8, 16, 0.22);
+  background: rgba(18, 28, 42, 0.92);
+}
+
+.world-boss-lobby__lane-card.is-selected {
+  border-color: rgba(210, 170, 102, 0.6);
+  background: linear-gradient(180deg, rgba(70, 49, 24, 0.9) 0%, rgba(33, 24, 14, 0.96) 100%);
+  box-shadow: 0 16px 24px rgba(9, 6, 3, 0.24);
+}
+
+.world-boss-lobby__lane-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.world-boss-lobby__lane-topline strong {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.world-boss-lobby__lane-topline span {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.world-boss-lobby__lane-card p {
+  margin: 0;
+  min-height: 50px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.world-boss-lobby__lane-card small {
+  font-size: 11px;
+  color: #ecd8b0;
+}
+
+.world-boss-lobby__distribution {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.world-boss-lobby__distribution-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(15, 23, 35, 0.7);
+  border: 1px solid rgba(89, 109, 137, 0.3);
+}
+
+.world-boss-lobby__distribution-item span {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.world-boss-lobby__distribution-item strong {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.world-boss-lobby__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.world-boss-lobby__leave-button {
+  min-width: 132px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(143, 115, 84, 0.42);
+  background: linear-gradient(180deg, rgba(54, 40, 28, 0.96) 0%, rgba(24, 18, 13, 0.98) 100%);
+  color: var(--text-soft);
+  cursor: pointer;
+}
+
+.world-boss-lobby__leave-button:hover {
+  border-color: rgba(182, 151, 115, 0.5);
+}
+
+@media (max-width: 900px) {
+  .world-boss-lobby__overview,
+  .world-boss-lobby__lanes,
+  .world-boss-lobby__distribution {
+    grid-template-columns: 1fr;
+  }
+
+  .world-boss-lobby__lane-card p {
+    min-height: 0;
+  }
+}

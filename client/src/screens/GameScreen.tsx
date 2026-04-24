@@ -23,6 +23,14 @@ import TopPanel from "../components/TopPanel";
 import RegionPlayersIndicator from "../components/RegionPlayersIndicator";
 import SideNavRail, { sideNavIcons } from "../components/SideNavRail";
 import { useCombatEncounter } from "../features/combat/application/hooks/useCombatEncounter";
+import { useLocalWorldBossTestScheduler } from "../features/boss/application/hooks/useLocalWorldBossTestScheduler";
+import { useWorldBossSession } from "../features/boss/application/hooks/useWorldBossSession";
+import { resolveWorldBossMapNotification } from "../features/boss/application/selectors/resolveWorldBossMapNotification";
+import { resolveWorldBossResultSummary } from "../features/boss/application/selectors/resolveWorldBossResultSummary";
+import { worldBossData } from "../features/boss/domain/worldBossData";
+import WorldBossLobbyDialog from "../features/boss/presentation/components/WorldBossLobbyDialog";
+import WorldBossActionDialog from "../features/boss/presentation/components/WorldBossActionDialog";
+import WorldBossResultDialog from "../features/boss/presentation/components/WorldBossResultDialog";
 
 import {
   WorldMap,
@@ -225,8 +233,13 @@ export default function GameScreen({
     null
   );
   const continuousCombatLoopStopRef = useRef<string | null>(null);
+  const announcedWorldBossSlotKeyRef = useRef<string | null>(null);
+  const announcedWorldBossBattleSessionIdRef = useRef<string | null>(null);
+  const announcedWorldBossCombatFeedEventKeyRef = useRef<string | null>(null);
+  const announcedWorldBossResolvedSessionIdRef = useRef<string | null>(null);
 
   const [currentMap, setCurrentMap] = useState<MapId>("belagard");
+  const localWorldBossScheduler = useLocalWorldBossTestScheduler();
   const {
     contextState,
     setContextState,
@@ -312,6 +325,200 @@ export default function GameScreen({
   });
 
   const currentMapData = resolveMapData(currentMap);
+  const localWorldBossPlayerSnapshot = {
+    id: selectedCharacter.id,
+    name: player.name,
+    classKey: selectedCharacter.classKey,
+    currentHp: Math.min(player.currentHp, computedMaxHp),
+    maxHp: computedMaxHp,
+    currentSp: Math.min(player.currentSp, computedSp),
+    maxSp: computedSp,
+    currentStamina: player.stamina,
+    maxStamina: player.maxStamina,
+  };
+  const worldBossSession = useWorldBossSession({
+    event: localWorldBossScheduler.activeEvent,
+    currentMapId: currentMap,
+    localPlayer: localWorldBossPlayerSnapshot,
+  });
+  const activeWorldBossDefinition = worldBossSession.activeSession
+    ? worldBossData[worldBossSession.activeSession.bossKey]
+    : localWorldBossScheduler.activeBossDefinition;
+  const worldBossMapNotice = resolveWorldBossMapNotification({
+    event: localWorldBossScheduler.activeEvent,
+    currentMapId: currentMap,
+    activeSession: worldBossSession.activeSession,
+  });
+  const worldBossMapAction = worldBossSession.joinEligibility.isEligibleToJoin
+    ? {
+        label: "Join Battle",
+        description:
+          "Enter the local pre-battle World Boss session from this map.",
+        tone: "join" as const,
+      }
+    : worldBossSession.joinEligibility.canLeaveBeforeStart
+      ? {
+          label: "Leave Battle",
+          description:
+            "Leave the local World Boss session before combat starts.",
+          tone: "leave" as const,
+        }
+      : null;
+  const worldBossLobbyOverlay =
+    worldBossSession.sessionShellState === "lobby" &&
+    worldBossSession.lobbySummary &&
+    activeWorldBossDefinition ? (
+      <WorldBossLobbyDialog
+        isOpen={true}
+        bossName={activeWorldBossDefinition.name}
+        bossTitle={activeWorldBossDefinition.title}
+        totalPlayers={worldBossSession.lobbySummary.totalPlayers}
+        countdownRemainingSeconds={
+          worldBossSession.lobbySummary.countdownRemainingSeconds
+        }
+        currentLaneId={worldBossSession.lobbySummary.localPlayerLaneId}
+        laneSummaries={worldBossSession.lobbySummary.laneSummaries}
+        onSelectLane={(laneId) => {
+          const selection = worldBossSession.selectLobbyLane(laneId);
+
+          if (!selection.didSelect) {
+            return;
+          }
+
+          setEventLogs((previousLogs) => [
+            ...previousLogs,
+            `World Boss: You moved to the ${laneId} lane in the pre-battle lobby.`,
+          ]);
+        }}
+        onLeave={() => {
+          const leaveResult = worldBossSession.leaveWorldBoss();
+
+          if (!leaveResult.didLeave || !worldBossMapNotice) {
+            return;
+          }
+
+          const leaveMessage = `You left the World Boss staging session for ${worldBossMapNotice.bossName}.`;
+          setEventLogs((previousLogs) => [...previousLogs, leaveMessage]);
+          notifyInfo(leaveMessage, {
+            title: "World Boss Left",
+          });
+        }}
+      />
+    ) : null;
+  const worldBossActionOverlay =
+    worldBossSession.sessionShellState === "combat" &&
+    activeWorldBossDefinition ? (
+      <WorldBossActionDialog
+        isOpen={true}
+        bossName={activeWorldBossDefinition.name}
+        bossTitle={activeWorldBossDefinition.title}
+        bossCurrentHp={worldBossSession.activeSession?.boss.currentHp ?? 0}
+        bossMaxHp={worldBossSession.activeSession?.boss.maxHp ?? 0}
+        round={worldBossSession.activeSession?.round.round ?? 1}
+        currentLaneId={
+          worldBossSession.activeSession?.participants.find(
+            (participant) => participant.playerId === selectedCharacter.id
+          )?.laneId ?? null
+        }
+        countdownRemainingSeconds={
+          worldBossSession.combat.countdownRemainingSeconds
+        }
+        telegraphs={worldBossSession.activeSession?.round.activeTelegraphs ?? []}
+        participants={
+          worldBossSession.activeSession?.participants.map((participant) => ({
+            id: participant.id,
+            name: participant.name,
+            classKey: participant.classKey,
+            role: participant.role,
+            laneId: participant.laneId,
+            state: participant.state,
+            currentHp: participant.currentHp,
+            maxHp: participant.maxHp,
+            currentSp: participant.currentSp,
+            maxSp: participant.maxSp,
+          })) ?? []
+        }
+        currentSelection={worldBossSession.combat.currentSelection}
+        latestCommittedAction={worldBossSession.combat.latestCommittedAction}
+        combatLog={worldBossSession.combat.combatLog}
+        actionOptions={worldBossSession.combat.actionOptions}
+        onSelectAction={(params) => {
+          const result = worldBossSession.combat.submitAction(params);
+
+          if (!result.didSubmit && result.reason) {
+            notifyError(result.reason, {
+              title: "World Boss Action",
+            });
+          }
+        }}
+        onLeaveBattle={() => {
+          const leaveResult = worldBossSession.abandonWorldBossSession(
+            "voluntary-exit"
+          );
+
+          if (!leaveResult.didAbandon) {
+            return;
+          }
+
+          setEventLogs((previousLogs) => [
+            ...previousLogs,
+            ...leaveResult.messages,
+          ]);
+          notifyInfo("You left the active World Boss encounter.", {
+            title: "World Boss Left",
+          });
+        }}
+      />
+    ) : null;
+  const worldBossResultSummary =
+    worldBossSession.sessionShellState === "result" &&
+    worldBossSession.activeSession &&
+    activeWorldBossDefinition
+      ? resolveWorldBossResultSummary({
+          session: worldBossSession.activeSession,
+          boss: activeWorldBossDefinition,
+          localPlayerId: selectedCharacter.id,
+        })
+      : null;
+  const worldBossResultOverlay =
+    worldBossResultSummary && activeWorldBossDefinition ? (
+      <WorldBossResultDialog
+        isOpen={true}
+        bossName={activeWorldBossDefinition.name}
+        bossTitle={activeWorldBossDefinition.title}
+        summary={worldBossResultSummary}
+        onClose={() => {
+          if (worldBossResultSummary.rewards.length > 0) {
+            setPlayer((previousPlayer) =>
+              applyRewardsToPlayerSnapshot(
+                previousPlayer,
+                worldBossResultSummary.rewards
+              )
+            );
+          }
+
+          const resultMessages = [
+            `World Boss Result: ${worldBossResultSummary.outcome === "victory" ? "Victory" : "Defeat"} against ${activeWorldBossDefinition.name}.`,
+            `World Boss Summary: ${worldBossResultSummary.contribution.damageDealt} damage dealt, ${worldBossResultSummary.contribution.healingDone} healing done, ${worldBossResultSummary.contribution.damageTaken} damage taken, ${worldBossResultSummary.durationLabel} duration, ${worldBossResultSummary.totalPlayers} player(s).`,
+            ...collectRewardMessages(worldBossResultSummary.rewards),
+          ];
+
+          setEventLogs((previousLogs) => [...previousLogs, ...resultMessages]);
+
+          if (worldBossResultSummary.outcome === "victory") {
+            notifySuccess(`${activeWorldBossDefinition.name} rewards claimed.`, {
+              title: "World Boss Complete",
+            });
+          } else {
+            notifyInfo("The World Boss session has been closed.", {
+              title: "World Boss Defeat",
+            });
+          }
+
+          worldBossSession.closeResolvedSession();
+        }}
+      />
+    ) : null;
   const linkedCurrentMapPoi =
     worldMapPoisData.find((poi) => poi.linkedMapIds?.includes(currentMap)) ?? null;
   // Prefer the prototype/testing continent override when present; otherwise fall back
@@ -385,6 +592,106 @@ export default function GameScreen({
   }));
   const hasInjury = player?.activeConditions.includes("injury") ?? false;
   const hasPoison = player?.activeConditions.includes("poison") ?? false;
+
+  useEffect(() => {
+    const activeEvent = localWorldBossScheduler.activeEvent;
+
+    if (!activeEvent?.schedulerSlotKey || !worldBossMapNotice) {
+      return;
+    }
+
+    if (announcedWorldBossSlotKeyRef.current === activeEvent.schedulerSlotKey) {
+      return;
+    }
+
+    announcedWorldBossSlotKeyRef.current = activeEvent.schedulerSlotKey;
+
+    const activationMessage = `World Boss ${worldBossMapNotice.bossName} is active. Travel to ${worldBossMapNotice.targetMapName}.`;
+
+    setEventLogs((previousLogs) => [...previousLogs, activationMessage]);
+    notifyInfo(activationMessage, {
+      title: "World Boss Active",
+      dedupeKey: `world-boss-slot:${activeEvent.schedulerSlotKey}`,
+    });
+  }, [
+    localWorldBossScheduler.activeEvent,
+    notifyInfo,
+    worldBossMapNotice,
+  ]);
+
+  useEffect(() => {
+    const activeSession = worldBossSession.activeSession;
+
+    if (!activeSession || activeSession.state !== "active") {
+      return;
+    }
+
+    if (announcedWorldBossBattleSessionIdRef.current === activeSession.sessionId) {
+      return;
+    }
+
+    announcedWorldBossBattleSessionIdRef.current = activeSession.sessionId;
+
+    const battleStartMessage = `World Boss: The lobby countdown ended. ${activeSession.boss.name} battle state is now active.`;
+
+    setEventLogs((previousLogs) => [...previousLogs, battleStartMessage]);
+    notifyInfo(battleStartMessage, {
+      title: "World Boss Battle Started",
+      dedupeKey: `world-boss-battle:${activeSession.sessionId}`,
+    });
+  }, [notifyInfo, worldBossSession.activeSession]);
+
+  useEffect(() => {
+    const feedBatch = worldBossSession.combat.latestFeedBatch;
+
+    if (!feedBatch) {
+      return;
+    }
+
+    if (announcedWorldBossCombatFeedEventKeyRef.current === feedBatch.key) {
+      return;
+    }
+
+    announcedWorldBossCombatFeedEventKeyRef.current = feedBatch.key;
+    setEventLogs((previousLogs) => [...previousLogs, ...feedBatch.messages]);
+  }, [worldBossSession.combat.latestFeedBatch]);
+
+  useEffect(() => {
+    const activeSession = worldBossSession.activeSession;
+
+    if (
+      !activeSession ||
+      (activeSession.state !== "completed" && activeSession.state !== "failed")
+    ) {
+      return;
+    }
+
+    if (announcedWorldBossResolvedSessionIdRef.current === activeSession.sessionId) {
+      return;
+    }
+
+    announcedWorldBossResolvedSessionIdRef.current = activeSession.sessionId;
+
+    const resolutionMessage =
+      activeSession.state === "completed"
+        ? `World Boss: ${activeSession.boss.name} was defeated. Review the result screen to claim rewards.`
+        : `World Boss: The raid failed against ${activeSession.boss.name}. Review the result screen for the battle summary.`;
+
+    setEventLogs((previousLogs) => [...previousLogs, resolutionMessage]);
+
+    if (activeSession.state === "completed") {
+      notifySuccess(resolutionMessage, {
+        title: "World Boss Victory",
+        dedupeKey: `world-boss-result:${activeSession.sessionId}`,
+      });
+      return;
+    }
+
+    notifyInfo(resolutionMessage, {
+      title: "World Boss Defeat",
+      dedupeKey: `world-boss-result:${activeSession.sessionId}`,
+    });
+  }, [notifyInfo, notifySuccess, worldBossSession.activeSession]);
 
   const logQuestUpdates = useCallback(
     (updates: Array<{
@@ -516,6 +823,37 @@ export default function GameScreen({
 
   const handleCloseNpcDialog = () => {
     closeNpcOverlay();
+  };
+
+  const handleWorldBossMapAction = () => {
+    if (worldBossSession.joinEligibility.isEligibleToJoin) {
+      const joinResult = worldBossSession.joinWorldBoss();
+
+      if (!joinResult.didJoin || !worldBossMapNotice) {
+        return;
+      }
+
+      const joinMessage = `You joined the World Boss staging session for ${worldBossMapNotice.bossName} in ${worldBossMapNotice.targetMapName}.`;
+      setEventLogs((previousLogs) => [...previousLogs, joinMessage]);
+      notifySuccess(joinMessage, {
+        title: "World Boss Joined",
+      });
+      return;
+    }
+
+    if (worldBossSession.joinEligibility.canLeaveBeforeStart) {
+      const leaveResult = worldBossSession.leaveWorldBoss();
+
+      if (!leaveResult.didLeave || !worldBossMapNotice) {
+        return;
+      }
+
+      const leaveMessage = `You left the World Boss staging session for ${worldBossMapNotice.bossName}.`;
+      setEventLogs((previousLogs) => [...previousLogs, leaveMessage]);
+      notifyInfo(leaveMessage, {
+        title: "World Boss Left",
+      });
+    }
   };
 
   useEffect(() => {
@@ -1960,6 +2298,16 @@ export default function GameScreen({
         return;
       }
 
+      const disconnectWorldBossResult =
+        worldBossSession.abandonWorldBossSession("disconnect");
+
+      if (disconnectWorldBossResult.didAbandon) {
+        setEventLogs((previousLogs) => [
+          ...previousLogs,
+          ...disconnectWorldBossResult.messages,
+        ]);
+      }
+
       onDisconnect();
     },
     tooltipDescription: "Leave the current session and return to the login screen.",
@@ -2032,6 +2380,9 @@ export default function GameScreen({
             globalActionEncountersCompleted={
               continuousCombatLoopState.completedEncounters
             }
+            worldBossNotice={worldBossMapNotice}
+            worldBossAction={worldBossMapAction}
+            onWorldBossAction={handleWorldBossMapAction}
             npcDialogOpen={npcDialogOpen}
             npcName={activeNpcProfile.name}
             npcRole={activeNpcProfile.role}
@@ -2168,6 +2519,12 @@ export default function GameScreen({
                   overlayToast={worldMapOverlayToast}
                   onDismissOverlayToast={dismissWorldMapOverlayToast}
                 />
+              ) : worldBossLobbyOverlay ? (
+                worldBossLobbyOverlay
+              ) : worldBossActionOverlay ? (
+                worldBossActionOverlay
+              ) : worldBossResultOverlay ? (
+                worldBossResultOverlay
               ) : null
             }
           />

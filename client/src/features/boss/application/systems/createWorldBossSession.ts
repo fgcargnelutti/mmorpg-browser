@@ -8,22 +8,16 @@ import {
 import type {
   WorldBossLaneId,
   WorldBossParticipant,
+  WorldBossPlayerSnapshot,
   WorldBossParticipantRole,
   WorldBossSession,
 } from "../../domain/worldBossTypes";
 import { createInitialWorldBossContribution } from "./worldBossContributionSystem";
-
-type WorldBossPlayerSnapshot = {
-  id: string;
-  name: string;
-  classKey: CharacterClassKey;
-  currentHp: number;
-  maxHp: number;
-  currentSp: number;
-  maxSp: number;
-  currentStamina: number;
-  maxStamina: number;
-};
+import {
+  WORLD_BOSS_RECONNECT_POLICY,
+  WORLD_BOSS_RESURRECTION_POLICY,
+  WORLD_BOSS_SESSION_AUTHORITY_MODE,
+} from "../../domain/worldBossAuthorityPolicy";
 
 function resolveWorldBossParticipantRole(
   classKey: CharacterClassKey
@@ -113,8 +107,12 @@ export function createWorldBossSession(params: {
     sessionId: createSessionId(boss.key, now),
     bossKey: boss.key,
     state: "forming",
+    authorityMode: WORLD_BOSS_SESSION_AUTHORITY_MODE,
+    reconnectPolicy: WORLD_BOSS_RECONNECT_POLICY,
+    resurrectionPolicy: WORLD_BOSS_RESURRECTION_POLICY,
     createdAt: nowIso,
     availableAt: nowIso,
+    lobbyCountdownDurationMs: countdownDurationMs,
     boss: {
       name: boss.name,
       title: boss.title,

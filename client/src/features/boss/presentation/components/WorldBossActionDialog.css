@@ -1,0 +1,284 @@
+.world-boss-action-anchor {
+  position: absolute;
+  inset: 0;
+  z-index: 26;
+}
+
+.world-boss-action-dialog {
+  display: grid;
+  gap: 14px;
+}
+
+.world-boss-action-dialog__overview {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.world-boss-action-dialog__overview-card,
+.world-boss-action-dialog__status {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(112, 132, 160, 0.34);
+  background: rgba(14, 22, 34, 0.82);
+}
+
+.world-boss-action-dialog__overview-card span,
+.world-boss-action-dialog__status strong {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.world-boss-action-dialog__overview-card strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.world-boss-action-dialog__status {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.world-boss-action-dialog__status p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-soft);
+}
+
+.world-boss-action-dialog__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(260px, 0.85fr);
+  gap: 14px;
+}
+
+.world-boss-action-dialog__main-column {
+  display: grid;
+  gap: 14px;
+}
+
+.world-boss-action-dialog__telegraphs {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(182, 140, 97, 0.34);
+  background: linear-gradient(180deg, rgba(62, 41, 20, 0.5) 0%, rgba(26, 19, 13, 0.62) 100%);
+}
+
+.world-boss-action-dialog__telegraphs strong {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #f1d7a2;
+}
+
+.world-boss-action-dialog__telegraph-list {
+  display: grid;
+  gap: 8px;
+}
+
+.world-boss-action-dialog__telegraph-item {
+  display: grid;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(194, 163, 124, 0.22);
+  background: rgba(74, 51, 26, 0.22);
+}
+
+.world-boss-action-dialog__telegraph-item span {
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(237, 225, 206, 0.88);
+}
+
+.world-boss-action-dialog__telegraph-item small {
+  font-size: 11px;
+  color: rgba(238, 205, 149, 0.8);
+}
+
+.world-boss-action-dialog__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.world-boss-action-dialog__button {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(99, 119, 149, 0.4);
+  background: rgba(14, 22, 34, 0.88);
+  color: var(--text-soft);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease;
+}
+
+.world-boss-action-dialog__button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(150, 178, 217, 0.56);
+  background: rgba(19, 30, 45, 0.94);
+}
+
+.world-boss-action-dialog__button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.world-boss-action-dialog__button strong {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.world-boss-action-dialog__button span {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.world-boss-action-dialog__combat-log,
+.world-boss-action-dialog__status-panel {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(102, 123, 150, 0.34);
+  background: rgba(12, 20, 31, 0.86);
+}
+
+.world-boss-action-dialog__combat-log > strong,
+.world-boss-action-dialog__status-panel-title {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.world-boss-action-dialog__combat-log-list,
+.world-boss-action-dialog__participant-list {
+  display: grid;
+  gap: 8px;
+}
+
+.world-boss-action-dialog__combat-log-item {
+  padding: 9px 10px;
+  border-radius: 12px;
+  background: rgba(16, 26, 40, 0.72);
+  border: 1px solid rgba(82, 102, 131, 0.26);
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-soft);
+}
+
+.world-boss-action-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.world-boss-action-dialog__leave-button {
+  min-width: 132px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(143, 115, 84, 0.42);
+  background: linear-gradient(180deg, rgba(54, 40, 28, 0.96) 0%, rgba(24, 18, 13, 0.98) 100%);
+  color: var(--text-soft);
+  cursor: pointer;
+}
+
+.world-boss-action-dialog__leave-button:hover {
+  border-color: rgba(182, 151, 115, 0.5);
+}
+
+.world-boss-action-dialog__participant-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(88, 108, 136, 0.26);
+  background: rgba(16, 26, 40, 0.72);
+}
+
+.world-boss-action-dialog__participant-info {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.world-boss-action-dialog__participant-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.world-boss-action-dialog__participant-topline strong {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.world-boss-action-dialog__participant-topline span {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #f1d7a2;
+}
+
+.world-boss-action-dialog__resource {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.world-boss-action-dialog__resource span {
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.world-boss-action-dialog__resource-bar {
+  position: relative;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(28, 40, 56, 0.86);
+}
+
+.world-boss-action-dialog__resource-fill {
+  height: 100%;
+  border-radius: inherit;
+}
+
+.world-boss-action-dialog__resource-fill--hp {
+  background: linear-gradient(90deg, #8d2c35 0%, #d1626d 100%);
+}
+
+.world-boss-action-dialog__resource-fill--sp {
+  background: linear-gradient(90deg, #32598b 0%, #63a4e8 100%);
+}
+
+@media (max-width: 900px) {
+  .world-boss-action-dialog__overview,
+  .world-boss-action-dialog__status,
+  .world-boss-action-dialog__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .world-boss-action-dialog__layout {
+    grid-template-columns: 1fr;
+  }
+}

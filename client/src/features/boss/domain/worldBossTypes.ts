@@ -1,4 +1,6 @@
 import type { CharacterClassKey } from "../../../data/characterClassesData";
+import type { Reward } from "../../systems/domain/rewardTypes";
+import type { MapId } from "../../world/domain/mapsData";
 
 export type WorldBossSessionState =
   | "available"
@@ -7,6 +9,15 @@ export type WorldBossSessionState =
   | "active"
   | "completed"
   | "failed";
+
+export type WorldBossEventState =
+  | "inactive"
+  | "active"
+  | "join-closed"
+  | "in-battle"
+  | "resolved";
+
+export type WorldBossEventSource = "local-test-scheduler";
 
 export type WorldBossLaneId = "front" | "mid" | "back";
 
@@ -27,6 +38,15 @@ export type WorldBossParticipantRole =
   | "hybrid";
 
 export type WorldBossCombatantState = "ready" | "down" | "dead" | "left";
+export type WorldBossParticipantRemovalReason =
+  | "voluntary-exit"
+  | "disconnect"
+  | "death";
+export type WorldBossSessionAuthorityMode =
+  | "local-prototype"
+  | "future-server-authoritative";
+export type WorldBossReconnectPolicy = "disabled" | "future-server-owned";
+export type WorldBossResurrectionPolicy = "disabled" | "future-hook";
 
 export type WorldBossPlayerActionType =
   | "basic-melee"
@@ -61,6 +81,18 @@ export type WorldBossContributionRecord = {
   roundsParticipated: number;
   roundsAlive: number;
   actionsCommitted: number;
+};
+
+export type WorldBossPlayerSnapshot = {
+  id: string;
+  name: string;
+  classKey: CharacterClassKey;
+  currentHp: number;
+  maxHp: number;
+  currentSp: number;
+  maxSp: number;
+  currentStamina: number;
+  maxStamina: number;
 };
 
 export type WorldBossParticipant = {
@@ -159,8 +191,11 @@ export type WorldBossDefinition = {
   key: string;
   name: string;
   title: string;
-  mapId: string;
+  mapId: MapId;
   description: string;
+  activationIntervalMs: number;
+  joinWindowDurationMs: number;
+  rewardPool: Reward[];
   maxHp: number;
   maxSp: number;
   baseRoundDurationMs: number;
@@ -173,12 +208,29 @@ export type WorldBossDefinition = {
   actions: WorldBossBossActionDefinition[];
 };
 
+export type WorldBossEventSnapshot = {
+  bossKey: string;
+  mapId: MapId;
+  activationIntervalMs: number;
+  joinWindowDurationMs: number;
+  source?: WorldBossEventSource;
+  schedulerSlotKey?: string;
+  activatedAt?: string;
+  expiresAt?: string;
+  combatStartedAt?: string;
+  resolvedAt?: string;
+};
+
 export type WorldBossSession = {
   sessionId: string;
   bossKey: string;
   state: WorldBossSessionState;
+  authorityMode: WorldBossSessionAuthorityMode;
+  reconnectPolicy: WorldBossReconnectPolicy;
+  resurrectionPolicy: WorldBossResurrectionPolicy;
   createdAt: string;
   availableAt: string;
+  lobbyCountdownDurationMs: number;
   countdownStartedAt?: string;
   combatStartedAt?: string;
   resolvedAt?: string;
