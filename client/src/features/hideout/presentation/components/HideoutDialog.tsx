@@ -35,6 +35,7 @@ type HideoutDialogProps = {
     itemKey: string;
     name: string;
     iconGlyph: string;
+    iconImageSrc?: string;
     iconLabel: string;
     count: number;
     description: string;
@@ -43,6 +44,7 @@ type HideoutDialogProps = {
     itemKey: string;
     name: string;
     iconGlyph: string;
+    iconImageSrc?: string;
     iconLabel: string;
     count: number;
     description: string;
@@ -172,9 +174,18 @@ export default function HideoutDialog({
                           })}
                           title={`${entry.name} x${entry.count}`}
                         >
-                          <span className="hideout-storage-slot__icon">
-                            {entry.iconGlyph}
-                          </span>
+                          {entry.iconImageSrc ? (
+                            <img
+                              className="hideout-storage-slot__image"
+                              src={entry.iconImageSrc}
+                              alt=""
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <span className="hideout-storage-slot__icon">
+                              {entry.iconGlyph}
+                            </span>
+                          )}
                           <span className="hideout-storage-slot__count">
                             x{entry.count}
                           </span>
@@ -214,9 +225,18 @@ export default function HideoutDialog({
                           })}
                           title={`${entry.name} x${entry.count}`}
                         >
-                          <span className="hideout-storage-slot__icon">
-                            {entry.iconGlyph}
-                          </span>
+                          {entry.iconImageSrc ? (
+                            <img
+                              className="hideout-storage-slot__image"
+                              src={entry.iconImageSrc}
+                              alt=""
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <span className="hideout-storage-slot__icon">
+                              {entry.iconGlyph}
+                            </span>
+                          )}
                           <span className="hideout-storage-slot__count">
                             x{entry.count}
                           </span>
