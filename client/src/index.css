@@ -11,9 +11,11 @@
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  --font-ui: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-numeric: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
+  --sans: var(--font-ui);
+  --heading: var(--font-ui);
+  --mono: var(--font-numeric);
 
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
@@ -64,6 +66,40 @@
 
 body {
   margin: 0;
+  font-family: var(--font-ui);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.ui-font {
+  font-family: var(--font-ui);
+}
+
+.numeric-font,
+:where(
+  code,
+  .counter,
+  .character-progress-value,
+  .character-progress-level,
+  .character-progress-xp,
+  .inventory-weight,
+  .inventory-item-count,
+  .skill-level,
+  .skill-value,
+  .specialization-skill-cell__header span,
+  .specialization-skill-cell__header b,
+  .skill-tree-summary__item strong,
+  .world-boss-lobby-dialog__summary strong,
+  .world-boss-action-dialog__summary strong,
+  .world-boss-action-dialog__resource strong
+) {
+  font-family: var(--font-numeric);
+  font-variant-numeric: tabular-nums;
 }
 
 h1,

@@ -162,8 +162,25 @@ export default function SkillTreeDialog({
                 {specializationRows.map(({ skill, tree, nodes: skillNodes }) => (
                   <div key={skill.key} className="specialization-table specialization-table--row">
                     <div className="specialization-skill-cell">
-                      <strong>{skill.name}</strong>
-                      <span>{tree.tooltip}</span>
+                      <div className="specialization-skill-cell__header">
+                        <strong>{skill.name}</strong>
+                        <span>Lv. {skill.level}</span>
+                        <b>{skill.progress}%</b>
+                      </div>
+                      <div
+                        className="specialization-skill-progress"
+                        role="progressbar"
+                        aria-label={`${skill.name} progress`}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={skill.progress}
+                      >
+                        <div
+                          className="specialization-skill-progress__fill"
+                          style={{ width: `${skill.progress}%` }}
+                        />
+                      </div>
+                      <p>{tree.tooltip}</p>
                     </div>
 
                     {[30, 60, 100].map((tier) => {
@@ -219,13 +236,6 @@ export default function SkillTreeDialog({
                 ))}
               </div>
 
-              <div className="skill-tree-note">
-                <strong>Current quick view</strong>
-                <p>
-                  The compact Skills panel only shows specializations you already own. Use this
-                  complete window to inspect every future branch.
-                </p>
-              </div>
             </div>
           )}
         </div>

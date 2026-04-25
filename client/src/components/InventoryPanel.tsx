@@ -90,7 +90,7 @@ export default function InventoryPanel({
   return (
     <section
       className="ui-panel sidebar-panel sidebar-panel--scroll inventory-panel"
-      style={{ height: `${panelHeight}px` }}
+      style={{ minHeight: `${panelHeight}px` }}
     >
       <div className="panel-title-row inventory-title-row">
         <h2>Inventory</h2>
@@ -150,7 +150,6 @@ export default function InventoryPanel({
                       {item.iconGlyph}
                     </span>
                   )}
-                  <span className="inventory-item-name">{item.name}</span>
                   <span className="inventory-item-count">x{item.count}</span>
                 </div>
               </Tooltip>

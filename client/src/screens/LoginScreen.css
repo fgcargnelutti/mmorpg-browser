@@ -7,7 +7,7 @@
   padding: 28px;
   background:
     linear-gradient(180deg, #090d13 0%, #070a10 100%);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: var(--font-ui);
 }
 
 .login-backdrop,

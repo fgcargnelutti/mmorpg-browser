@@ -12,7 +12,6 @@ import "../components/NpcDialog.css";
 import "../components/CombatDialog.css";
 import "../components/SideNavRail.css";
 
-import SkillsPanel from "../components/SkillsPanel";
 import InventoryPanel from "../components/InventoryPanel";
 import type { InventoryPanelItem } from "../components/InventoryPanel";
 import CharacterPanel from "../components/CharacterPanel";
@@ -2567,11 +2566,6 @@ export default function GameScreen({
             items={groupedInventory}
             currentWeight={Number(currentWeight.toFixed(1))}
             maxWeight={computedCarryWeight}
-          />
-
-          <SkillsPanel
-            skills={skills}
-            specializationProgress={player.specializationProgress}
           />
         </aside>
       </section>

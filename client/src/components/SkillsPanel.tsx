@@ -63,11 +63,7 @@ export default function SkillsPanel({
                   </div>
                 ))}
               </div>
-            ) : (
-              <p className="skills-panel__hint">
-                No specializations unlocked yet. Open the Skill Tree to inspect future paths.
-              </p>
-            )}
+            ) : null}
           </div>
         ))}
       </div>

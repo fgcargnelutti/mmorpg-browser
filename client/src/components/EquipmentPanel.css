@@ -1,39 +1,41 @@
 .equipment-panel {
-  overflow: visible;
+  overflow: hidden;
   position: relative;
   z-index: 20;
+  --equipment-slot-size: clamp(64px, 4.8vw, 72px);
+  --equipment-slot-gap: clamp(7px, 0.6vw, 10px);
 }
 
 .equipment-rows {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  overflow: visible;
+  gap: var(--equipment-slot-gap);
+  overflow: hidden;
 }
 
 .equipment-row-grid {
   display: grid;
-  gap: 8px;
+  gap: calc(var(--equipment-slot-gap) - 1px);
   justify-content: center;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .equipment-cols-2 {
-  grid-template-columns: repeat(2, 72px);
+  grid-template-columns: repeat(2, var(--equipment-slot-size));
 }
 
 .equipment-cols-3 {
-  grid-template-columns: repeat(3, 72px);
+  grid-template-columns: repeat(3, var(--equipment-slot-size));
 }
 
 .equipment-cols-4 {
-  grid-template-columns: repeat(4, 72px);
+  grid-template-columns: repeat(4, var(--equipment-slot-size));
 }
 
 .equip-slot {
   position: relative;
-  width: 72px;
-  height: 72px;
+  width: var(--equipment-slot-size);
+  height: var(--equipment-slot-size);
   display: grid;
   place-items: center;
   background: linear-gradient(180deg, rgba(38, 51, 72, 0.98) 0%, rgba(20, 29, 44, 1) 100%);
@@ -67,11 +69,18 @@
 
 .equip-slot-image {
   display: block;
-  width: 42px;
-  height: 42px;
+  width: calc(var(--equipment-slot-size) * 0.58);
+  height: calc(var(--equipment-slot-size) * 0.58);
   object-fit: contain;
   image-rendering: auto;
   filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.22));
+}
+
+@media (min-width: 1280px) and (max-height: 900px) {
+  .equipment-panel {
+    --equipment-slot-size: 66px;
+    --equipment-slot-gap: 8px;
+  }
 }
 
 .equipment-tooltip-content,
