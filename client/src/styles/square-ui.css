@@ -1,0 +1,80 @@
+:root {
+  --panel-radius: 0px;
+  --panel-radius-sm: 0px;
+  --ornate-radius: 0px;
+}
+
+.ui-panel,
+.game-dialog,
+.game-dialog-fab,
+.top-panel,
+.side-nav-rail,
+.world-map-shell,
+.scroll-box,
+.empty-box,
+.badge,
+.inline-tooltip,
+.quest-log-section,
+.quest-log-entry,
+.bestiary-dialog__list,
+.bestiary-dialog__detail,
+.hideout-storage-panel,
+.hideout-card,
+.region-players__panel,
+.region-players__item,
+.chat-message,
+.log-line,
+.inventory-square-slot,
+.equip-slot,
+.hideout-storage-slot,
+.hideout-storage-dropzone,
+.npc-dialog-portrait-box,
+.npc-dialog-notes-panel,
+.npc-dialog-topics-panel,
+.npc-dialog-conversation-panel,
+.npc-trade-panel {
+  border-radius: 0 !important;
+}
+
+button,
+input,
+textarea,
+select,
+.context-dialog__action,
+.game-dialog__minimize,
+.game-dialog__close,
+.npc-dialog-topic-button,
+.npc-dialog-footer-button,
+.npc-trade-panel__confirm-button,
+.npc-trade-panel__secondary-button,
+.trade-list-item,
+.trade-list-item__remove,
+.side-nav-rail__button,
+.chat-send-button,
+.region-players__trigger,
+.region-players__action-button,
+.hideout-card__action,
+.quest-log-status,
+.bestiary-dialog__tier-badge,
+.hideout-cost-chip,
+.hideout-card__function-list span,
+.hideout-card__requirement-list span,
+.inventory-resize-handle {
+  border-radius: 0 !important;
+}
+
+.ui-panel::before,
+.ui-panel::after,
+.game-dialog::before,
+.game-dialog::after,
+.ornate-panel::before,
+.ornate-panel::after,
+.ornate-toolbar::before,
+.ornate-toolbar::after,
+.ornate-dialog::before,
+.ornate-dialog::after,
+.ornate-section::before,
+.ornate-section::after,
+.ornate-slot::before {
+  border-radius: 0 !important;
+}

@@ -89,10 +89,10 @@ export default function RegionPlayersIndicator({
       {isOpen ? (
         <section
           id={panelId}
-          className="region-players__panel"
+          className="region-players__panel ornate-section ornate-corners"
           aria-label="Players online here"
         >
-          <div className="region-players__panel-header">
+          <div className="region-players__panel-header ornate-header">
             <strong>Players online here</strong>
             <span>{currentMapName}</span>
           </div>
@@ -104,7 +104,7 @@ export default function RegionPlayersIndicator({
           ) : (
             <div className="region-players__list">
               {players.map((player) => (
-                <article key={player.id} className="region-players__item">
+                <article key={player.id} className="region-players__item ornate-slot">
                   <div className="region-players__item-main">
                     <strong>{player.name}</strong>
                     {player.detail ? (
@@ -117,7 +117,7 @@ export default function RegionPlayersIndicator({
                   <div className="region-players__actions">
                     <button
                       type="button"
-                      className={`region-players__action-button ${
+                      className={`region-players__action-button ornate-button ${
                         inspectedPlayerId === player.id
                           ? "region-players__action-button--active"
                           : ""
@@ -134,7 +134,7 @@ export default function RegionPlayersIndicator({
                       <button
                         key={action.id}
                         type="button"
-                        className="region-players__action-button"
+                        className="region-players__action-button ornate-button"
                         onClick={() => action.onSelect?.(player.id, player.name)}
                       >
                         {action.label}

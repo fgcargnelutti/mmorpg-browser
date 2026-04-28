@@ -15,14 +15,14 @@ export default function SkillsPanel({
   specializationProgress,
 }: SkillsPanelProps) {
   return (
-    <section className="ui-panel sidebar-panel sidebar-panel--scroll skills-panel">
-      <div className="panel-title-row">
+    <section className="ui-panel ornate-panel ornate-corners sidebar-panel sidebar-panel--scroll skills-panel">
+      <div className="panel-title-row ornate-header">
         <h2>Skills</h2>
       </div>
 
       <div className="skills-list">
         {skills.map((skill) => (
-          <div key={skill.key} className="skill-card">
+          <div key={skill.key} className="skill-card ornate-divider">
             <div className="skill-main-row">
               <Tooltip
                 content={

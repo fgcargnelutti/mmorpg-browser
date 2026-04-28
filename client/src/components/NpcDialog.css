@@ -292,9 +292,9 @@
 .npc-dialog-footer-button {
   min-width: 90px;
   padding: 8px 12px;
-  border: 1px solid rgba(89, 110, 140, 0.46);
+  border: 1px solid transparent;
   border-radius: 12px;
-  background: linear-gradient(180deg, #243447 0%, #172231 100%);
+  background: transparent;
   color: var(--text-soft);
   cursor: pointer;
   transition:
@@ -306,8 +306,7 @@
 
 .npc-dialog-footer-button:hover,
 .npc-dialog-footer-button.is-active {
-  background: linear-gradient(180deg, #2f4662 0%, #1d2d40 100%);
-  border-color: rgba(136, 162, 205, 0.62);
+  border-color: var(--ornate-button-border-hover);
   box-shadow: 0 12px 18px rgba(1, 6, 13, 0.18);
   transform: translateY(-1px);
 }
@@ -513,9 +512,9 @@
 .npc-trade-panel__confirm-button {
   min-width: 108px;
   padding: 10px 14px;
-  border: 1px solid rgba(89, 110, 140, 0.46);
+  border: 1px solid transparent;
   border-radius: 12px;
-  background: linear-gradient(180deg, #2b415d 0%, #1a2a3e 100%);
+  background: transparent;
   color: var(--text-soft);
   cursor: pointer;
   transition:
@@ -529,13 +528,9 @@
 .npc-trade-panel__secondary-button {
   min-width: 108px;
   padding: 10px 14px;
-  border: 1px solid rgba(89, 110, 140, 0.38);
+  border: 1px solid transparent;
   border-radius: 12px;
-  background: linear-gradient(
-    180deg,
-    rgba(28, 40, 58, 0.96) 0%,
-    rgba(16, 24, 36, 0.98) 100%
-  );
+  background: transparent;
   color: var(--text-soft);
   cursor: pointer;
   transition:
@@ -547,12 +542,7 @@
 }
 
 .npc-trade-panel__secondary-button:hover:not(:disabled) {
-  background: linear-gradient(
-    180deg,
-    rgba(35, 51, 73, 0.98) 0%,
-    rgba(19, 29, 44, 1) 100%
-  );
-  border-color: rgba(136, 162, 205, 0.52);
+  border-color: var(--ornate-button-border-hover);
   box-shadow: 0 12px 18px rgba(1, 6, 13, 0.16);
   transform: translateY(-1px);
 }
@@ -563,8 +553,7 @@
 }
 
 .npc-trade-panel__confirm-button:hover:not(:disabled) {
-  background: linear-gradient(180deg, #355070 0%, #203248 100%);
-  border-color: rgba(136, 162, 205, 0.62);
+  border-color: var(--ornate-button-border-hover);
   box-shadow: 0 12px 18px rgba(1, 6, 13, 0.18);
   transform: translateY(-1px);
 }

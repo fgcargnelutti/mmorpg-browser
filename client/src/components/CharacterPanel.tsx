@@ -41,7 +41,7 @@ export default function CharacterPanel({
   buffs,
 }: CharacterPanelProps) {
   return (
-    <section className="ui-panel sidebar-panel sidebar-panel--content character-panel">
+    <section className="ui-panel ornate-panel ornate-corners sidebar-panel sidebar-panel--content character-panel">
       <div className="character-panel-header">
         <CharacterAvatar
           src={avatarSrc}
@@ -56,7 +56,7 @@ export default function CharacterPanel({
         </div>
       </div>
 
-      <div className="character-progress-section">
+      <div className="character-progress-section ornate-divider">
         <div className="character-progress-value">
           <span className="character-progress-level">Level {level}</span>
           <span className="character-progress-separator">•</span>
@@ -78,7 +78,7 @@ export default function CharacterPanel({
         </div>
       </div>
 
-      <div className="conditions-section">
+      <div className="conditions-section ornate-divider">
         <div className="conditions-label">Conditions</div>
         <div className="conditions-row">
           {conditions.map((condition) => (
@@ -95,7 +95,7 @@ export default function CharacterPanel({
         </div>
       </div>
 
-      <div className="buffs-section">
+      <div className="buffs-section ornate-divider">
         <div className="buffs-label">Active Buffs</div>
         <div className="buffs-row">
           {buffs.map((buff) => (

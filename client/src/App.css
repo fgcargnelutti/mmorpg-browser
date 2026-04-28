@@ -27,6 +27,25 @@
   --accent-blue-soft: rgba(126, 162, 216, 0.16);
   --accent-green: #76b38f;
   --accent-red: #d37474;
+  --ornate-outer-line: rgba(150, 126, 88, 0.3);
+  --ornate-inner-line: rgba(187, 165, 126, 0.16);
+  --ornate-inner-line-soft: rgba(170, 145, 104, 0.12);
+  --ornate-corner-color: rgba(192, 167, 120, 0.44);
+  --ornate-divider-soft: rgba(157, 134, 97, 0.22);
+  --ornate-divider-strong: rgba(188, 160, 116, 0.36);
+  --ornate-button-border: rgba(132, 110, 80, 0.54);
+  --ornate-button-border-hover: rgba(176, 149, 98, 0.66);
+  --ornate-button-surface: linear-gradient(
+    180deg,
+    rgba(52, 43, 31, 0.92) 0%,
+    rgba(27, 22, 16, 0.98) 100%
+  );
+  --ornate-button-surface-hover: linear-gradient(
+    180deg,
+    rgba(67, 55, 39, 0.96) 0%,
+    rgba(35, 28, 20, 1) 100%
+  );
+  --ornate-radius: 18px;
   --surface-glass: linear-gradient(
     180deg,
     rgba(26, 35, 51, 0.9) 0%,

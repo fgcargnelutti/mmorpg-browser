@@ -28,6 +28,9 @@
 .bestiary-dialog__detail {
   min-height: 0;
   background: transparent;
+  padding: 12px;
+  border: 1px solid rgba(122, 103, 75, 0.3);
+  border-radius: 14px;
 }
 
 .bestiary-dialog__list {
@@ -80,10 +83,9 @@
   gap: 4px;
   padding: 14px 2px;
   text-align: left;
-  border: 0;
-  border-bottom: 1px solid var(--line-soft);
-  border-radius: 0;
-  background: transparent;
+  border: 1px solid rgba(113, 96, 70, 0.24);
+  border-radius: 10px;
+  background: rgba(10, 15, 24, 0.34);
   color: var(--text);
   transition:
     transform 0.16s ease,

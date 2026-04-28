@@ -38,7 +38,7 @@ export default function ContextActions({
         {actions.map((action) => (
           <button
             key={action.id}
-            className="context-dialog__action"
+            className="context-dialog__action ornate-button"
             type="button"
             onClick={() => onAction(action)}
           >

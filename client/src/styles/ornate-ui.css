@@ -1,0 +1,118 @@
+.ornate-panel,
+.ornate-toolbar,
+.ornate-dialog,
+.ornate-section {
+  position: relative;
+}
+
+.ornate-panel::before,
+.ornate-toolbar::before,
+.ornate-dialog::before,
+.ornate-section::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid var(--ornate-inner-line);
+  border-radius: calc(var(--ornate-radius) - 6px);
+  pointer-events: none;
+}
+
+.ornate-panel::after,
+.ornate-toolbar::after,
+.ornate-dialog::after,
+.ornate-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 1px var(--ornate-outer-line),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.36);
+}
+
+.ornate-corners {
+  --ornate-corner-size: 10px;
+  background-image:
+    linear-gradient(var(--ornate-corner-color), var(--ornate-corner-color)),
+    linear-gradient(var(--ornate-corner-color), var(--ornate-corner-color)),
+    linear-gradient(var(--ornate-corner-color), var(--ornate-corner-color)),
+    linear-gradient(var(--ornate-corner-color), var(--ornate-corner-color)),
+    linear-gradient(var(--ornate-corner-color), var(--ornate-corner-color)),
+    linear-gradient(var(--ornate-corner-color), var(--ornate-corner-color)),
+    linear-gradient(var(--ornate-corner-color), var(--ornate-corner-color)),
+    linear-gradient(var(--ornate-corner-color), var(--ornate-corner-color));
+  background-repeat: no-repeat;
+  background-size:
+    var(--ornate-corner-size) 1px,
+    1px var(--ornate-corner-size),
+    var(--ornate-corner-size) 1px,
+    1px var(--ornate-corner-size),
+    var(--ornate-corner-size) 1px,
+    1px var(--ornate-corner-size),
+    var(--ornate-corner-size) 1px,
+    1px var(--ornate-corner-size);
+  background-position:
+    left 12px top 12px,
+    left 12px top 12px,
+    right 12px top 12px,
+    right 12px top 12px,
+    left 12px bottom 12px,
+    left 12px bottom 12px,
+    right 12px bottom 12px,
+    right 12px bottom 12px;
+}
+
+.ornate-header {
+  position: relative;
+  padding-bottom: 8px;
+}
+
+.ornate-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--ornate-divider-strong) 22%,
+    var(--ornate-divider-strong) 78%,
+    transparent 100%
+  );
+}
+
+.ornate-divider {
+  border-top: 1px solid var(--ornate-divider-soft);
+}
+
+.ornate-slot {
+  position: relative;
+  overflow: hidden;
+}
+
+.ornate-slot::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid var(--ornate-inner-line-soft);
+  border-radius: 9px;
+  pointer-events: none;
+}
+
+.ornate-button {
+  border: 1px solid var(--ornate-button-border);
+  background: var(--ornate-button-surface);
+  color: var(--text-soft);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 8px 16px rgba(1, 6, 12, 0.14);
+}
+
+.ornate-button:hover:not(:disabled) {
+  border-color: var(--ornate-button-border-hover);
+  background: var(--ornate-button-surface-hover);
+}

@@ -23,7 +23,7 @@ export default function TopPanel({
   rightContent,
 }: TopPanelProps) {
   return (
-    <header className="top-panel">
+    <header className="top-panel ornate-toolbar ornate-corners">
       <div className="top-left">
         <span className="location-name">{locationName}</span>
         {locationSubtitle ? (

@@ -218,7 +218,7 @@ function renderRailItem(item: SideNavRailItem) {
 
 export default function SideNavRail({ items, footerItem }: SideNavRailProps) {
   return (
-    <aside className="side-nav-rail ui-panel" aria-label="Game navigation">
+    <aside className="side-nav-rail ui-panel ornate-panel ornate-corners" aria-label="Game navigation">
       <div className="side-nav-rail__main">{items.map(renderRailItem)}</div>
       {footerItem ? (
         <div className="side-nav-rail__footer">{renderRailItem(footerItem)}</div>

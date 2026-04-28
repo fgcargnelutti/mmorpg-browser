@@ -38,14 +38,17 @@ export default function ChatPanel({
   }, [messages]);
 
   return (
-    <section className="ui-panel chat-panel">
-      <div className="panel-title-row">
+    <section className="ui-panel ornate-panel ornate-corners chat-panel">
+      <div className="panel-title-row ornate-header">
         <h2>Chat</h2>
       </div>
 
       <div ref={scrollRef} className="chat-messages">
         {messages.map((message, index) => (
-          <div key={`${message}-${index}`} className={getMessageClass(message)}>
+          <div
+            key={`${message}-${index}`}
+            className={`${getMessageClass(message)} ornate-slot`}
+          >
             <span className="chat-message__timestamp">{message.timestamp}</span>{" "}
             <span className="chat-message__content">{message.content}</span>
           </div>
@@ -67,7 +70,11 @@ export default function ChatPanel({
           }}
         />
 
-        <button className="chat-send-button" type="button" onClick={onSend}>
+        <button
+          className="chat-send-button ornate-button"
+          type="button"
+          onClick={onSend}
+        >
           Send
         </button>
       </div>

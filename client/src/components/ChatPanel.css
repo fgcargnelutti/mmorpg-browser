@@ -19,7 +19,7 @@
 
 .chat-message {
   padding: 6px 8px;
-  border: 1px solid rgba(68, 86, 110, 0.24);
+  border: 1px solid rgba(103, 88, 63, 0.28);
   border-radius: 10px;
   background: rgba(11, 17, 27, 0.24);
   color: var(--text-soft);
@@ -42,13 +42,13 @@
 }
 
 .chat-message--npc {
-  border-color: rgba(179, 142, 86, 0.45);
+  border-color: rgba(179, 142, 86, 0.56);
   background: linear-gradient(180deg, rgba(45, 38, 22, 0.42) 0%, rgba(18, 17, 15, 0.76) 100%);
   color: #e7d4a8;
 }
 
 .chat-message--player {
-  border-color: rgba(108, 140, 187, 0.5);
+  border-color: rgba(124, 136, 158, 0.56);
   background: linear-gradient(180deg, rgba(28, 40, 58, 0.46) 0%, rgba(13, 19, 31, 0.8) 100%);
   color: #dce8fb;
 }
@@ -105,9 +105,9 @@
 .chat-send-button {
   min-height: 40px;
   padding: 0 14px;
-  border: 1px solid var(--line);
+  border: 1px solid transparent;
   border-radius: 12px;
-  background: linear-gradient(180deg, #314760 0%, #1f2d3d 100%);
+  background: transparent;
   color: var(--text-soft);
   cursor: pointer;
   font: inherit;
@@ -119,8 +119,7 @@
 }
 
 .chat-send-button:hover {
-  background: linear-gradient(180deg, #3a5573 0%, #243447 100%);
-  border-color: rgba(141, 169, 210, 0.52);
+  border-color: var(--ornate-button-border-hover);
   box-shadow: 0 12px 20px rgba(1, 6, 13, 0.18);
   transform: translateY(-1px);
 }

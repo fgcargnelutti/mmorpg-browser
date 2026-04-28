@@ -237,7 +237,7 @@ export default function QuestLogDialog({
             {sections.map((section) => (
               <section key={section.id} className="quest-log-section">
                 <SectionHeading
-                  className="quest-log-section__header"
+                  className="quest-log-section__header ornate-header"
                   title={section.label}
                   description={section.summary}
                 />

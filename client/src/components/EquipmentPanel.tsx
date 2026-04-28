@@ -18,8 +18,8 @@ export default function EquipmentPanel({
   equipmentRows,
 }: EquipmentPanelProps) {
   return (
-    <section className="ui-panel sidebar-panel sidebar-panel--content equipment-panel">
-      <div className="panel-title-row">
+    <section className="ui-panel ornate-panel ornate-corners sidebar-panel sidebar-panel--content equipment-panel">
+      <div className="panel-title-row ornate-header">
         <h2>Equipment</h2>
       </div>
 
@@ -44,7 +44,7 @@ export default function EquipmentPanel({
                   </div>
                 }
               >
-                <div key={slot.key} className="equip-slot">
+                <div key={slot.key} className="equip-slot ornate-slot">
                   {slot.iconImageSrc ? (
                     <img
                       className="equip-slot-image"

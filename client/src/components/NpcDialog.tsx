@@ -239,8 +239,8 @@ export default function NpcDialog({
                 </div>
               </div>
 
-              <div className="npc-dialog-notes-panel">
-                <div className="npc-dialog-panel-header">
+              <div className="npc-dialog-notes-panel ornate-section ornate-corners">
+                <div className="npc-dialog-panel-header ornate-header">
                   <strong>Notes</strong>
                 </div>
 
@@ -257,7 +257,7 @@ export default function NpcDialog({
             </div>
 
             <div className="npc-dialog-bottom-row">
-              <div className="npc-dialog-topics-panel">
+              <div className="npc-dialog-topics-panel ornate-section ornate-corners">
                 <div className="npc-dialog-topics-list">
                   {visibleTopics.map((option) => {
                     const optionStateClass = getOptionStateClass(option.state);
@@ -282,8 +282,8 @@ export default function NpcDialog({
                 </div>
               </div>
 
-              <div className="npc-dialog-conversation-panel">
-                <div className="npc-dialog-panel-header">
+              <div className="npc-dialog-conversation-panel ornate-section ornate-corners">
+                <div className="npc-dialog-panel-header ornate-header">
                   <strong>Conversation</strong>
                 </div>
 
@@ -310,7 +310,7 @@ export default function NpcDialog({
               <div className="npc-dialog-footer-actions">
                 <button
                   type="button"
-                  className="npc-dialog-footer-button"
+                  className="npc-dialog-footer-button ornate-button"
                   onClick={onClose}
                 >
                   Close
@@ -318,7 +318,7 @@ export default function NpcDialog({
 
                 <button
                   type="button"
-                  className={`npc-dialog-footer-button ${
+                  className={`npc-dialog-footer-button ornate-button ${
                     activeTradeMode === "buy" ? "is-active" : ""
                   }`}
                   onClick={() => openTradeMode("buy")}
@@ -328,7 +328,7 @@ export default function NpcDialog({
 
                 <button
                   type="button"
-                  className={`npc-dialog-footer-button ${
+                  className={`npc-dialog-footer-button ornate-button ${
                     activeTradeMode === "sell" ? "is-active" : ""
                   }`}
                   onClick={() => openTradeMode("sell")}
@@ -340,7 +340,7 @@ export default function NpcDialog({
           </div>
 
           <aside
-            className={`npc-trade-panel ${
+            className={`npc-trade-panel ornate-section ornate-corners ${
               activeTradeMode ? "npc-trade-panel--visible" : ""
             }`}
           >
@@ -405,7 +405,7 @@ export default function NpcDialog({
                       </div>
                       <button
                         type="button"
-                        className="npc-trade-panel__confirm-button"
+                        className="npc-trade-panel__confirm-button ornate-button"
                         onClick={() => {
                           if (selectedBuyOffer) {
                             onBuyItem?.(selectedBuyOffer);
@@ -490,7 +490,7 @@ export default function NpcDialog({
                       </div>
                       <button
                         type="button"
-                        className="npc-trade-panel__secondary-button"
+                        className="npc-trade-panel__secondary-button ornate-button"
                         onClick={handleSellAll}
                         disabled={sellBasketEntries.length === 0}
                       >
@@ -498,7 +498,7 @@ export default function NpcDialog({
                       </button>
                       <button
                         type="button"
-                        className="npc-trade-panel__confirm-button"
+                        className="npc-trade-panel__confirm-button ornate-button"
                         onClick={handleSellSelected}
                         disabled={!selectedSellEntry}
                       >

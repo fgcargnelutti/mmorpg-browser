@@ -35,8 +35,8 @@ export default function EventLogPanel({ logs }: EventLogPanelProps) {
   };
 
   return (
-    <section className="ui-panel bottom-box event-log-panel">
-      <div className="panel-title-row">
+    <section className="ui-panel ornate-panel ornate-corners bottom-box event-log-panel">
+      <div className="panel-title-row ornate-header">
         <h2>Event Log</h2>
       </div>
 
@@ -45,7 +45,10 @@ export default function EventLogPanel({ logs }: EventLogPanelProps) {
           <div className="empty-box">No events yet.</div>
         ) : (
           logs.map((log, index) => (
-            <div key={`${log}-${index}`} className={getLogLineClassName(log)}>
+            <div
+              key={`${log}-${index}`}
+              className={`${getLogLineClassName(log)} ornate-slot`}
+            >
               {formatEventLogLine(log)}
             </div>
           ))

@@ -37,8 +37,8 @@ export default function GameDialog({
   }
 
   return (
-    <section className="game-dialog">
-      <div className="game-dialog__header">
+    <section className="game-dialog ornate-dialog ornate-corners">
+      <div className="game-dialog__header ornate-header">
         <div className="game-dialog__heading">
           <h3>{title}</h3>
           {subtitle ? <p>{subtitle}</p> : null}

@@ -137,8 +137,8 @@ export default function HideoutDialog({
         onClose={onClose}
       >
         <div className="hideout-dialog-content">
-          <section className="hideout-storage-panel">
-            <div className="hideout-storage-panel__header">
+          <section className="hideout-storage-panel ornate-section ornate-corners">
+            <div className="hideout-storage-panel__header ornate-header">
               <div>
                 <h4>Storage Chest</h4>
                 <p>
@@ -149,14 +149,14 @@ export default function HideoutDialog({
             </div>
 
             <div className="hideout-storage-transfer">
-              <section className="hideout-storage-column">
+              <section className="hideout-storage-column ornate-section">
                 <div className="hideout-storage-column__title-row">
                   <strong>Inventory</strong>
                   <span>{inventoryEntries.length} item types</span>
                 </div>
 
                 <div
-                  className="hideout-storage-dropzone"
+                  className="hideout-storage-dropzone ornate-slot"
                   onDragOver={allowDrop}
                   onDrop={handleDropToInventory}
                 >
@@ -166,7 +166,7 @@ export default function HideoutDialog({
                         <button
                           key={`inventory-${entry.itemKey}`}
                           type="button"
-                          className="hideout-storage-slot"
+                          className="hideout-storage-slot ornate-slot"
                           draggable
                           onDragStart={handleDragStart({
                             itemKey: entry.itemKey,
@@ -200,14 +200,14 @@ export default function HideoutDialog({
                 </div>
               </section>
 
-              <section className="hideout-storage-column">
+              <section className="hideout-storage-column ornate-section">
                 <div className="hideout-storage-column__title-row">
                   <strong>Hideout Chest</strong>
                   <span>{storageEntries.length} stored types</span>
                 </div>
 
                 <div
-                  className="hideout-storage-dropzone"
+                  className="hideout-storage-dropzone ornate-slot"
                   onDragOver={allowDrop}
                   onDrop={handleDropToStorage}
                 >
@@ -217,7 +217,7 @@ export default function HideoutDialog({
                         <button
                           key={`storage-${entry.itemKey}`}
                           type="button"
-                          className="hideout-storage-slot hideout-storage-slot--stored"
+                          className="hideout-storage-slot ornate-slot hideout-storage-slot--stored"
                           draggable
                           onDragStart={handleDragStart({
                             itemKey: entry.itemKey,
@@ -255,8 +255,8 @@ export default function HideoutDialog({
 
           <div className="hideout-dialog-layout">
           {structures.map(({ definition, progress, eligibility }) => (
-            <section key={definition.key} className="hideout-card">
-              <div className="hideout-card__header">
+            <section key={definition.key} className="hideout-card ornate-section ornate-corners">
+              <div className="hideout-card__header ornate-header">
                 <div>
                   <h4>{definition.name}</h4>
                   <p>{definition.description}</p>
@@ -307,7 +307,7 @@ export default function HideoutDialog({
 
                     <button
                       type="button"
-                      className="hideout-card__action"
+                      className="hideout-card__action ornate-button"
                       onClick={() => onUpgrade(definition.key)}
                       disabled={!eligibility.canUpgrade}
                     >

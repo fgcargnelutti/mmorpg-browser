@@ -108,8 +108,8 @@ export default function BestiaryDialog({
         onClose={onClose}
       >
         <div className="bestiary-dialog-layout">
-          <aside className="bestiary-dialog__list">
-            <div className="bestiary-dialog__list-header">
+          <aside className="bestiary-dialog__list ornate-section ornate-corners">
+            <div className="bestiary-dialog__list-header ornate-header">
               <strong>Known Creatures</strong>
               <span>{entries.length}</span>
             </div>
@@ -120,7 +120,7 @@ export default function BestiaryDialog({
                   <button
                     key={entry.creatureKey}
                     type="button"
-                    className={`bestiary-entry-card${
+                    className={`bestiary-entry-card ornate-slot${
                       resolvedSelectedCreatureKey === entry.creatureKey
                         ? " bestiary-entry-card--active"
                         : ""
@@ -146,10 +146,10 @@ export default function BestiaryDialog({
             )}
           </aside>
 
-          <section className="bestiary-dialog__detail">
+          <section className="bestiary-dialog__detail ornate-section ornate-corners">
             {selectedEntry ? (
               <>
-                <div className="bestiary-dialog__detail-header">
+                <div className="bestiary-dialog__detail-header ornate-header">
                   <div>
                     <h4>{selectedEntry.name}</h4>
                     <p>{selectedEntry.killCount} confirmed kills</p>
@@ -190,7 +190,7 @@ export default function BestiaryDialog({
 
                   <div className="bestiary-detail-section">
                     <SectionHeading
-                      className="bestiary-detail-section__header"
+                      className="bestiary-detail-section__header ornate-header"
                       title="Vitals"
                     />
                     <div className="bestiary-detail-line">
@@ -205,7 +205,7 @@ export default function BestiaryDialog({
 
                   <div className="bestiary-detail-section">
                     <SectionHeading
-                      className="bestiary-detail-section__header"
+                      className="bestiary-detail-section__header ornate-header"
                       title="Loot"
                     />
                     <div className="bestiary-detail-line">
@@ -228,7 +228,7 @@ export default function BestiaryDialog({
 
                   <div className="bestiary-detail-section">
                     <SectionHeading
-                      className="bestiary-detail-section__header"
+                      className="bestiary-detail-section__header ornate-header"
                       title="Combat Notes"
                     />
                     <div className="bestiary-detail-line">

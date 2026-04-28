@@ -89,10 +89,10 @@ export default function InventoryPanel({
 
   return (
     <section
-      className="ui-panel sidebar-panel sidebar-panel--scroll inventory-panel"
+      className="ui-panel ornate-panel ornate-corners sidebar-panel sidebar-panel--scroll inventory-panel"
       style={{ minHeight: `${panelHeight}px` }}
     >
-      <div className="panel-title-row inventory-title-row">
+      <div className="panel-title-row inventory-title-row ornate-header">
         <h2>Inventory</h2>
         <span className="inventory-weight">
           Weight ({currentWeight}/{maxWeight}Kg)
@@ -120,7 +120,7 @@ export default function InventoryPanel({
                 }
               >
                 <div
-                  className={`inventory-slot inventory-square-slot inventory-square-slot--${item.iconTone}`}
+                  className={`inventory-slot inventory-square-slot ornate-slot inventory-square-slot--${item.iconTone}`}
                   aria-label={`${item.name}, quantity ${item.count}`}
                   draggable
                   onDragStart={(event) => {
@@ -159,7 +159,7 @@ export default function InventoryPanel({
           {Array.from({ length: emptySlotCount }).map((_, index) => (
             <div
               key={`empty-slot-${index}`}
-              className="inventory-slot inventory-square-slot inventory-square-slot--empty"
+              className="inventory-slot inventory-square-slot ornate-slot inventory-square-slot--empty"
               aria-hidden="true"
             >
               <span className="inventory-slot-placeholder" />
