@@ -397,3 +397,12 @@
     font-size: 26px;
   }
 }
+
+.character-select-screen *,
+.character-select-screen *::before,
+.character-select-screen *::after,
+.character-creation-screen *,
+.character-creation-screen *::before,
+.character-creation-screen *::after {
+  border-radius: 0 !important;
+}
