@@ -2320,7 +2320,7 @@ export default function GameScreen({
         <section className="world-panel">
           <TopPanel
             locationName={currentMapData.name}
-            locationSubtitle=""
+            locationSubtitle={currentMapData.biomeLabel ?? ""}
             worldStatus={[]}
             rightContent={
               <RegionPlayersIndicator

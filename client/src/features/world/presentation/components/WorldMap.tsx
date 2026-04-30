@@ -254,6 +254,8 @@ export default function WorldMap({
     selectedMapPoi?.description ?? mapData.description ?? "";
 
   const contextActions = selectedMapPoi?.actions ?? mapData.actions ?? [];
+  const shouldShowSecondaryMapIdentity =
+    mapData.tier === "secondary" && Boolean(mapData.biomeLabel);
   const hasForegroundDialog =
     npcDialogOpen || combatDialogOpen || Boolean(overlayContent);
 
@@ -300,6 +302,17 @@ export default function WorldMap({
               />
             ))}
           </div>
+
+          {shouldShowSecondaryMapIdentity ? (
+            <div
+              className="world-map-identity"
+              aria-label={`${mapData.name}, ${mapData.biomeLabel}`}
+            >
+              <span className="world-map-identity__eyebrow">Local Map</span>
+              <strong className="world-map-identity__name">{mapData.name}</strong>
+              <span className="world-map-identity__biome">{mapData.biomeLabel}</span>
+            </div>
+          ) : null}
 
           {visibleMapPois.map((poi) => {
             const isSelected =

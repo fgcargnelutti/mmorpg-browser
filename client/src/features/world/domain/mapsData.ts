@@ -78,6 +78,7 @@ export type MapData = {
   id: MapId;
   name: string;
   tier: "primary" | "secondary";
+  biomeLabel?: string;
   background: string;
   description?: string;
   actions?: ContextAction[];
@@ -344,6 +345,7 @@ const belegardHubPois: MapPoi[] = [
 const belagardHubMapBase = {
   name: "Belegard",
   tier: "primary" as const,
+  biomeLabel: "Ruined city hub",
   background: belagardContinentArt,
   entryLocationKey: "merchant" as const,
   pois: belegardHubPois,
@@ -364,6 +366,7 @@ export const mapsData: Record<MapId, MapData> = {
     id: "sewer",
     name: "Sewers",
     tier: "secondary",
+    biomeLabel: "Subterranean tunnels",
     background: sewerMapArt,
     entryLocationKey: "sewer",
     defaultPoiVariant: "danger",
@@ -481,6 +484,7 @@ export const mapsData: Record<MapId, MapData> = {
     id: "north-forest",
     name: "North Forest",
     tier: "secondary",
+    biomeLabel: "Cold woodland",
     background: northForestMapArt,
     entryLocationKey: "north-road",
     defaultPoiVariant: "building",
@@ -655,6 +659,7 @@ export const mapsData: Record<MapId, MapData> = {
     id: "southwest-farm",
     name: "Southwest Farm",
     tier: "secondary",
+    biomeLabel: "Rural outskirts",
     background: southwestFarmMapArt,
     entryLocationKey: "southwest-road",
     defaultPoiVariant: "building",

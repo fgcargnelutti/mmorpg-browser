@@ -30,8 +30,10 @@
 /* LEFT */
 .top-left {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -40,6 +42,23 @@
   color: var(--text);
   font-size: 15px;
   letter-spacing: 0.03em;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.location-subtitle {
+  max-width: 100%;
+  color: var(--muted-strong);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 /* CENTER */
