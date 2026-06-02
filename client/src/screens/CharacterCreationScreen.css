@@ -183,9 +183,9 @@
 .character-creation-carousel__nav {
   width: 48px;
   height: 48px;
-  border: 1px solid rgba(99, 121, 154, 0.34);
+  border: 1px solid var(--ornate-button-border);
   border-radius: 999px;
-  background: rgba(11, 18, 29, 0.72);
+  background: var(--surface-action-soft);
   color: var(--text-soft);
   font-size: 28px;
   line-height: 1;
@@ -197,8 +197,8 @@
 
 .character-creation-carousel__nav:hover {
   transform: translateY(-1px);
-  border-color: rgba(161, 186, 221, 0.5);
-  background: rgba(19, 28, 42, 0.92);
+  border-color: var(--ornate-button-border-hover);
+  background: var(--surface-action-hover);
 }
 
 .character-creation-carousel__track {
@@ -213,7 +213,7 @@
 .character-creation-carousel-card {
   min-height: 120px;
   padding: 18px;
-  border: 1px solid rgba(82, 101, 130, 0.3);
+  border: 1px solid var(--line-soft);
   border-radius: 22px;
   background: rgba(10, 15, 24, 0.46);
   color: inherit;
@@ -229,8 +229,8 @@
 .character-creation-carousel-card:hover {
   transform: translateY(-2px);
   opacity: 1;
-  border-color: rgba(144, 170, 209, 0.46);
-  background: rgba(14, 21, 32, 0.76);
+  border-color: var(--panel-hover-border);
+  background: var(--surface-action-soft);
 }
 
 .character-creation-carousel-card.is-active {
@@ -243,18 +243,19 @@
   gap: 0;
   padding: 30px 24px;
   opacity: 1;
-  border-color: rgba(210, 177, 115, 0.36);
+  border-color: rgba(168, 210, 255, 0.5);
   background:
     radial-gradient(circle at top, rgba(126, 162, 216, 0.1), transparent 42%),
     linear-gradient(180deg, rgba(18, 26, 40, 0.92) 0%, rgba(10, 15, 24, 0.98) 100%);
   box-shadow:
-    0 24px 48px rgba(1, 8, 17, 0.28),
+    0 26px 54px rgba(0, 5, 14, 0.38),
+    0 0 32px rgba(104, 164, 239, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .character-creation-carousel-card strong {
   display: block;
-  color: var(--text);
+  color: var(--text-h);
   font-size: 18px;
 }
 
@@ -294,9 +295,11 @@
 }
 
 .character-creation-name-input:focus {
-  border-color: rgba(138, 165, 206, 0.6);
+  border-color: var(--panel-hover-border);
   background: rgba(14, 22, 36, 0.98);
-  box-shadow: 0 0 0 3px rgba(126, 162, 216, 0.1);
+  box-shadow:
+    0 0 0 3px rgba(104, 164, 239, 0.12),
+    0 0 22px rgba(104, 164, 239, 0.08);
   transform: translateY(-1px);
 }
 

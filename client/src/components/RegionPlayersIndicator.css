@@ -11,10 +11,12 @@
   gap: 8px;
   min-height: 36px;
   padding: 6px 10px;
-  border: 1px solid rgba(86, 114, 76, 0.8);
+  border: 1px solid rgba(111, 157, 123, 0.72);
   border-radius: 999px;
-  background: linear-gradient(180deg, rgba(24, 28, 22, 0.94) 0%, rgba(13, 16, 12, 0.94) 100%);
-  color: #d9d2c1;
+  background:
+    radial-gradient(circle at 0% 50%, rgba(120, 199, 154, 0.16), transparent 38%),
+    linear-gradient(180deg, rgba(18, 32, 27, 0.96) 0%, rgba(6, 12, 12, 0.97) 100%);
+  color: var(--text-soft);
   transition:
     border-color 0.16s ease,
     box-shadow 0.16s ease,
@@ -24,12 +26,14 @@
 
 .region-players__trigger:hover,
 .region-players__trigger.is-open {
-  border-color: rgba(122, 168, 102, 0.92);
+  border-color: rgba(120, 199, 154, 0.94);
   box-shadow:
     0 8px 18px rgba(0, 0, 0, 0.22),
-    0 0 14px rgba(105, 152, 95, 0.12);
+    0 0 18px rgba(120, 199, 154, 0.18);
   transform: translateY(-1px);
-  background: linear-gradient(180deg, rgba(27, 33, 24, 0.96) 0%, rgba(14, 18, 13, 0.96) 100%);
+  background:
+    radial-gradient(circle at 0% 50%, rgba(120, 199, 154, 0.22), transparent 40%),
+    linear-gradient(180deg, rgba(22, 40, 32, 0.98) 0%, rgba(7, 15, 14, 0.98) 100%);
 }
 
 .region-players__status-dot {
@@ -53,7 +57,7 @@
 }
 
 .region-players__count {
-  color: #e6ddca;
+  color: var(--text-h);
   font-size: 11px;
 }
 
@@ -64,12 +68,13 @@
   width: 280px;
   max-width: min(280px, calc(100vw - 24px));
   padding: 10px;
-  border: 1px solid rgba(124, 105, 76, 0.5);
+  border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--surface-popover);
   box-shadow:
-    0 18px 34px rgba(1, 6, 14, 0.36),
-    0 0 0 1px rgba(151, 176, 214, 0.08);
+    0 22px 42px rgba(0, 4, 12, 0.5),
+    0 0 0 1px rgba(168, 210, 255, 0.08),
+    0 0 30px rgba(104, 164, 239, 0.08);
   backdrop-filter: blur(8px);
   z-index: 40;
 }
@@ -80,7 +85,7 @@
   gap: 2px;
   margin-bottom: 10px;
   padding-bottom: 8px;
-  border-bottom: 1px solid rgba(140, 118, 82, 0.28);
+  border-bottom: 1px solid var(--ornate-divider-soft);
 }
 
 .region-players__panel-header strong {
@@ -114,7 +119,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 10px;
-  border: 1px solid rgba(119, 101, 74, 0.34);
+  border: 1px solid var(--line-soft);
   border-radius: 10px;
   background: var(--surface-popover-soft);
 }

@@ -1,0 +1,37 @@
+body {
+  background:
+    radial-gradient(circle at 50% -12%, rgba(95, 154, 236, 0.22), transparent 31%),
+    radial-gradient(circle at 12% 24%, rgba(57, 92, 139, 0.18), transparent 28%),
+    radial-gradient(circle at 88% 18%, rgba(137, 116, 186, 0.12), transparent 26%),
+    linear-gradient(180deg, #070b12 0%, #05080d 52%, #030509 100%);
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+body::before {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.014) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(circle at center, black 0%, transparent 76%);
+  opacity: 0.35;
+}
+
+body::after {
+  background:
+    radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.16) 56%, rgba(0, 0, 0, 0.48) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, transparent 14%, rgba(0, 0, 0, 0.22) 100%);
+}
+
+.game-shell {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(120, 188, 255, 0.09), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.018) 0%, transparent 18%);
+}
