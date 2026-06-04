@@ -41,6 +41,8 @@ function buildToast(
     createdAt: now,
     title: input.title,
     icon: input.icon,
+    iconLabel: input.iconLabel,
+    groupKey: input.groupKey,
     dedupeKey:
       input.dedupeKey ??
       [input.tone ?? "info", input.title ?? "", normalizedMessage].join("|"),

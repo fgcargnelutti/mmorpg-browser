@@ -22,7 +22,7 @@ export default function SkillsPanel({
 
       <div className="skills-list">
         {skills.map((skill) => (
-          <div key={skill.key} className="skill-card ornate-divider">
+          <div key={skill.key} className="skill-card ornate-divider game-card">
             <div className="skill-main-row">
               <Tooltip
                 content={
@@ -42,7 +42,7 @@ export default function SkillsPanel({
             {getUnlockedSkillSpecializations(skill, specializationProgress).length > 0 ? (
               <div className="skill-tiers-grid">
                 {getUnlockedSkillSpecializations(skill, specializationProgress).map((group) => (
-                  <div key={`${skill.key}-${group.tier}`} className="skill-tier-block">
+                      <div key={`${skill.key}-${group.tier}`} className="skill-tier-block game-slot">
                     <div className="skill-tier-header">
                       <span className="tier-label unlocked">Tier {group.tier}</span>
                     </div>

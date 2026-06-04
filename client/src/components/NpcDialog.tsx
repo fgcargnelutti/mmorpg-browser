@@ -230,7 +230,7 @@ export default function NpcDialog({
           <div className="npc-dialog-main">
             <div className="npc-dialog-top-row">
               <div className="npc-dialog-portrait">
-                <div className="npc-dialog-portrait-box">
+                <div className="npc-dialog-portrait-box game-card">
                   <img
                     src={resolvedPortrait}
                     alt={npcName}
@@ -239,7 +239,7 @@ export default function NpcDialog({
                 </div>
               </div>
 
-              <div className="npc-dialog-notes-panel ornate-section ornate-corners">
+              <div className="npc-dialog-notes-panel ornate-section ornate-corners game-card">
                 <div className="npc-dialog-panel-header ornate-header">
                   <strong>Notes</strong>
                 </div>
@@ -257,7 +257,7 @@ export default function NpcDialog({
             </div>
 
             <div className="npc-dialog-bottom-row">
-              <div className="npc-dialog-topics-panel ornate-section ornate-corners">
+              <div className="npc-dialog-topics-panel ornate-section ornate-corners game-card">
                 <div className="npc-dialog-topics-list">
                   {visibleTopics.map((option) => {
                     const optionStateClass = getOptionStateClass(option.state);
@@ -266,7 +266,7 @@ export default function NpcDialog({
                       <button
                         key={option.id}
                         type="button"
-                        className={`npc-dialog-topic-button ${optionStateClass}`}
+                        className={`npc-dialog-topic-button game-button game-button--ghost ${optionStateClass}`}
                         onClick={() => onOptionSelect(option.id)}
                       >
                         <span className="npc-dialog-topic-label">
@@ -282,7 +282,7 @@ export default function NpcDialog({
                 </div>
               </div>
 
-              <div className="npc-dialog-conversation-panel ornate-section ornate-corners">
+              <div className="npc-dialog-conversation-panel ornate-section ornate-corners game-card">
                 <div className="npc-dialog-panel-header ornate-header">
                   <strong>Conversation</strong>
                 </div>
@@ -302,7 +302,7 @@ export default function NpcDialog({
             </div>
 
             <div className="npc-dialog-footer">
-              <div className="npc-dialog-footer-hint npc-dialog-footer-hint--narrative">
+              <div className="npc-dialog-footer-hint npc-dialog-footer-hint--narrative game-card">
                 <span className="npc-dialog-footer-hint-icon">✦</span>
                 <span>{narrativeHint}</span>
               </div>
@@ -310,7 +310,7 @@ export default function NpcDialog({
               <div className="npc-dialog-footer-actions">
                 <button
                   type="button"
-                  className="npc-dialog-footer-button ornate-button"
+                  className="npc-dialog-footer-button game-button game-button--ghost"
                   onClick={onClose}
                 >
                   Close
@@ -318,7 +318,7 @@ export default function NpcDialog({
 
                 <button
                   type="button"
-                  className={`npc-dialog-footer-button ornate-button ${
+                  className={`npc-dialog-footer-button game-button ${
                     activeTradeMode === "buy" ? "is-active" : ""
                   }`}
                   onClick={() => openTradeMode("buy")}
@@ -328,7 +328,7 @@ export default function NpcDialog({
 
                 <button
                   type="button"
-                  className={`npc-dialog-footer-button ornate-button ${
+                  className={`npc-dialog-footer-button game-button ${
                     activeTradeMode === "sell" ? "is-active" : ""
                   }`}
                   onClick={() => openTradeMode("sell")}
@@ -340,7 +340,7 @@ export default function NpcDialog({
           </div>
 
           <aside
-            className={`npc-trade-panel ornate-section ornate-corners ${
+            className={`npc-trade-panel ornate-section ornate-corners game-card ${
               activeTradeMode ? "npc-trade-panel--visible" : ""
             }`}
           >
@@ -364,7 +364,7 @@ export default function NpcDialog({
                             <button
                               key={offer.itemKey}
                               type="button"
-                              className={`trade-list-item ${
+                              className={`trade-list-item game-card game-card--interactive ${
                                 selectedBuyItemKey === offer.itemKey
                                   ? "is-selected"
                                   : ""
@@ -382,7 +382,7 @@ export default function NpcDialog({
                           ))}
                         </div>
                       ) : (
-                        <div className="trade-empty-state">
+                        <div className="trade-empty-state game-empty-state">
                           <strong>No stock available</strong>
                           <p>
                             This merchant does not have a real buy inventory in the
@@ -405,7 +405,7 @@ export default function NpcDialog({
                       </div>
                       <button
                         type="button"
-                        className="npc-trade-panel__confirm-button ornate-button"
+                        className="npc-trade-panel__confirm-button game-button game-button--primary"
                         onClick={() => {
                           if (selectedBuyOffer) {
                             onBuyItem?.(selectedBuyOffer);
@@ -421,7 +421,7 @@ export default function NpcDialog({
                   <>
                     <div className="npc-trade-panel__content npc-trade-panel__content--sell">
                       <div
-                        className="trade-drop-zone"
+                        className="trade-drop-zone game-card"
                         onDragOver={allowSellDrop}
                         onDrop={handleSellDrop}
                       >
@@ -434,7 +434,7 @@ export default function NpcDialog({
                           {sellBasketEntries.map((entry) => (
                             <div
                               key={entry.itemKey}
-                              className={`trade-list-item ${
+                              className={`trade-list-item game-card game-card--interactive ${
                                 selectedSellItemKey === entry.itemKey
                                   ? "is-selected"
                                   : ""
@@ -456,7 +456,7 @@ export default function NpcDialog({
                                 </span>
                                 <button
                                   type="button"
-                                  className="trade-list-item__remove"
+                                  className="trade-list-item__remove game-button game-button--ghost game-button--compact"
                                   onClick={() => handleRemoveSellEntry(entry.itemKey)}
                                   aria-label={`Remove ${entry.name} from sell basket`}
                                 >
@@ -467,7 +467,7 @@ export default function NpcDialog({
                           ))}
                         </div>
                       ) : (
-                        <div className="trade-empty-state">
+                        <div className="trade-empty-state game-empty-state">
                           <strong>No items in the sell basket</strong>
                           <p>
                             Drag an eligible inventory stack into this panel to
@@ -490,7 +490,7 @@ export default function NpcDialog({
                       </div>
                       <button
                         type="button"
-                        className="npc-trade-panel__secondary-button ornate-button"
+                        className="npc-trade-panel__secondary-button game-button game-button--secondary"
                         onClick={handleSellAll}
                         disabled={sellBasketEntries.length === 0}
                       >
@@ -498,7 +498,7 @@ export default function NpcDialog({
                       </button>
                       <button
                         type="button"
-                        className="npc-trade-panel__confirm-button ornate-button"
+                        className="npc-trade-panel__confirm-button game-button game-button--primary"
                         onClick={handleSellSelected}
                         disabled={!selectedSellEntry}
                       >
@@ -509,7 +509,7 @@ export default function NpcDialog({
                 )}
               </>
             ) : (
-              <div className="npc-trade-panel__placeholder">
+              <div className="npc-trade-panel__placeholder game-empty-state">
                 <strong>Trade</strong>
                 <p>
                   Open Buy or Sell to manage commerce without shrinking the

@@ -260,7 +260,7 @@ export default function WorldMap({
     npcDialogOpen || combatDialogOpen || Boolean(overlayContent);
 
   return (
-    <div className="world-stage world-map-shell">
+    <div className="world-stage world-map-shell game-surface ornate-corners">
       <div className={`world-map-frame world-map-frame--${mapData.id}`}>
         <img
           src={mapData.background}
@@ -305,7 +305,7 @@ export default function WorldMap({
 
           {shouldShowSecondaryMapIdentity ? (
             <div
-              className="world-map-identity"
+              className="world-map-identity game-card"
               aria-label={`${mapData.name}, ${mapData.biomeLabel}`}
             >
               <span className="world-map-identity__eyebrow">Local Map</span>

@@ -4,6 +4,9 @@
   z-index: 20;
   --equipment-slot-size: clamp(64px, 4.8vw, 72px);
   --equipment-slot-gap: clamp(7px, 0.6vw, 10px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .equipment-rows {
@@ -38,28 +41,12 @@
   height: var(--equipment-slot-size);
   display: grid;
   place-items: center;
-  background: linear-gradient(180deg, rgba(38, 51, 72, 0.98) 0%, rgba(20, 29, 44, 1) 100%);
-  border: 1px solid rgba(108, 131, 170, 0.46);
-  border-radius: 12px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 8px 14px rgba(1, 6, 12, 0.12);
   cursor: default;
   z-index: 1;
-  transition:
-    transform 0.16s ease,
-    border-color 0.16s ease,
-    box-shadow 0.16s ease;
 }
 
 .equip-slot:hover {
   z-index: 9999;
-  transform: translateY(-1px);
-  border-color: rgba(166, 191, 230, 0.62);
-  background: linear-gradient(180deg, rgba(46, 61, 85, 1) 0%, rgba(25, 35, 52, 1) 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 12px 18px rgba(1, 7, 14, 0.16);
 }
 
 .equip-slot-icon {

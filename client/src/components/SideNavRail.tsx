@@ -182,6 +182,9 @@ export const sideNavIcons = {
 function renderRailItem(item: SideNavRailItem) {
   const buttonClassName = [
     "side-nav-rail__button",
+    "game-button",
+    "game-button--ghost",
+    "game-icon-button",
     item.isActive ? "side-nav-rail__button--active" : "",
     item.isDisabled ? "side-nav-rail__button--disabled" : "",
   ]

@@ -73,7 +73,7 @@ export default function CombatDialog({
       {showStopHuntOnly && onStopLoop ? (
         <button
           type="button"
-          className="combat-dialog-button combat-dialog-button--secondary"
+          className="combat-dialog-button game-button game-button--secondary"
           onClick={onStopLoop}
         >
           Stop Hunt
@@ -83,7 +83,7 @@ export default function CombatDialog({
       {showRetreat ? (
         <button
           type="button"
-          className="combat-dialog-button combat-dialog-button--secondary"
+          className="combat-dialog-button game-button game-button--secondary"
           onClick={onRetreat}
         >
           Retreat
@@ -97,7 +97,7 @@ export default function CombatDialog({
       <GameDialog title="" onClose={onClose}>
         <div className="combat-dialog-layout">
           <div className="combat-dialog-main">
-            <div className="combat-dialog-log-panel">
+            <div className="combat-dialog-log-panel game-card">
               <div className="combat-dialog-panel-title">Combat Log</div>
 
               <div ref={logViewportRef} className="combat-dialog-log">
@@ -107,9 +107,9 @@ export default function CombatDialog({
               </div>
             </div>
 
-            <div className="combat-dialog-creature-panel" aria-label="Creature panel">
+            <div className="combat-dialog-creature-panel game-card" aria-label="Creature panel">
               <div className="combat-dialog-creature-stage">
-                <div className="combat-dialog-creature-overlay">
+                <div className="combat-dialog-creature-overlay game-card">
                   <strong>{enemyName}</strong>
 
                   <div className="combat-dialog-creature-hp">

@@ -27,10 +27,7 @@
 .bestiary-dialog__list,
 .bestiary-dialog__detail {
   min-height: 0;
-  background: transparent;
   padding: 12px;
-  border: 1px solid rgba(122, 103, 75, 0.3);
-  border-radius: 14px;
 }
 
 .bestiary-dialog__list {
@@ -83,14 +80,8 @@
   gap: 4px;
   padding: 14px 2px;
   text-align: left;
-  border: 1px solid rgba(113, 96, 70, 0.24);
-  border-radius: 10px;
-  background: rgba(10, 15, 24, 0.34);
   color: var(--text);
-  transition:
-    transform 0.16s ease,
-    color 0.16s ease,
-    opacity 0.16s ease;
+  box-shadow: none;
 }
 
 .bestiary-entry-card:hover {
@@ -99,7 +90,9 @@
 }
 
 .bestiary-entry-card--active {
-  color: #f0dfb8;
+  border-color: rgba(168, 210, 255, 0.58);
+  color: var(--text-h);
+  box-shadow: 0 0 22px rgba(104, 164, 239, 0.1);
 }
 
 .bestiary-entry-card__title-row {
@@ -134,10 +127,6 @@
 }
 
 .bestiary-dialog__tier-badge {
-  padding: 4px 10px;
-  border: 1px solid var(--line-soft);
-  border-radius: 999px;
-  color: var(--muted-strong);
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -180,6 +169,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  padding: 12px;
 }
 
 .bestiary-detail-summary__item span {
@@ -233,8 +223,7 @@
 }
 
 .bestiary-detail-notes {
-  padding: 16px 0 0;
-  border-top: 1px solid var(--line-soft);
+  padding: 14px;
 }
 
 .bestiary-detail-notes ul {

@@ -219,15 +219,15 @@ export default function QuestLogDialog({
       >
         <div className="quest-log-dialog">
           <div className="quest-log-dialog__overview">
-            <div className="quest-log-dialog__overview-item">
+            <div className="quest-log-dialog__overview-item game-card">
               <span>Available</span>
               <strong>{entries.filter((entry) => entry.state === "available").length}</strong>
             </div>
-            <div className="quest-log-dialog__overview-item">
+            <div className="quest-log-dialog__overview-item game-card">
               <span>In Progress</span>
               <strong>{entries.filter((entry) => entry.state === "active").length}</strong>
             </div>
-            <div className="quest-log-dialog__overview-item">
+            <div className="quest-log-dialog__overview-item game-card">
               <span>Completed</span>
               <strong>{entries.filter((entry) => entry.state === "completed").length}</strong>
             </div>
@@ -235,7 +235,7 @@ export default function QuestLogDialog({
 
           <div className="quest-log-dialog__sections">
             {sections.map((section) => (
-              <section key={section.id} className="quest-log-section">
+              <section key={section.id} className="quest-log-section game-card">
                 <SectionHeading
                   className="quest-log-section__header ornate-header"
                   title={section.label}
@@ -245,10 +245,10 @@ export default function QuestLogDialog({
                 <div className="quest-log-section__entries">
                   {section.entries.length > 0 ? (
                     section.entries.map((entry) => (
-                      <article key={entry.quest.key} className="quest-log-entry">
+                      <article key={entry.quest.key} className="quest-log-entry game-card">
                         <div className="quest-log-entry__topline">
                           <strong>{entry.quest.title}</strong>
-                          <span className={getStatusClassName(entry.state)}>
+                          <span className={`${getStatusClassName(entry.state)} game-chip`}>
                             {formatStateLabel(entry.state)}
                           </span>
                         </div>

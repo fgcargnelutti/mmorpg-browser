@@ -12,13 +12,19 @@ export default function EmptyStateNotice({
   description,
   className = "",
 }: EmptyStateNoticeProps) {
-  const rootClassName = ["empty-state-notice", className].filter(Boolean).join(" ");
+  const rootClassName = ["empty-state-notice", "game-empty-state", className]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div className={rootClassName}>
-      <strong className="empty-state-notice__title">{title}</strong>
+      <strong className="empty-state-notice__title game-empty-state__title">
+        {title}
+      </strong>
       {description ? (
-        <p className="empty-state-notice__description">{description}</p>
+        <p className="empty-state-notice__description game-empty-state__description">
+          {description}
+        </p>
       ) : null}
     </div>
   );

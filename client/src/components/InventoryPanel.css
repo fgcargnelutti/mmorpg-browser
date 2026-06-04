@@ -6,6 +6,7 @@
   z-index: 5;
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
 .inventory-title-row {
@@ -17,12 +18,11 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-bottom: 8px;
+  padding: 2px 2px 8px 0;
 }
 
 .inventory-weight {
   font-size: 11px;
-  color: var(--muted-strong);
   white-space: nowrap;
 }
 
@@ -39,9 +39,6 @@
 .inventory-empty-copy {
   grid-column: 1 / -1;
   margin: 0 0 2px;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.4;
   text-align: left;
 }
 
@@ -50,38 +47,17 @@
   aspect-ratio: 1 / 1;
   min-height: 72px;
   padding: 8px;
-  background: linear-gradient(180deg, rgba(38, 51, 72, 0.98) 0%, rgba(20, 29, 44, 1) 100%);
-  border: 1px solid rgba(108, 131, 170, 0.46);
-  border-radius: 12px;
   display: grid;
   place-items: center;
   align-items: center;
   justify-items: center;
   cursor: default;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.03),
-    0 8px 14px rgba(1, 5, 12, 0.1);
-  transition:
-    transform 0.16s ease,
-    border-color 0.16s ease,
-    box-shadow 0.16s ease,
-    background 0.16s ease;
-}
-
-.inventory-square-slot:hover {
-  transform: translateY(-1px);
-  border-color: rgba(166, 191, 230, 0.62);
-  background: linear-gradient(180deg, rgba(46, 61, 85, 1) 0%, rgba(25, 35, 52, 1) 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 12px 18px rgba(1, 6, 13, 0.16);
 }
 
 .inventory-square-slot--empty {
-  background:
-    linear-gradient(180deg, rgba(15, 22, 34, 0.82) 0%, rgba(9, 14, 23, 0.92) 100%);
+  background: rgba(5, 10, 18, 0.62);
   border-style: dashed;
-  border-color: rgba(89, 110, 140, 0.26);
+  border-color: rgba(116, 144, 183, 0.24);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.02),
     inset 0 0 0 1px rgba(122, 148, 189, 0.04);
@@ -89,9 +65,8 @@
 
 .inventory-square-slot--empty:hover {
   transform: none;
-  border-color: rgba(89, 110, 140, 0.26);
-  background:
-    linear-gradient(180deg, rgba(15, 22, 34, 0.82) 0%, rgba(9, 14, 23, 0.92) 100%);
+  border-color: rgba(116, 144, 183, 0.24);
+  background: rgba(5, 10, 18, 0.62);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.02),
     inset 0 0 0 1px rgba(122, 148, 189, 0.04);
@@ -106,11 +81,11 @@
 }
 
 .inventory-square-slot--currency {
-  border-color: rgba(204, 177, 93, 0.34);
+  border-color: rgba(216, 189, 130, 0.42);
 }
 
 .inventory-square-slot--equipment {
-  border-color: rgba(116, 152, 198, 0.34);
+  border-color: rgba(131, 184, 255, 0.42);
 }
 
 .inventory-square-slot--survival {
@@ -118,7 +93,7 @@
 }
 
 .inventory-square-slot--resource {
-  border-color: rgba(141, 124, 102, 0.34);
+  border-color: rgba(145, 179, 223, 0.3);
 }
 
 .inventory-square-slot--quest {
@@ -158,7 +133,10 @@
   top: 6px;
   font-size: 10px;
   font-weight: 700;
-  color: var(--text-soft);
+  padding: 2px 5px;
+  border: 1px solid rgba(168, 210, 255, 0.24);
+  background: rgba(3, 7, 13, 0.72);
+  color: var(--text-h);
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.55);
 }
 
@@ -166,10 +144,7 @@
   width: 100%;
   height: 14px;
   margin-top: 6px;
-  border: 0;
   border-radius: 999px;
-  background:
-    linear-gradient(180deg, rgba(62, 83, 115, 0.2) 0%, rgba(27, 40, 59, 0.12) 100%);
   cursor: ns-resize;
   position: relative;
 }

@@ -73,14 +73,14 @@ export default function SkillTreeDialog({
           <div className="skill-tree-tabs">
             <button
               type="button"
-              className={`skill-tree-tab${activeTab === "talents" ? " is-active" : ""}`}
+              className={`skill-tree-tab game-button${activeTab === "talents" ? " is-active" : ""}`}
               onClick={() => setActiveTab("talents")}
             >
               Talents
             </button>
             <button
               type="button"
-              className={`skill-tree-tab${activeTab === "specializations" ? " is-active" : ""}`}
+              className={`skill-tree-tab game-button${activeTab === "specializations" ? " is-active" : ""}`}
               onClick={() => setActiveTab("specializations")}
             >
               Specializations
@@ -90,19 +90,19 @@ export default function SkillTreeDialog({
           {activeTab === "talents" ? (
             <div className="skill-tree-content">
               <div className="skill-tree-summary">
-                <div className="skill-tree-summary__item">
+                <div className="skill-tree-summary__item game-card">
                   <span>Character Level</span>
                   <strong>{characterLevel}</strong>
                 </div>
-                <div className="skill-tree-summary__item">
+                <div className="skill-tree-summary__item game-card">
                   <span>Talent Points Earned</span>
                   <strong>{talentPointsEarned}</strong>
                 </div>
-                <div className="skill-tree-summary__item">
+                <div className="skill-tree-summary__item game-card">
                   <span>Points Spent</span>
                   <strong>{talentPointsSpent}</strong>
                 </div>
-                <div className="skill-tree-summary__item">
+                <div className="skill-tree-summary__item game-card">
                   <span>Available Now</span>
                   <strong>{talentPointsAvailable}</strong>
                 </div>
@@ -110,7 +110,7 @@ export default function SkillTreeDialog({
 
               <div className="skill-tree-talents">
                 {talentTrees.map(({ archetype, nodes }) => (
-                  <section key={archetype.key} className="talent-branch">
+                  <section key={archetype.key} className="talent-branch game-card">
                     <div className="talent-branch__header">
                       <h4>{archetype.label}</h4>
                       <p>{archetype.description}</p>
@@ -121,7 +121,7 @@ export default function SkillTreeDialog({
                         <button
                           key={node.key}
                           type="button"
-                          className={`talent-node talent-node--${node.state}`}
+                          className={`talent-node game-button talent-node--${node.state}`}
                           style={{
                             gridColumn: node.gridColumn,
                             gridRow: node.gridRow,
@@ -160,7 +160,7 @@ export default function SkillTreeDialog({
                 </div>
 
                 {specializationRows.map(({ skill, tree, nodes: skillNodes }) => (
-                  <div key={skill.key} className="specialization-table specialization-table--row">
+                  <div key={skill.key} className="specialization-table specialization-table--row game-card">
                     <div className="specialization-skill-cell">
                       <div className="specialization-skill-cell__header">
                         <strong>{skill.name}</strong>
@@ -189,7 +189,7 @@ export default function SkillTreeDialog({
                       return (
                         <div
                           key={`${skill.key}-${tier}`}
-                          className={`specialization-tier-cell${
+                          className={`specialization-tier-cell game-card${
                             nodes.some((node) => node.state === "selected")
                               ? " is-selected"
                               : nodes.some((node) => node.state === "unlockable")
@@ -213,7 +213,7 @@ export default function SkillTreeDialog({
                               <button
                                 key={node.key}
                                 type="button"
-                                className={`skill-tree-specialization-choice skill-tree-specialization-choice--${node.state}`}
+                                className={`skill-tree-specialization-choice game-button game-button--ghost skill-tree-specialization-choice--${node.state}`}
                                 onClick={() => onSelectSpecialization(skill.key, node.key)}
                                 disabled={node.state !== "unlockable"}
                               >

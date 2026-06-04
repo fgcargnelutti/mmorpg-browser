@@ -8,6 +8,8 @@ export type ToastDefinition = {
   createdAt: number;
   title?: string;
   icon?: string;
+  iconLabel?: string;
+  groupKey?: string;
   dedupeKey?: string;
 };
 
@@ -17,5 +19,7 @@ export type ToastInput = {
   durationMs?: number;
   title?: string;
   icon?: string;
+  iconLabel?: string;
+  groupKey?: string;
   dedupeKey?: string;
 };

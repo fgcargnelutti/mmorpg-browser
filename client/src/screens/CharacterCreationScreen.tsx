@@ -60,10 +60,10 @@ export default function CharacterCreationScreen({
       <div className="character-flow-vignette" />
 
       <section className="character-flow-shell character-creation-shell">
-        <section className="character-flow-panel character-creation-panel">
+        <section className="character-flow-panel character-creation-panel game-card ornate-corners">
           <button
             type="button"
-            className="character-flow-button character-flow-button--secondary character-creation-back"
+            className="character-flow-button character-flow-button--secondary character-creation-back game-button game-button--secondary"
             onClick={onBack}
           >
             Back
@@ -95,7 +95,7 @@ export default function CharacterCreationScreen({
                   onSelect: () => setSelectedIndex(nextIndex),
                 }}
                 activeCard={
-                  <article className="character-creation-carousel-card is-active">
+                  <article className="character-creation-carousel-card game-card is-active">
                     <CharacterAvatar
                       src={selectedAvatar.imageSrc}
                       alt={selectedAvatar.altLabel}
@@ -105,7 +105,7 @@ export default function CharacterCreationScreen({
 
                     <div className="character-creation-preview__content">
                       <strong>{trimmedName || selectedClass.name}</strong>
-                      <span>{selectedClass.name} • Level 1</span>
+                      <span>{selectedClass.name} / Level 1</span>
                     </div>
                   </article>
                 }
@@ -119,12 +119,12 @@ export default function CharacterCreationScreen({
                   onChange={(event) => setCharacterName(event.target.value)}
                   placeholder="Character name"
                   maxLength={20}
-                  className="character-creation-name-input"
+                  className="character-creation-name-input game-input"
                 />
 
                 <button
                   type="button"
-                  className="character-flow-button character-flow-button--primary"
+                  className="character-flow-button character-flow-button--primary game-button game-button--primary"
                   disabled={!isValidName}
                   onClick={handleSubmit}
                 >

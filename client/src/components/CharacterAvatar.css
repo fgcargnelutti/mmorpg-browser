@@ -1,7 +1,6 @@
 .character-avatar {
   position: relative;
   overflow: hidden;
-  border-radius: 18px;
   border: 1px solid rgba(126, 151, 190, 0.36);
   background:
     radial-gradient(circle at top, rgba(146, 179, 227, 0.18) 0%, transparent 42%),
@@ -29,7 +28,6 @@
 .character-avatar--pin {
   width: 26px;
   height: 26px;
-  border-radius: 999px;
   border-color: rgba(230, 204, 141, 0.58);
   box-shadow:
     0 10px 18px rgba(1, 7, 15, 0.24),

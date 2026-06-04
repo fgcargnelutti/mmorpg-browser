@@ -56,7 +56,7 @@ export default function CharacterPanel({
         </div>
       </div>
 
-      <div className="character-progress-section ornate-divider">
+      <div className="character-progress-section ornate-divider game-card">
         <div className="character-progress-value">
           <span className="character-progress-level">Level {level}</span>
           <span className="character-progress-separator">•</span>
@@ -79,7 +79,7 @@ export default function CharacterPanel({
       </div>
 
       <div className="conditions-section ornate-divider">
-        <div className="conditions-label">Conditions</div>
+        <div className="conditions-label game-section-title">Conditions</div>
         <div className="conditions-row">
           {conditions.map((condition) => (
             <StatusIcon
@@ -96,7 +96,7 @@ export default function CharacterPanel({
       </div>
 
       <div className="buffs-section ornate-divider">
-        <div className="buffs-label">Active Buffs</div>
+        <div className="buffs-label game-section-title">Active Buffs</div>
         <div className="buffs-row">
           {buffs.map((buff) => (
             <StatusIcon

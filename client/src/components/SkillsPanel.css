@@ -11,18 +11,13 @@
 .skills-list {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 10px;
   padding-right: 4px;
 }
 
 /* CARD */
 .skill-card {
-  padding: 12px 0;
-  background: transparent;
-  border: none;
-  border-top: 1px solid rgba(84, 103, 132, 0.24);
-  border-radius: 0;
-  box-shadow: none;
+  padding: 10px;
   transition:
     transform 0.18s ease,
     border-color 0.18s ease,
@@ -30,16 +25,8 @@
     background 0.18s ease;
 }
 
-.skill-card:first-child {
-  padding-top: 0;
-  border-top: none;
-}
-
 .skill-card:hover {
-  transform: none;
-  border-top-color: rgba(132, 160, 205, 0.38);
-  box-shadow: none;
-  background: transparent;
+  border-color: rgba(137, 174, 224, 0.46);
 }
 
 /* TOP ROW */
@@ -53,7 +40,8 @@
 
 .skill-name {
   font-size: 13px;
-  color: var(--text-soft);
+  color: var(--text-h);
+  font-weight: 700;
   cursor: help;
   transition: color 0.16s ease, text-shadow 0.16s ease;
 }
@@ -66,7 +54,7 @@
 
 .skill-value {
   font-size: 11px;
-  color: var(--accent-gold);
+  color: var(--accent-blue-strong);
   white-space: nowrap;
 }
 
@@ -82,9 +70,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 0;
-  border: none;
-  background: transparent;
+  padding: 8px;
 }
 
 /* TIER HEADER */
@@ -101,7 +87,7 @@
 }
 
 .tier-label.unlocked {
-  color: var(--text-soft);
+  color: var(--accent-blue-strong);
 }
 
 .tier-label.locked {
@@ -118,11 +104,6 @@
 .skill-card:hover .skill-name {
   color: var(--text);
   text-shadow: 0 0 10px rgba(126, 162, 216, 0.12);
-}
-
-.skill-card:hover .skill-tier-block {
-  border-color: transparent;
-  background: transparent;
 }
 
 .skills-panel__hint {

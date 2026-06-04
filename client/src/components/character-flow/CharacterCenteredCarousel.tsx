@@ -28,6 +28,19 @@ export default function CharacterCenteredCarousel({
   activeCard,
   disableNavigation = false,
 }: CharacterCenteredCarouselProps) {
+  const navClassName = `${buildPrefixedClassName(
+    prefix,
+    "carousel__nav"
+  )} game-button game-button--ghost game-icon-button`;
+  const sideCardClassName = `${buildPrefixedClassName(
+    prefix,
+    "carousel-card"
+  )} game-card game-card--interactive is-side`;
+  const emptyCardClassName = `${buildPrefixedClassName(
+    prefix,
+    "carousel-card"
+  )} game-card is-side is-empty`;
+
   return (
     <section
       className={buildPrefixedClassName(prefix, "carousel")}
@@ -35,19 +48,19 @@ export default function CharacterCenteredCarousel({
     >
       <button
         type="button"
-        className={buildPrefixedClassName(prefix, "carousel__nav")}
+        className={navClassName}
         onClick={onPrevious}
         disabled={disableNavigation}
         aria-label="Previous"
       >
-        ‹
+        &lt;
       </button>
 
       <div className={buildPrefixedClassName(prefix, "carousel__track")}>
         {previousCard ? (
           <button
             type="button"
-            className={`${buildPrefixedClassName(prefix, "carousel-card")} is-side`}
+            className={sideCardClassName}
             onClick={previousCard.onSelect}
           >
             <span className={buildPrefixedClassName(prefix, "carousel-card__name")}>
@@ -58,9 +71,7 @@ export default function CharacterCenteredCarousel({
             </span>
           </button>
         ) : (
-          <div
-            className={`${buildPrefixedClassName(prefix, "carousel-card")} is-side is-empty`}
-          />
+          <div className={emptyCardClassName} />
         )}
 
         {activeCard}
@@ -68,7 +79,7 @@ export default function CharacterCenteredCarousel({
         {nextCard ? (
           <button
             type="button"
-            className={`${buildPrefixedClassName(prefix, "carousel-card")} is-side`}
+            className={sideCardClassName}
             onClick={nextCard.onSelect}
           >
             <span className={buildPrefixedClassName(prefix, "carousel-card__name")}>
@@ -79,20 +90,18 @@ export default function CharacterCenteredCarousel({
             </span>
           </button>
         ) : (
-          <div
-            className={`${buildPrefixedClassName(prefix, "carousel-card")} is-side is-empty`}
-          />
+          <div className={emptyCardClassName} />
         )}
       </div>
 
       <button
         type="button"
-        className={buildPrefixedClassName(prefix, "carousel__nav")}
+        className={navClassName}
         onClick={onNext}
         disabled={disableNavigation}
         aria-label="Next"
       >
-        ›
+        &gt;
       </button>
     </section>
   );

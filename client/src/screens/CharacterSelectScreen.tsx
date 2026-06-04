@@ -117,7 +117,7 @@ export default function CharacterSelectScreen({
       <div className="character-flow-vignette" />
 
       <section className="character-flow-shell character-select-shell">
-        <section className="character-flow-panel character-select-panel">
+        <section className="character-flow-panel character-select-panel game-card ornate-corners">
           {selectedCharacter && selectedClass ? (
             <div className="character-select-layout">
               <CharacterClassDetailsSidebar
@@ -155,7 +155,7 @@ export default function CharacterSelectScreen({
                       : null
                   }
                   activeCard={
-                    <article className="character-select-carousel-card is-active">
+                    <article className="character-select-carousel-card game-card is-active">
                       {selectedAvatar ? (
                         <CharacterAvatar
                           src={selectedAvatar.imageSrc}
@@ -168,7 +168,7 @@ export default function CharacterSelectScreen({
                       <div className="character-select-carousel-card__content">
                         <strong>{selectedCharacter.name}</strong>
                         <span>
-                          {selectedClass.name} • Level {selectedCharacter.level}
+                          {selectedClass.name} / Level {selectedCharacter.level}
                         </span>
                       </div>
                     </article>
@@ -178,7 +178,7 @@ export default function CharacterSelectScreen({
                 <div className="character-select-footer">
                   <button
                     type="button"
-                    className="character-flow-button character-flow-button--primary"
+                    className="character-flow-button character-flow-button--primary game-button game-button--primary"
                     onClick={() => onEnterWorld(selectedCharacter)}
                   >
                     Enter World
@@ -186,7 +186,7 @@ export default function CharacterSelectScreen({
 
                   <button
                     type="button"
-                    className="character-flow-button character-flow-button--secondary"
+                    className="character-flow-button character-flow-button--secondary game-button game-button--secondary"
                     onClick={onCreateNewCharacter}
                   >
                     Create New Character
@@ -194,7 +194,7 @@ export default function CharacterSelectScreen({
 
                   <button
                     type="button"
-                    className="character-select-delete-link"
+                    className="character-select-delete-link game-button game-button--danger"
                     onClick={handleDeleteSelectedCharacter}
                   >
                     Delete Character
@@ -203,14 +203,14 @@ export default function CharacterSelectScreen({
               </div>
             </div>
           ) : (
-            <div className="character-empty-state character-select-empty">
+            <div className="character-empty-state character-select-empty game-empty-state">
               <strong>No characters found</strong>
               <span>Create a new character to start building your roster.</span>
 
               <div className="character-select-footer">
                 <button
                   type="button"
-                  className="character-flow-button character-flow-button--secondary"
+                  className="character-flow-button character-flow-button--secondary game-button game-button--secondary"
                   onClick={onCreateNewCharacter}
                 >
                   Create New Character

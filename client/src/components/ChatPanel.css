@@ -14,14 +14,11 @@
   padding-right: 4px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
 }
 
 .chat-message {
-  padding: 6px 8px;
-  border: 1px solid rgba(103, 88, 63, 0.28);
-  border-radius: 10px;
-  background: rgba(11, 17, 27, 0.24);
+  padding: 7px 9px;
   color: var(--text-soft);
   font-size: 12px;
   line-height: 1.35;
@@ -42,13 +39,13 @@
 }
 
 .chat-message--npc {
-  border-color: rgba(179, 142, 86, 0.56);
-  background: linear-gradient(180deg, rgba(45, 38, 22, 0.42) 0%, rgba(18, 17, 15, 0.76) 100%);
-  color: #e7d4a8;
+  border-color: rgba(216, 189, 130, 0.46);
+  background: linear-gradient(180deg, rgba(52, 43, 24, 0.36) 0%, rgba(18, 16, 12, 0.72) 100%);
+  color: #ead5a0;
 }
 
 .chat-message--player {
-  border-color: rgba(124, 136, 158, 0.56);
+  border-color: rgba(131, 184, 255, 0.48);
   background: linear-gradient(180deg, rgba(28, 40, 58, 0.46) 0%, rgba(13, 19, 31, 0.8) 100%);
   color: #dce8fb;
 }
@@ -63,8 +60,7 @@
 
 .chat-message--other {
   border-color: var(--line-soft);
-  background: rgba(11, 17, 27, 0.24);
-  color: #e7d8c1;
+  color: var(--text-soft);
 }
 
 .chat-input-row {
@@ -80,48 +76,12 @@
   min-width: 0;
   min-height: 40px;
   padding: 0 12px;
-  border: 1px solid var(--line-soft);
-  border-radius: 12px;
-  background: rgba(11, 18, 29, 0.95);
-  color: var(--text);
   font: inherit;
-  transition:
-    border-color 0.16s ease,
-    box-shadow 0.16s ease,
-    background 0.16s ease;
-}
-
-.chat-input::placeholder {
-  color: var(--muted);
-}
-
-.chat-input:focus {
-  outline: none;
-  border-color: rgba(138, 165, 206, 0.6);
-  box-shadow: 0 0 0 3px rgba(126, 162, 216, 0.1);
-  background: rgba(14, 22, 36, 0.98);
 }
 
 .chat-send-button {
   min-height: 40px;
   padding: 0 14px;
-  border: 1px solid transparent;
-  border-radius: 12px;
-  background: transparent;
-  color: var(--text-soft);
-  cursor: pointer;
-  font: inherit;
-  transition:
-    transform 0.16s ease,
-    border-color 0.16s ease,
-    box-shadow 0.16s ease,
-    background 0.16s ease;
-}
-
-.chat-send-button:hover {
-  border-color: var(--ornate-button-border-hover);
-  box-shadow: 0 12px 20px rgba(1, 6, 13, 0.18);
-  transform: translateY(-1px);
 }
 
 .chat-messages::-webkit-scrollbar {

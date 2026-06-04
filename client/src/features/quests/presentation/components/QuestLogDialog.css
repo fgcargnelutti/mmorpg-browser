@@ -33,8 +33,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 0 0 10px;
-  border-bottom: 1px solid rgba(84, 103, 132, 0.34);
+  padding: 12px;
 }
 
 .quest-log-dialog__overview-item span {
@@ -65,13 +64,6 @@
   flex-direction: column;
   gap: 14px;
   padding: 12px;
-  border: 1px solid rgba(111, 123, 146, 0.22);
-  border-radius: 14px;
-  background: linear-gradient(
-    180deg,
-    rgba(13, 20, 31, 0.46) 0%,
-    rgba(9, 14, 22, 0.62) 100%
-  );
 }
 
 .quest-log-section__header {
@@ -104,9 +96,6 @@
   gap: 8px;
   min-width: 0;
   padding: 10px;
-  border: 1px solid rgba(84, 103, 132, 0.24);
-  border-radius: 12px;
-  background: rgba(10, 15, 24, 0.28);
 }
 
 .quest-log-entry__topline {
@@ -129,20 +118,13 @@
 }
 
 .quest-log-status {
-  display: inline-flex;
-  align-items: center;
-  min-height: 24px;
-  padding: 4px 8px;
-  border: 1px solid rgba(91, 109, 137, 0.38);
-  border-radius: 999px;
-  background: rgba(14, 21, 33, 0.54);
-  color: var(--text-soft);
+  color: var(--muted-strong);
 }
 
 .quest-log-status--available {
-  border-color: rgba(188, 150, 89, 0.44);
-  background: linear-gradient(180deg, rgba(58, 45, 24, 0.72) 0%, rgba(27, 22, 15, 0.82) 100%);
-  color: #e2c98f;
+  border-color: rgba(168, 210, 255, 0.44);
+  background: rgba(20, 42, 68, 0.62);
+  color: var(--accent-blue-strong);
 }
 
 .quest-log-status--active {

@@ -108,7 +108,7 @@ export default function BestiaryDialog({
         onClose={onClose}
       >
         <div className="bestiary-dialog-layout">
-          <aside className="bestiary-dialog__list ornate-section ornate-corners">
+          <aside className="bestiary-dialog__list ornate-section ornate-corners game-card">
             <div className="bestiary-dialog__list-header ornate-header">
               <strong>Known Creatures</strong>
               <span>{entries.length}</span>
@@ -120,7 +120,7 @@ export default function BestiaryDialog({
                   <button
                     key={entry.creatureKey}
                     type="button"
-                    className={`bestiary-entry-card ornate-slot${
+                    className={`bestiary-entry-card ornate-slot game-card game-card--interactive${
                       resolvedSelectedCreatureKey === entry.creatureKey
                         ? " bestiary-entry-card--active"
                         : ""
@@ -146,7 +146,7 @@ export default function BestiaryDialog({
             )}
           </aside>
 
-          <section className="bestiary-dialog__detail ornate-section ornate-corners">
+          <section className="bestiary-dialog__detail ornate-section ornate-corners game-card">
             {selectedEntry ? (
               <>
                 <div className="bestiary-dialog__detail-header ornate-header">
@@ -155,10 +155,10 @@ export default function BestiaryDialog({
                     <p>{selectedEntry.killCount} confirmed kills</p>
                   </div>
                   <div className="bestiary-dialog__meta">
-                    <span className="bestiary-dialog__tier-badge">
+                    <span className="bestiary-dialog__tier-badge game-chip">
                       {formatTitleCase(selectedEntry.unlockedTier)}
                     </span>
-                    <span className="bestiary-dialog__tier-badge">
+                    <span className="bestiary-dialog__tier-badge game-chip">
                       {formatTitleCase(selectedEntry.threatTier)}
                     </span>
                   </div>
@@ -172,17 +172,17 @@ export default function BestiaryDialog({
                   ) : null}
 
                   <div className="bestiary-detail-summary">
-                    <div className="bestiary-detail-summary__item">
+                    <div className="bestiary-detail-summary__item game-card">
                       <span>Category</span>
                       <strong>{formatTitleCase(selectedEntry.category)}</strong>
                     </div>
-                    <div className="bestiary-detail-summary__item">
+                    <div className="bestiary-detail-summary__item game-card">
                       <span>Habitats</span>
                       <strong>
                         {selectedEntry.habitatTags.map(formatTitleCase).join(", ")}
                       </strong>
                     </div>
-                    <div className="bestiary-detail-summary__item">
+                    <div className="bestiary-detail-summary__item game-card">
                       <span>Boss Potential</span>
                       <strong>{selectedEntry.isBossCandidate ? "Yes" : "No"}</strong>
                     </div>
@@ -254,7 +254,7 @@ export default function BestiaryDialog({
                   </div>
                 </div>
 
-                <div className="bestiary-detail-notes">
+                <div className="bestiary-detail-notes game-card">
                   <strong>Field Notes</strong>
                   {selectedEntry.notes?.length ? (
                     <ul>

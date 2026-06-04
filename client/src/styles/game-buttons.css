@@ -4,9 +4,17 @@
 .chat-send-button,
 .context-dialog__action,
 .region-players__action-button {
+  min-width: 0;
   border: 1px solid var(--ornate-button-border);
   background: var(--surface-action);
   color: var(--text-soft);
+  cursor: var(--cursor-interactive);
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: 0.035em;
+  line-height: 1.1;
+  text-align: center;
+  overflow-wrap: anywhere;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.065),
     0 12px 20px rgba(0, 5, 13, 0.22);
@@ -16,6 +24,71 @@
     box-shadow var(--motion-base) var(--ease-standard),
     background var(--motion-base) var(--ease-standard),
     color var(--motion-base) var(--ease-standard);
+}
+
+.game-button {
+  min-height: 40px;
+  padding: 0 14px;
+}
+
+.game-button--primary {
+  border-color: rgba(168, 210, 255, 0.62);
+  background: var(--surface-primary);
+  color: var(--text-h);
+  box-shadow:
+    0 14px 26px rgba(0, 6, 16, 0.3),
+    0 0 22px rgba(104, 164, 239, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.game-button--secondary {
+  border-color: var(--ornate-button-border);
+  background: var(--surface-action);
+  color: var(--text-soft);
+}
+
+.game-button--ghost {
+  border-color: rgba(116, 144, 183, 0.34);
+  background: rgba(7, 13, 23, 0.52);
+  color: var(--muted-strong);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.game-button--danger {
+  border-color: rgba(225, 116, 124, 0.5);
+  background: linear-gradient(
+    180deg,
+    rgba(91, 34, 43, 0.94) 0%,
+    rgba(42, 16, 23, 0.98) 100%
+  );
+  color: #ffd7db;
+}
+
+.game-button--compact {
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+  letter-spacing: 0.025em;
+}
+
+.game-icon-button {
+  display: inline-grid;
+  place-items: center;
+  aspect-ratio: 1;
+  padding: 0;
+  line-height: 1;
+}
+
+.game-button:disabled,
+.ornate-button:disabled,
+.chat-send:disabled,
+.chat-send-button:disabled,
+.context-dialog__action:disabled,
+.region-players__action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+  transform: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 .ornate-button:hover:not(:disabled),
@@ -34,6 +107,28 @@
   transform: var(--interactive-lift);
 }
 
+.game-button--primary:hover:not(:disabled) {
+  background: var(--surface-primary-hover);
+  border-color: rgba(190, 224, 255, 0.8);
+  box-shadow:
+    0 18px 34px rgba(0, 7, 18, 0.38),
+    0 0 28px rgba(104, 164, 239, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.game-button--danger:hover:not(:disabled) {
+  border-color: rgba(245, 145, 151, 0.68);
+  background: linear-gradient(
+    180deg,
+    rgba(115, 43, 52, 0.98) 0%,
+    rgba(55, 20, 29, 1) 100%
+  );
+  box-shadow:
+    0 16px 28px rgba(0, 6, 15, 0.3),
+    0 0 22px rgba(225, 116, 124, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
 .ornate-button:active:not(:disabled),
 .game-button:active:not(:disabled),
 .chat-send:active:not(:disabled),
@@ -48,6 +143,8 @@
 
 .ornate-button:focus-visible,
 .game-button:focus-visible,
+.game-input:focus-visible,
+.game-icon-button:focus-visible,
 .chat-send:focus-visible,
 .chat-send-button:focus-visible,
 .context-dialog__action:focus-visible,

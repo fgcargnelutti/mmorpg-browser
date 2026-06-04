@@ -29,12 +29,18 @@ input {
 }
 
 button,
+input,
+textarea,
+select {
+  max-width: 100%;
+}
+
+button,
 [role="button"],
 .portal-tooltip-trigger,
 .poi,
 .poi-discovery-zone,
-.context-dialog__action,
-.chat-send {
+.context-dialog__action {
   cursor: var(--cursor-interactive);
 }
 
@@ -159,9 +165,6 @@ button,
   border-radius: inherit;
 }
 
-.ui-panel:hover {
-}
-
 .sidebar-panel {
   align-self: stretch;
 }
@@ -192,16 +195,13 @@ button,
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--text-soft);
+  overflow-wrap: anywhere;
 }
 
 .badge {
   padding: 3px 9px;
-  border: 1px solid var(--line-soft);
   border-radius: 999px;
-  background: rgba(15, 22, 35, 0.78);
-  color: var(--muted-strong);
   font-size: 11px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .inline-tooltip {
@@ -260,14 +260,7 @@ button,
 
 .empty-box {
   padding: 12px;
-  background: linear-gradient(
-    180deg,
-    rgba(19, 27, 40, 0.82) 0%,
-    rgba(11, 17, 28, 0.88) 100%
-  );
-  border: 1px solid var(--line-soft);
   border-radius: 12px;
-  color: var(--muted);
   font-size: 13px;
 }
 
@@ -301,64 +294,6 @@ button,
     inset 0 -1px 0 rgba(2, 5, 10, 0.28);
 }
 
-.chat-row {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.chat-row input {
-  flex: 1;
-  min-width: 0;
-  height: 38px;
-  padding: 0 10px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(11, 18, 29, 0.95);
-  color: var(--text);
-  outline: none;
-  transition:
-    border-color 0.16s ease,
-    box-shadow 0.16s ease,
-    background 0.16s ease;
-}
-
-.chat-row input:focus {
-  border-color: var(--panel-hover-border);
-  box-shadow: 0 0 0 3px rgba(126, 162, 216, 0.1);
-  background: rgba(14, 22, 36, 0.98);
-}
-
-.chat-send {
-  height: 38px;
-  padding: 0 14px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: linear-gradient(180deg, #314760 0%, #1f2d3d 100%);
-  color: var(--text);
-  transition:
-    transform 0.15s ease,
-    border-color 0.15s ease,
-    box-shadow 0.15s ease,
-    background 0.15s ease;
-}
-
-.chat-send:hover {
-  background: linear-gradient(180deg, #3a5573 0%, #243447 100%);
-  border-color: var(--panel-hover-border);
-  box-shadow: 0 12px 22px rgba(1, 7, 16, 0.28);
-  transform: var(--interactive-lift);
-}
-
-.chat-send:active {
-  transform: translateY(0);
-}
-
-.chat-send:focus-visible {
-  outline: 2px solid rgba(126, 162, 216, 0.42);
-  outline-offset: 2px;
-}
-
 .scroll-box::-webkit-scrollbar {
   width: 8px;
 }
@@ -374,9 +309,24 @@ button,
 }
 
 @media (max-width: 1100px) {
+  html,
+  body,
+  #root {
+    overflow: auto;
+  }
+
+  .game-shell {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
   .game-grid {
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(50vh, 58vh) auto;
+    height: auto;
+    min-height: calc(100dvh - (var(--shell-gap) * 2));
+    overflow: visible;
   }
 
   .world-panel {
@@ -387,6 +337,7 @@ button,
     grid-template-rows: auto auto minmax(300px, 1fr);
     height: auto;
     max-height: none;
+    overflow: visible;
   }
 
   .bottom-left-panel {
@@ -405,15 +356,5 @@ button,
 
   .right-sidebar {
     grid-template-rows: auto auto minmax(300px, 1fr);
-  }
-}
-
-@media (max-width: 520px) {
-  .chat-row {
-    flex-direction: column;
-  }
-
-  .chat-send {
-    width: 100%;
   }
 }

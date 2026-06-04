@@ -1,37 +1,28 @@
 .status-icon {
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--line-soft);
-  background: rgba(12, 18, 29, 0.9);
   cursor: var(--cursor-interactive, pointer);
   position: relative;
-  border-radius: 8px;
   overflow: hidden;
-  transition:
-    transform 0.16s ease,
-    border-color 0.16s ease,
-    box-shadow 0.16s ease,
-    background 0.16s ease,
-    opacity 0.16s ease;
 }
 
 .status-icon::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 45%);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.08), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 45%);
   pointer-events: none;
 }
 
-/* 🔹 GLYPH (corrige ícones desalinhados) */
 .status-icon__glyph {
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
+  position: relative;
+  z-index: 1;
 }
 
-/* 🔹 SIZES */
 .status-icon.sm {
   width: 22px;
   height: 22px;
@@ -50,10 +41,9 @@
   font-size: 18px;
 }
 
-/* 🔹 STATES */
 .status-icon.active {
-  border-color: rgba(126, 162, 216, 0.42);
-  background: rgba(20, 29, 42, 0.94);
+  border-color: rgba(131, 184, 255, 0.46);
+  background: var(--surface-action-soft);
 }
 
 .status-icon.inactive {
@@ -63,55 +53,50 @@
 .portal-tooltip-trigger:hover .status-icon.active {
   transform: translateY(-1px);
   box-shadow:
-    0 6px 14px rgba(0, 0, 0, 0.22),
-    0 0 0 1px rgba(151, 176, 214, 0.08);
+    0 8px 16px rgba(0, 5, 13, 0.24),
+    0 0 0 1px rgba(168, 210, 255, 0.1);
 }
 
 .portal-tooltip-trigger:hover .status-icon.default.active {
   border-color: rgba(152, 178, 216, 0.54);
-  background: rgba(24, 33, 48, 0.94);
+  background: rgba(18, 34, 54, 0.94);
   box-shadow:
-    0 6px 14px rgba(0, 0, 0, 0.24),
-    0 0 12px rgba(126, 162, 216, 0.12);
+    0 8px 16px rgba(0, 5, 13, 0.24),
+    0 0 14px rgba(104, 164, 239, 0.14);
 }
 
 .portal-tooltip-trigger:hover .status-icon.buff.active {
   border-color: rgba(157, 129, 205, 0.56);
   background: rgba(32, 25, 46, 0.94);
   box-shadow:
-    0 6px 14px rgba(0, 0, 0, 0.24),
+    0 8px 16px rgba(0, 5, 13, 0.24),
     0 0 12px rgba(145, 114, 193, 0.14);
 }
 
 .portal-tooltip-trigger:hover .status-icon.specialization.active {
   border-color: rgba(132, 160, 205, 0.54);
-  background: rgba(20, 29, 42, 0.94);
+  background: rgba(18, 34, 54, 0.94);
   box-shadow:
-    0 6px 14px rgba(0, 0, 0, 0.24),
-    0 0 12px rgba(126, 162, 216, 0.12);
+    0 8px 16px rgba(0, 5, 13, 0.24),
+    0 0 14px rgba(104, 164, 239, 0.14);
 }
 
-/* 🔹 VARIANTS */
-
-/* default = conditions */
 .status-icon.default.active {
-  border-color: rgba(126, 162, 216, 0.46);
-  background: rgba(20, 29, 42, 0.9);
+  border-color: rgba(131, 184, 255, 0.48);
+  background: rgba(18, 34, 54, 0.88);
 }
 
-/* buffs (leve roxo) */
 .status-icon.buff.active {
   border-color: rgba(157, 129, 205, 0.5);
   background: rgba(32, 25, 46, 0.9);
 }
 
-/* specialization (neutro, levemente mais clean) */
 .status-icon.specialization {
   border-color: var(--line-soft);
-  background: rgba(12, 18, 29, 0.9);
+  background: var(--surface-action-soft);
 }
 
 .status-icon.specialization.active {
-  border-color: rgba(126, 162, 216, 0.42);
-  background: rgba(20, 29, 42, 0.92);
+  border-color: rgba(131, 184, 255, 0.46);
+  background: rgba(18, 34, 54, 0.9);
 }

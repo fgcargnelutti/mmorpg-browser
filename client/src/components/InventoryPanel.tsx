@@ -94,7 +94,7 @@ export default function InventoryPanel({
     >
       <div className="panel-title-row inventory-title-row ornate-header">
         <h2>Inventory</h2>
-        <span className="inventory-weight">
+        <span className="inventory-weight game-chip game-chip--blue">
           Weight ({currentWeight}/{maxWeight}Kg)
         </span>
       </div>
@@ -102,7 +102,9 @@ export default function InventoryPanel({
       <div className="inventory-panel__body">
         <div className="inventory-grid inventory-grid-slots">
           {items.length === 0 ? (
-            <div className="inventory-empty-copy">Inventory is empty.</div>
+            <div className="inventory-empty-copy game-empty-state">
+              <strong className="game-empty-state__title">Inventory is empty.</strong>
+            </div>
           ) : (
             items.map((item) => (
               <Tooltip
@@ -120,7 +122,7 @@ export default function InventoryPanel({
                 }
               >
                 <div
-                  className={`inventory-slot inventory-square-slot ornate-slot inventory-square-slot--${item.iconTone}`}
+                  className={`inventory-slot inventory-square-slot ornate-slot game-slot game-card--interactive inventory-square-slot--${item.iconTone}`}
                   aria-label={`${item.name}, quantity ${item.count}`}
                   draggable
                   onDragStart={(event) => {
@@ -159,7 +161,7 @@ export default function InventoryPanel({
           {Array.from({ length: emptySlotCount }).map((_, index) => (
             <div
               key={`empty-slot-${index}`}
-              className="inventory-slot inventory-square-slot ornate-slot inventory-square-slot--empty"
+              className="inventory-slot inventory-square-slot ornate-slot game-slot inventory-square-slot--empty"
               aria-hidden="true"
             >
               <span className="inventory-slot-placeholder" />
@@ -170,7 +172,7 @@ export default function InventoryPanel({
 
       <button
         type="button"
-        className="inventory-resize-handle"
+        className="inventory-resize-handle game-button game-button--ghost"
         aria-label="Resize inventory panel"
         onPointerDown={handleResizeStart}
       />

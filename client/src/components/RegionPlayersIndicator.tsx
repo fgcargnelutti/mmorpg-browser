@@ -70,7 +70,9 @@ export default function RegionPlayersIndicator({
     <div ref={containerRef} className="region-players">
       <button
         type="button"
-        className={`region-players__trigger ${isOpen ? "is-open" : ""}`}
+        className={`region-players__trigger game-button game-button--ghost ${
+          isOpen ? "is-open" : ""
+        }`}
         onClick={() => {
           setIsOpen((previous) => !previous);
           setInspectedPlayerId(null);
@@ -89,7 +91,7 @@ export default function RegionPlayersIndicator({
       {isOpen ? (
         <section
           id={panelId}
-          className="region-players__panel ornate-section ornate-corners"
+          className="region-players__panel ornate-section ornate-corners game-card"
           aria-label="Players online here"
         >
           <div className="region-players__panel-header ornate-header">
@@ -98,13 +100,14 @@ export default function RegionPlayersIndicator({
           </div>
 
           {players.length === 0 ? (
-            <div className="region-players__empty">
+            <div className="region-players__empty game-empty-state">
+              <strong className="game-empty-state__title">No one nearby</strong>
               No other players online in this region.
             </div>
           ) : (
             <div className="region-players__list">
               {players.map((player) => (
-                <article key={player.id} className="region-players__item ornate-slot">
+                <article key={player.id} className="region-players__item ornate-slot game-card">
                   <div className="region-players__item-main">
                     <strong>{player.name}</strong>
                     {player.detail ? (
@@ -117,7 +120,7 @@ export default function RegionPlayersIndicator({
                   <div className="region-players__actions">
                     <button
                       type="button"
-                      className={`region-players__action-button ornate-button ${
+                      className={`region-players__action-button ornate-button game-button game-button--compact game-button--ghost ${
                         inspectedPlayerId === player.id
                           ? "region-players__action-button--active"
                           : ""
@@ -134,7 +137,7 @@ export default function RegionPlayersIndicator({
                       <button
                         key={action.id}
                         type="button"
-                        className="region-players__action-button ornate-button"
+                        className="region-players__action-button ornate-button game-button game-button--compact game-button--secondary"
                         onClick={() => action.onSelect?.(player.id, player.name)}
                       >
                         {action.label}
@@ -144,7 +147,7 @@ export default function RegionPlayersIndicator({
 
                   {inspectedPlayerId === player.id ? (
                     <div
-                      className="region-players__inspect-panel"
+                      className="region-players__inspect-panel game-card"
                       aria-label={`Inspect ${player.name}`}
                     >
                       <div className="region-players__inspect-row">

@@ -27,8 +27,7 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid rgba(82, 102, 131, 0.28);
+  padding: 14px;
 }
 
 .hideout-storage-panel__header h4 {
@@ -56,6 +55,7 @@
   flex-direction: column;
   gap: 10px;
   min-width: 0;
+  padding: 12px;
 }
 
 .hideout-storage-column__title-row {
@@ -83,8 +83,6 @@
   min-height: 146px;
   padding: 12px;
   border: 1px dashed rgba(99, 123, 160, 0.34);
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgba(13, 20, 31, 0.68) 0%, rgba(9, 14, 22, 0.82) 100%);
   transition:
     border-color 0.16s ease,
     box-shadow 0.16s ease,
@@ -110,9 +108,6 @@
   gap: 6px;
   min-height: 78px;
   padding: 10px 8px;
-  border: 1px solid rgba(82, 101, 127, 0.34);
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgba(26, 36, 54, 0.92) 0%, rgba(14, 21, 33, 0.96) 100%);
   color: var(--text-soft);
   cursor: grab;
   transition:
@@ -186,9 +181,6 @@
   flex-direction: column;
   gap: 14px;
   padding: 14px;
-  border: 1px solid rgba(86, 107, 136, 0.38);
-  border-radius: 16px;
-  background: linear-gradient(180deg, rgba(14, 21, 33, 0.84) 0%, rgba(10, 16, 26, 0.9) 100%);
 }
 
 .hideout-card__header {
@@ -213,11 +205,6 @@
 .hideout-card__level {
   flex: 0 0 auto;
   height: fit-content;
-  padding: 4px 9px;
-  border: 1px solid rgba(110, 132, 166, 0.34);
-  border-radius: 999px;
-  background: rgba(11, 18, 29, 0.8);
-  color: var(--text-soft);
   font-size: 11px;
 }
 
@@ -270,9 +257,6 @@
   align-items: center;
   min-height: 30px;
   padding: 6px 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(78, 96, 122, 0.32);
-  background: rgba(10, 15, 24, 0.5);
   color: var(--text-soft);
   font-size: 12px;
 }
@@ -286,29 +270,6 @@
 .hideout-card__action {
   min-height: 42px;
   margin-top: 4px;
-  padding: 0 14px;
-  border: 1px solid rgba(112, 136, 171, 0.46);
-  border-radius: 12px;
-  background: linear-gradient(180deg, #2a3d55 0%, #182536 100%);
-  color: var(--text);
-  cursor: pointer;
-  transition:
-    transform 0.16s ease,
-    border-color 0.16s ease,
-    box-shadow 0.16s ease,
-    background 0.16s ease;
-}
-
-.hideout-card__action:hover:not(:disabled) {
-  transform: translateY(-1px);
-  border-color: var(--panel-hover-border);
-  background: linear-gradient(180deg, #355070 0%, #203146 100%);
-  box-shadow: 0 14px 22px rgba(1, 7, 16, 0.24);
-}
-
-.hideout-card__action:disabled {
-  cursor: not-allowed;
-  opacity: 0.56;
 }
 
 .hideout-dialog-layout::-webkit-scrollbar {

@@ -9,6 +9,212 @@
     inset 0 -1px 0 rgba(0, 0, 0, 0.42);
 }
 
+.game-card,
+.game-slot,
+.game-empty-state,
+.game-tooltip {
+  position: relative;
+  border: 1px solid var(--line-soft);
+  background: var(--surface-panel-soft);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.34);
+}
+
+.game-card,
+.game-empty-state,
+.game-tooltip {
+  padding: 12px;
+}
+
+.game-card::before,
+.game-slot::before,
+.game-empty-state::before,
+.game-tooltip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(131, 184, 255, 0.08), transparent 32%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 46%);
+}
+
+.game-card--interactive {
+  transition:
+    transform var(--motion-base) var(--ease-standard),
+    border-color var(--motion-base) var(--ease-standard),
+    box-shadow var(--motion-base) var(--ease-standard),
+    background var(--motion-base) var(--ease-standard);
+}
+
+.game-card--interactive:hover {
+  transform: var(--interactive-lift);
+  border-color: var(--panel-hover-border);
+  box-shadow:
+    0 16px 28px rgba(0, 6, 15, 0.24),
+    0 0 22px rgba(104, 164, 239, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.055);
+}
+
+.game-section-heading,
+.game-header-row {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.game-section-heading {
+  padding-bottom: 8px;
+}
+
+.game-section-heading::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(104, 164, 239, 0) 0%,
+    rgba(168, 210, 255, 0.42) 24%,
+    rgba(168, 210, 255, 0.3) 76%,
+    rgba(104, 164, 239, 0) 100%
+  );
+}
+
+.game-section-title {
+  color: var(--text-h);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.game-section-description {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.game-empty-state {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+}
+
+.game-empty-state__title {
+  color: var(--text-h);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+}
+
+.game-empty-state__description {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.game-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 4px 9px;
+  border: 1px solid var(--line-soft);
+  background: rgba(8, 15, 26, 0.78);
+  color: var(--muted-strong);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.035em;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.game-chip--blue,
+.game-chip--magic {
+  border-color: rgba(131, 184, 255, 0.44);
+  background: rgba(20, 42, 68, 0.62);
+  color: var(--accent-blue-strong);
+}
+
+.game-chip--success {
+  border-color: rgba(120, 199, 154, 0.44);
+  background: rgba(18, 48, 36, 0.6);
+  color: #bdeccf;
+}
+
+.game-chip--danger {
+  border-color: rgba(225, 116, 124, 0.44);
+  background: rgba(64, 22, 28, 0.58);
+  color: #f0b7bc;
+}
+
+.game-chip--gold {
+  border-color: rgba(216, 189, 130, 0.4);
+  background: rgba(61, 48, 24, 0.5);
+  color: #ead5a0;
+}
+
+.game-icon-surface {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line-soft);
+  background: var(--surface-action-soft);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 8px 16px rgba(0, 5, 13, 0.18);
+  transition:
+    transform var(--motion-base) var(--ease-standard),
+    border-color var(--motion-base) var(--ease-standard),
+    box-shadow var(--motion-base) var(--ease-standard),
+    background var(--motion-base) var(--ease-standard),
+    opacity var(--motion-base) var(--ease-standard);
+}
+
+.game-input {
+  border: 1px solid var(--line-soft);
+  background: rgba(5, 10, 18, 0.94);
+  color: var(--text);
+  outline: none;
+  transition:
+    transform var(--motion-base) var(--ease-standard),
+    border-color var(--motion-base) var(--ease-standard),
+    box-shadow var(--motion-base) var(--ease-standard),
+    background var(--motion-base) var(--ease-standard);
+}
+
+.game-input::placeholder {
+  color: rgba(170, 185, 203, 0.68);
+}
+
+.game-input:hover:not(:disabled) {
+  border-color: rgba(137, 174, 224, 0.5);
+  background: rgba(7, 13, 23, 0.97);
+}
+
+.game-input:focus {
+  border-color: var(--panel-hover-border);
+  background: rgba(8, 14, 24, 0.98);
+  box-shadow:
+    0 0 0 3px rgba(104, 164, 239, 0.12),
+    0 0 22px rgba(104, 164, 239, 0.08);
+}
+
+.game-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
 .ui-panel::before,
 .game-surface::before {
   background:
@@ -35,6 +241,7 @@
 }
 
 .badge,
+.game-chip,
 .empty-box,
 .scroll-box {
   border-color: var(--line-soft);

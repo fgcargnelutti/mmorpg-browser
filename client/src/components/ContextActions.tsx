@@ -35,10 +35,12 @@ export default function ContextActions({
       onExpand={onExpand}
     >
       <div className="context-dialog__actions">
-        {actions.map((action) => (
+        {actions.map((action, index) => (
           <button
             key={action.id}
-            className="context-dialog__action ornate-button"
+            className={`context-dialog__action ornate-button game-button ${
+              index === 0 ? "game-button--primary" : "game-button--secondary"
+            }`}
             type="button"
             onClick={() => onAction(action)}
           >

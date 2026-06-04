@@ -51,13 +51,6 @@
 .combat-dialog-log-panel,
 .combat-dialog-creature-panel {
   min-height: 0;
-  border: 1px solid rgba(76, 95, 123, 0.4);
-  border-radius: 16px;
-  background: linear-gradient(
-    180deg,
-    rgba(10, 15, 24, 0.86) 0%,
-    rgba(8, 12, 19, 0.94) 100%
-  );
   overflow: hidden;
 }
 
@@ -101,8 +94,7 @@
   z-index: 2;
   width: min(360px, calc(100% - 36px));
   padding: 14px;
-  border: 1px solid rgba(97, 121, 155, 0.42);
-  border-radius: 16px;
+  border-color: rgba(121, 154, 201, 0.5);
   background: rgba(16, 23, 35, 0.82);
   backdrop-filter: blur(10px);
 }
@@ -188,39 +180,7 @@
 
 .combat-dialog-button {
   min-width: 110px;
-  padding: 8px 12px;
-  border: 1px solid rgba(89, 110, 140, 0.46);
-  border-radius: 12px;
-  background: linear-gradient(180deg, #243447 0%, #172231 100%);
-  color: var(--text-soft);
-  cursor: pointer;
-  transition:
-    transform 0.16s ease,
-    border-color 0.16s ease,
-    background 0.16s ease,
-    box-shadow 0.16s ease;
-}
-
-.combat-dialog-button:hover {
-  background: linear-gradient(180deg, #2f4662 0%, #1d2d40 100%);
-  border-color: rgba(136, 162, 205, 0.62);
-  box-shadow: 0 12px 18px rgba(1, 6, 13, 0.18);
-  transform: translateY(-1px);
-}
-
-.combat-dialog-button--primary {
-  border-color: rgba(210, 177, 115, 0.56);
-  background: linear-gradient(180deg, #6b5f3d 0%, #3f3824 100%);
-}
-
-.combat-dialog-button--secondary {
-  border: 1px solid rgba(89, 110, 140, 0.46);
-  background: rgba(11, 18, 29, 0.72);
-  color: var(--text-soft);
-}
-
-.combat-dialog-button--secondary:hover {
-  background: linear-gradient(180deg, rgba(38, 53, 76, 0.96) 0%, rgba(18, 28, 43, 0.98) 100%);
+  min-height: 38px;
 }
 
 .combat-dialog-log::-webkit-scrollbar {
@@ -241,17 +201,34 @@
   .combat-dialog-anchor .game-dialog {
     width: calc(100% - 28px);
     height: calc(100% - 28px);
+    overflow-y: auto;
   }
 
   .combat-dialog-main {
     grid-template-columns: 1fr;
+    grid-template-rows: minmax(180px, 0.8fr) minmax(260px, 1.2fr);
   }
 }
 
 @media (max-width: 720px) {
+  .combat-dialog-anchor .game-dialog {
+    width: calc(100% - 16px);
+    height: calc(100% - 16px);
+  }
+
+  .combat-dialog-layout {
+    gap: 10px;
+  }
+
   .combat-dialog-creature-overlay {
     width: calc(100% - 24px);
     top: 12px;
     left: 12px;
+  }
+
+  .combat-dialog-creature-hp {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
   }
 }

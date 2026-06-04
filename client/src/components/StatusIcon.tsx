@@ -30,7 +30,7 @@ export default function StatusIcon({
       <div
         className={`status-icon ${size} ${variant} ${
           active ? "active" : "inactive"
-        }`}
+        } game-icon-surface`}
       >
         <span className="status-icon__glyph">{icon}</span>
       </div>

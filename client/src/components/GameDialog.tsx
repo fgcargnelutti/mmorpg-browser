@@ -25,7 +25,7 @@ export default function GameDialog({
   if (isMinimized) {
     return (
       <button
-        className="game-dialog-fab"
+        className="game-dialog-fab game-button game-button--primary game-icon-button"
         type="button"
         onClick={onExpand}
         aria-label={`Expand ${title}`}
@@ -47,7 +47,7 @@ export default function GameDialog({
         <div className="game-dialog__header-actions">
           {onMinimize ? (
             <button
-              className="game-dialog__minimize"
+              className="game-dialog__minimize game-button game-button--ghost game-icon-button"
               type="button"
               onClick={onMinimize}
               aria-label={`Minimize ${title}`}
@@ -59,7 +59,7 @@ export default function GameDialog({
 
           {onClose ? (
             <button
-              className="game-dialog__close"
+              className="game-dialog__close game-button game-button--ghost game-icon-button"
               type="button"
               onClick={onClose}
               aria-label={`Close ${title}`}

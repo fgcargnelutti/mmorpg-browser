@@ -92,7 +92,7 @@ export default function Tooltip({ content, children }: TooltipProps) {
         createPortal(
           <div
             ref={tooltipRef}
-            className="portal-tooltip"
+            className="portal-tooltip game-tooltip"
             style={{ top: "0px", left: "0px" }}
           >
             {content}

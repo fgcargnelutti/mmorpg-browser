@@ -42,12 +42,14 @@ export default function EventLogPanel({ logs }: EventLogPanelProps) {
 
       <div ref={scrollRef} className="scroll-box event-log-scroll">
         {logs.length === 0 ? (
-          <div className="empty-box">No events yet.</div>
+          <div className="empty-box game-empty-state">
+            <strong className="game-empty-state__title">No events yet.</strong>
+          </div>
         ) : (
           logs.map((log, index) => (
             <div
               key={`${log}-${index}`}
-              className={`${getLogLineClassName(log)} ornate-slot`}
+              className={`${getLogLineClassName(log)} ornate-slot game-card`}
             >
               {formatEventLogLine(log)}
             </div>

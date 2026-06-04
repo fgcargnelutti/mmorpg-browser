@@ -65,7 +65,7 @@ export default function TopPanel({
       <div className="top-right">
         {rightContent ??
           worldStatus.map((status) => (
-            <span key={status} className="world-status-chip">
+            <span key={status} className="world-status-chip game-chip game-chip--blue">
               {status}
             </span>
           ))}

@@ -32,20 +32,10 @@
 
 .skill-tree-tab {
   min-height: 50px;
-  border: 1px solid rgba(97, 172, 180, 0.48);
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgba(26, 57, 67, 0.82) 0%, rgba(15, 28, 36, 0.92) 100%);
-  color: var(--text-soft);
-  transition:
-    transform 0.16s ease,
-    border-color 0.16s ease,
-    box-shadow 0.16s ease,
-    background 0.16s ease;
+  overflow-wrap: anywhere;
 }
 
-.skill-tree-tab:hover,
 .skill-tree-tab.is-active {
-  transform: var(--interactive-lift);
   border-color: rgba(116, 211, 216, 0.62);
   box-shadow: 0 14px 24px rgba(2, 10, 14, 0.18);
   background: linear-gradient(180deg, rgba(34, 80, 91, 0.9) 0%, rgba(16, 35, 44, 0.96) 100%);
@@ -71,6 +61,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  padding: 12px;
 }
 
 .skill-tree-summary__item span {
@@ -99,6 +90,7 @@
   grid-template-rows: auto minmax(0, 1fr);
   gap: 14px;
   min-height: 0;
+  padding: 14px;
 }
 
 .talent-branch__header {
@@ -137,15 +129,13 @@
   justify-content: center;
   text-align: center;
   padding: 14px 12px;
-  border-radius: 14px;
-  border: 2px solid rgba(88, 165, 235, 0.6);
-  background: linear-gradient(180deg, rgba(32, 52, 71, 0.78) 0%, rgba(15, 25, 37, 0.94) 100%);
   color: var(--text-soft);
   min-height: 88px;
 }
 
 .talent-node strong {
   font-size: 14px;
+  overflow-wrap: anywhere;
 }
 
 .talent-node span {
@@ -240,8 +230,7 @@
 }
 
 .specialization-table--row {
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--line-soft);
+  padding: 14px;
 }
 
 .specialization-skill-cell {
@@ -305,9 +294,6 @@
   flex-direction: column;
   gap: 10px;
   padding: 12px;
-  border: 1px solid rgba(84, 103, 132, 0.3);
-  border-radius: 14px;
-  background: rgba(11, 18, 29, 0.56);
 }
 
 .specialization-tier-cell.is-unlocked {
@@ -344,16 +330,15 @@
   gap: 8px;
   min-height: 40px;
   padding: 6px 8px;
-  border: 1px solid rgba(84, 103, 132, 0.3);
-  border-radius: 12px;
-  background: rgba(8, 13, 21, 0.4);
   color: var(--text-soft);
+  min-width: 0;
 }
 
 .skill-tree-specialization-choice span {
   font-size: 12px;
   color: var(--muted);
   text-align: left;
+  overflow-wrap: anywhere;
 }
 
 .skill-tree-specialization-choice--unlockable {
@@ -415,5 +400,24 @@
 
   .skill-tree-summary {
     grid-template-columns: 1fr;
+  }
+
+  .skill-tree-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .talent-branch__grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    gap: 12px;
+  }
+
+  .talent-node {
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+
+  .talent-link {
+    display: none;
   }
 }

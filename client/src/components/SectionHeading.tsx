@@ -14,14 +14,20 @@ export default function SectionHeading({
   aside,
   className = "",
 }: SectionHeadingProps) {
-  const rootClassName = ["section-heading", className].filter(Boolean).join(" ");
+  const rootClassName = ["section-heading", "game-section-heading", className]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div className={rootClassName}>
       <div className="section-heading__content">
-        <strong className="section-heading__title">{title}</strong>
+        <strong className="section-heading__title game-section-title">
+          {title}
+        </strong>
         {description ? (
-          <p className="section-heading__description">{description}</p>
+          <p className="section-heading__description game-section-description">
+            {description}
+          </p>
         ) : null}
       </div>
       {aside ? <div className="section-heading__aside">{aside}</div> : null}

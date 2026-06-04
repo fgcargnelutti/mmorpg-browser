@@ -47,7 +47,7 @@ export default function ChatPanel({
         {messages.map((message, index) => (
           <div
             key={`${message}-${index}`}
-            className={`${getMessageClass(message)} ornate-slot`}
+            className={`${getMessageClass(message)} ornate-slot game-card`}
           >
             <span className="chat-message__timestamp">{message.timestamp}</span>{" "}
             <span className="chat-message__content">{message.content}</span>
@@ -57,7 +57,7 @@ export default function ChatPanel({
 
       <div className="chat-input-row">
         <input
-          className="chat-input"
+          className="chat-input game-input"
           type="text"
           value={inputValue}
           onChange={(event) => onInputChange(event.target.value.slice(0, 200))}
@@ -71,7 +71,7 @@ export default function ChatPanel({
         />
 
         <button
-          className="chat-send-button ornate-button"
+          className="chat-send-button ornate-button game-button game-button--secondary game-button--compact"
           type="button"
           onClick={onSend}
         >

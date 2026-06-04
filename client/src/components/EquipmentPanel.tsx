@@ -44,7 +44,7 @@ export default function EquipmentPanel({
                   </div>
                 }
               >
-                <div key={slot.key} className="equip-slot ornate-slot">
+                <div key={slot.key} className="equip-slot ornate-slot game-slot game-card--interactive">
                   {slot.iconImageSrc ? (
                     <img
                       className="equip-slot-image"
