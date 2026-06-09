@@ -114,20 +114,6 @@
   text-align: left;
 }
 
-/* SCROLLBAR */
-.skills-panel::-webkit-scrollbar {
-  width: 8px;
-}
-
-.skills-panel::-webkit-scrollbar-track {
-  background: rgba(8, 13, 21, 0.8);
-}
-
-.skills-panel::-webkit-scrollbar-thumb {
-  background: rgba(85, 108, 141, 0.54);
-  border: 1px solid rgba(10, 16, 25, 0.84);
-  border-radius: 999px;
-}
 
 /* MOBILE */
 @media (max-width: 780px) {

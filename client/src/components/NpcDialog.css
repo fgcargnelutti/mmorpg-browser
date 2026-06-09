@@ -444,21 +444,6 @@
   min-width: 108px;
 }
 
-.npc-dialog-main-text::-webkit-scrollbar,
-.npc-dialog-topics-list::-webkit-scrollbar,
-.npc-dialog-notes-content::-webkit-scrollbar,
-.npc-trade-panel__content::-webkit-scrollbar {
-  width: 8px;
-}
-
-.npc-dialog-main-text::-webkit-scrollbar-thumb,
-.npc-dialog-topics-list::-webkit-scrollbar-thumb,
-.npc-dialog-notes-content::-webkit-scrollbar-thumb,
-.npc-trade-panel__content::-webkit-scrollbar-thumb {
-  background: rgba(85, 108, 141, 0.54);
-  border-radius: 999px;
-}
-
 @media (max-width: 1180px) {
   .npc-dialog-anchor .game-dialog {
     width: min(1180px, calc(100% - 24px));

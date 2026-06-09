@@ -254,18 +254,76 @@
     inset 0 -1px 0 rgba(0, 0, 0, 0.4);
 }
 
-.scroll-box::-webkit-scrollbar,
-.right-sidebar::-webkit-scrollbar {
+:where(
+  .right-sidebar,
+  .scroll-box,
+  .character-flow-scroll-panel,
+  .skills-panel,
+  .chat-messages,
+  .inventory-panel__body,
+  .combat-dialog-log,
+  .npc-dialog-main-text,
+  .npc-dialog-topics-list,
+  .npc-dialog-notes-content,
+  .npc-trade-panel__content,
+  .hideout-dialog-layout,
+  .quest-log-dialog__sections
+) {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(85, 108, 141, 0.68) rgba(3, 7, 13, 0.82);
+}
+
+:where(
+  .right-sidebar,
+  .scroll-box,
+  .character-flow-scroll-panel,
+  .skills-panel,
+  .chat-messages,
+  .inventory-panel__body,
+  .combat-dialog-log,
+  .npc-dialog-main-text,
+  .npc-dialog-topics-list,
+  .npc-dialog-notes-content,
+  .npc-trade-panel__content,
+  .hideout-dialog-layout,
+  .quest-log-dialog__sections
+)::-webkit-scrollbar {
   width: 10px;
 }
 
-.scroll-box::-webkit-scrollbar-track,
-.right-sidebar::-webkit-scrollbar-track {
+:where(
+  .right-sidebar,
+  .scroll-box,
+  .character-flow-scroll-panel,
+  .skills-panel,
+  .chat-messages,
+  .inventory-panel__body,
+  .combat-dialog-log,
+  .npc-dialog-main-text,
+  .npc-dialog-topics-list,
+  .npc-dialog-notes-content,
+  .npc-trade-panel__content,
+  .hideout-dialog-layout,
+  .quest-log-dialog__sections
+)::-webkit-scrollbar-track {
   background: rgba(3, 7, 13, 0.82);
 }
 
-.scroll-box::-webkit-scrollbar-thumb,
-.right-sidebar::-webkit-scrollbar-thumb {
+:where(
+  .right-sidebar,
+  .scroll-box,
+  .character-flow-scroll-panel,
+  .skills-panel,
+  .chat-messages,
+  .inventory-panel__body,
+  .combat-dialog-log,
+  .npc-dialog-main-text,
+  .npc-dialog-topics-list,
+  .npc-dialog-notes-content,
+  .npc-trade-panel__content,
+  .hideout-dialog-layout,
+  .quest-log-dialog__sections
+)::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, rgba(109, 147, 196, 0.66), rgba(53, 75, 108, 0.72));
   border: 1px solid rgba(4, 8, 14, 0.88);
 }

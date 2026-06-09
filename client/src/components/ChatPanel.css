@@ -84,19 +84,6 @@
   padding: 0 14px;
 }
 
-.chat-messages::-webkit-scrollbar {
-  width: 8px;
-}
-
-.chat-messages::-webkit-scrollbar-track {
-  background: rgba(8, 13, 21, 0.8);
-}
-
-.chat-messages::-webkit-scrollbar-thumb {
-  background: rgba(85, 108, 141, 0.54);
-  border: 1px solid rgba(10, 16, 25, 0.84);
-  border-radius: 999px;
-}
 
 @media (max-width: 520px) {
   .chat-input-row {

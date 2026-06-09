@@ -211,20 +211,6 @@
   text-align: left;
 }
 
-.quest-log-dialog__sections::-webkit-scrollbar {
-  width: 8px;
-}
-
-.quest-log-dialog__sections::-webkit-scrollbar-track {
-  background: rgba(8, 13, 21, 0.8);
-}
-
-.quest-log-dialog__sections::-webkit-scrollbar-thumb {
-  background: rgba(85, 108, 141, 0.54);
-  border: 1px solid rgba(10, 16, 25, 0.84);
-  border-radius: 999px;
-}
-
 @media (max-width: 980px) {
   .quest-log-dialog__overview,
   .quest-log-dialog__sections {

@@ -162,19 +162,6 @@
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-.inventory-panel__body::-webkit-scrollbar {
-  width: 8px;
-}
-
-.inventory-panel__body::-webkit-scrollbar-track {
-  background: rgba(8, 13, 21, 0.8);
-}
-
-.inventory-panel__body::-webkit-scrollbar-thumb {
-  background: rgba(85, 108, 141, 0.54);
-  border: 1px solid rgba(10, 16, 25, 0.84);
-  border-radius: 999px;
-}
 
 @media (max-width: 780px) {
   .inventory-grid-slots {
